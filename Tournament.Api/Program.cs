@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Tournament.Api.Extensions;
+using Tournament.Core.Repositories;
 using Tournament.Data.Data;
+using Tournament.Data.Repositories;
 
 
 // Ignore Spelling: Api
@@ -22,7 +24,8 @@ namespace Tournament.Api
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
-
+            builder.Services.AddScoped<ITournamentRepository, TournamentRepository>();
+            builder.Services.AddScoped<ITournamentRepository, GameRepository>();
             var app = builder.Build();
 
             await app.SeedDataAsync();
