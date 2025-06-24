@@ -1,37 +1,38 @@
-﻿using Tournament.Core.Entities;
+﻿using Microsoft.EntityFrameworkCore;
+using Tournament.Core.Entities;
 using Tournament.Core.Repositories;
 using Tournament.Data.Data;
 
 namespace Tournament.Data.Repositories;
-public class GameRepository(TournamentApiContext context) : ITournamentRepository
+public class GameRepository(TournamentApiContext context) : IGameRepository
 {
-    public void Add(TournamentDetails tournament)
+    public void Add(Game game)
     {
-        throw new NotImplementedException();
+        context.Game.Add(game);
     }
 
     public Task<bool> AnyAsync(int id)
     {
-        throw new NotImplementedException();
+        return context.Game.AnyAsync(g => g.Id == id);
     }
 
-    public Task<IEnumerable<TournamentDetails>> GetAllAsync()
+    public async Task<IEnumerable<Game>> GetAllAsync()
     {
-        throw new NotImplementedException();
+        return await context.Game.ToListAsync();
     }
 
-    public Task<TournamentDetails> GetAsync(int tournamentId)
+    public async Task<Game?> GetAsync(int gameId)
     {
-        throw new NotImplementedException();
+        return await context.Game.FindAsync(gameId);
     }
 
-    public void Remove(TournamentDetails tournament)
+    public void Remove(Game game)
     {
-        throw new NotImplementedException();
+        context.Game.Remove(game);
     }
 
-    public void Update(TournamentDetails tournament)
+    public void Update(Game game)
     {
-        throw new NotImplementedException();
+        context.Game.Update(game);
     }
 }

@@ -9,6 +9,7 @@ public class TournamentRepository(TournamentApiContext context) : ITournamentRep
     public void Add(TournamentDetails tournament)
     {
         context.TournamentDetails.Add(tournament);
+
     }
 
     public Task<bool> AnyAsync(int id)
