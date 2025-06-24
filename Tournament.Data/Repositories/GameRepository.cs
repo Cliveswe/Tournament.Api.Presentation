@@ -11,9 +11,9 @@ public class GameRepository(TournamentApiContext context) : IGameRepository
         context.Game.Add(game);
     }
 
-    public Task<bool> AnyAsync(int id)
+    public async Task<bool> AnyAsync(int id)
     {
-        return context.Game.AnyAsync(g => g.Id == id);
+        return await context.Game.AnyAsync(g => g.Id == id);
     }
 
     public async Task<IEnumerable<Game>> GetAllAsync()
