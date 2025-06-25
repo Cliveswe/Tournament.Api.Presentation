@@ -1,7 +1,7 @@
 ﻿using Tournament.Core.Entities;
 
 namespace Tournament.Core.Repositories;
-public interface ITournamentRepository
+public interface ITournamentDetailsRepository
 {
     Task<IEnumerable<TournamentDetails>> GetAllAsync();
     Task<TournamentDetails?> GetAsync(int tournamentId);
