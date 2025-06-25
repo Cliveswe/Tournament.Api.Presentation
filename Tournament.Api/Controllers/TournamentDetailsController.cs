@@ -1,34 +1,47 @@
 ﻿// Ignore Spelling: Api
 
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Tournament.Core.Entities;
 using Tournament.Core.Repositories;
-using Tournament.Data.Data;
 
 namespace Tournament.Api.Controllers
 {
     [Route("api/tournamentDetails")]
     [ApiController]
-    public class TournamentDetailsController(TournamentApiContext context, IUoW uoW) : ControllerBase
+    //public class TournamentDetailsController(TournamentApiContext context, IUoW uoW) : ControllerBase
+    public class TournamentDetailsController(IMapper mapper, IUoW uoW) : ControllerBase
     {
         #region GET api/TournamentDetails api/TournamentDetails/5
 
+
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<TournamentDetails>>> GetTournamentDetails(bool includeGames)
+        {
+            var tournamentDetails = includeGames
+                ? mapper.Map<IEnumerable<TournamentDto>> await uoW.TournamentDetailsRepository.GetAllAsync(includeGames)
+                : await uoW.TournamentDetailsRepository.GetAllAsync();
+
+            return Ok(tournamentDetails);
+        }
+
+        #region old code
         // GET: api/TournamentDetails
         // This method retrieves all TournamentDetails records from the database.
         // It returns a 200 OK response with the collection of entities.
         // Data access is done via the Unit of Work abstraction (uoW).
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<TournamentDetails>>> GetTournamentDetails()
-        {
-            // Retrieve all TournamentDetails records via the repository
-            IEnumerable<TournamentDetails> tournamentDetails = await uoW.TournamentDetailsRepository.GetAllAsync();
-            // Alternatively, you could use eager loading for related entities:
-            // return await context.TournamentDetails.Include(g => g.Games).ToListAsync();
+        //public async Task<ActionResult<IEnumerable<TournamentDetails>>> GetTournamentDetails()
+        //{
+        //    // Retrieve all TournamentDetails records via the repository
+        //    IEnumerable<TournamentDetails> tournamentDetails = await uoW.TournamentDetailsRepository.GetAllAsync();
+        //    // Alternatively, you could use eager loading for related entities:
+        //    // return await context.TournamentDetails.Include(g => g.Games).ToListAsync();
 
-            // Return the results with HTTP 200 OK
-            return Ok(tournamentDetails);
-        }
+        //    // Return the results with HTTP 200 OK
+        //    return Ok(tournamentDetails);
+        //}
+        #endregion
 
         // GET: api/TournamentDetails/5
         // This method retrieves a single TournamentDetails entity by its ID.

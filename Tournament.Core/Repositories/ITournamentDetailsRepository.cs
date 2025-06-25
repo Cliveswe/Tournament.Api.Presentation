@@ -3,7 +3,8 @@
 namespace Tournament.Core.Repositories;
 public interface ITournamentDetailsRepository
 {
-    Task<IEnumerable<TournamentDetails>> GetAllAsync();
+    //    Task<IEnumerable<TournamentDetails>> GetAllAsync();
+    Task<IEnumerable<TournamentDetails>> GetAllAsync(bool includeGames = false);
     Task<TournamentDetails?> GetAsync(int tournamentId);
     Task<bool> AnyAsync(int id);
     void Add(TournamentDetails tournament);

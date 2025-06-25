@@ -28,7 +28,7 @@ namespace Tournament.Api
             //builder.Services.AddScoped<ITournamentDetailsRepository, TournamentDetailsRepository>();
             //builder.Services.AddScoped<IGameRepository, GameRepository>();
             builder.Services.AddScoped<IUoW, UoW>();
-
+            builder.Services.AddAutoMapper(typeof(TournamentMappings));
             var app = builder.Build();
 
             await app.SeedDataAsync();
