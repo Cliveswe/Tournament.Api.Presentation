@@ -1,29 +1,45 @@
 ﻿// Ignore Spelling: Api
 
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Tournament.Core.Dto;
 using Tournament.Core.Entities;
 using Tournament.Core.Repositories;
 
 namespace Tournament.Api.Controllers
 {
-    [Route("api/games")]
     [ApiController]
+    [Route("api/games")]
     //public class GamesController(TournamentApiContext context) : ControllerBase
-    public class GamesController(IUoW uoW) : ControllerBase
+    public class GamesController(IMapper mapper, IUoW uoW) : ControllerBase
     {
-        #region GET api/Games api/Games/5
+        #region GET api/Games api/1/Games/
 
         // GET: api/Games
         // This method retrieves all Game entities from the database.
         // It returns a 200 OK response containing the full list of games.
         // Data is accessed through the Unit of Work abstraction.
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Game>>> GetGame()
+        //Note that the route is overridden and it is important to add a root "/api/..." and 
+        //not "api/..." there is a difference.
+        [HttpGet("/api/tournamentDetails/{tournametId}/games")]
+        public async Task<ActionResult<IEnumerable<GameDto>>> GetTournamentGame(int tournametId)
         {
-            // Fetch all Game records using the GameRepository
-            IEnumerable<Game> games = await uoW.GameRepository.GetAllAsync();
+            // Validate the tournament ID from the route parameter
+            bool exists = await uoW.TournamentDetailsRepository.AnyAsync(tournametId);
+            // If the tournament with the specified ID does not exist, return 404 Not Found
+            if(!exists) {
+                return NotFound($"Tournament with ID {tournametId} does not exist.");
+            }
 
+            // Fetch all Game records using the GameRepository
+            //IEnumerable<Game> games = await uoW.GameRepository.GetAllAsync();
+
+            // Check if any games exist for the specified tournament ID
+            IEnumerable<Game> gamesExist = await uoW.GameRepository.GetAllAsync();
+            List<Game> gamesResult = gamesExist.Where(g => g.TournamentDetailsId == tournametId).ToList();
+
+            IEnumerable<GameDto> games = mapper.Map<IEnumerable<GameDto>>(gamesResult);
             // Alternatively, direct EF Core access could be used:
             //return await context.Game.ToListAsync();
 

@@ -13,5 +13,7 @@ public class TournamentMappings : Profile
         //Mapping lets you decouple your database model from the API contract.
         CreateMap<Game, GameDto>()
             .ForMember(dest => dest.StartDate, opt => opt.MapFrom(src => src.Time)); // adjust if needed;
+
+
     }
 }
