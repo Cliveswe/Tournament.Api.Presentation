@@ -3,6 +3,7 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Tournament.Core.Dto;
 using Tournament.Core.Entities;
 using Tournament.Core.Repositories;
 
@@ -17,11 +18,11 @@ namespace Tournament.Api.Controllers
 
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<TournamentDetails>>> GetTournamentDetails(bool includeGames)
+        public async Task<ActionResult<IEnumerable<TournamentDto>>> GetTournamentDetails(bool includeGames)
         {
             var tournamentDetails = includeGames
-                ? mapper.Map<IEnumerable<TournamentDto>> await uoW.TournamentDetailsRepository.GetAllAsync(includeGames)
-                : await uoW.TournamentDetailsRepository.GetAllAsync();
+                ? mapper.Map<IEnumerable<TournamentDto>>(await uoW.TournamentDetailsRepository.GetAllAsync(includeGames))
+                : mapper.Map<IEnumerable<TournamentDto>>(await uoW.TournamentDetailsRepository.GetAllAsync());
 
             return Ok(tournamentDetails);
         }

@@ -8,6 +8,10 @@ public class TournamentMappings : Profile
     public TournamentMappings()
     {
         CreateMap<TournamentDetails, TournamentDto>();
-        CreateMap<Game, GameDto>();
+
+        //Show users a more descriptive name like StartDate instead of the raw database property name Time.
+        //Mapping lets you decouple your database model from the API contract.
+        CreateMap<Game, GameDto>()
+            .ForMember(dest => dest.StartDate, opt => opt.MapFrom(src => src.Time)); // adjust if needed;
     }
 }

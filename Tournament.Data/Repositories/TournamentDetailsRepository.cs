@@ -37,6 +37,7 @@ public class TournamentDetailsRepository(TournamentApiContext context) : ITourna
         return context.TournamentDetails.AnyAsync(t => t.Id == id);
     }
 
+    #region old code
     /// <summary>
     /// Asynchronously retrieves all tournament details, including associated games.
     /// </summary>
@@ -44,11 +45,22 @@ public class TournamentDetailsRepository(TournamentApiContext context) : ITourna
     /// <see cref="TournamentDetails.Games"/> property populated for each tournament.</remarks>
     /// <returns>A task that represents the asynchronous operation. The task result contains      an <see
     /// cref="IEnumerable{TournamentDetails}"/> of all tournaments and their associated games.</returns>
-    public async Task<IEnumerable<TournamentDetails>> GetAllAsync()
+    //public async Task<IEnumerable<TournamentDetails>> GetAllAsync()
+    //{
+    //    return await context.TournamentDetails
+    //        .Include(g => g.Games)
+    //        .ToListAsync();
+    //}
+    #endregion
+
+    public async Task<IEnumerable<TournamentDetails>> GetAllAsync(bool includeGames = false)
     {
-        return await context.TournamentDetails
-            .Include(g => g.Games)
-            .ToListAsync();
+        return includeGames
+             ? await context.TournamentDetails
+                 .Include(t => t.Games)
+                 .ToListAsync()
+             : await context.TournamentDetails
+                 .ToListAsync();
     }
 
     /// <summary>
