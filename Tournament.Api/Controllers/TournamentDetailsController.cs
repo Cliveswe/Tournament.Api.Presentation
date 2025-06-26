@@ -81,19 +81,44 @@ namespace Tournament.Api.Controllers
 
         #region PUT api/Games/5
 
-        // PUT: api/TournamentDetails/5
-        // To protect from over-posting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        // This method updates an existing TournamentDetails entity.
-        // It follows REST conventions by returning 204 NoContent if the update is successful.
-        // To protect against over-posting attacks, bind only the fields you want to update.
+        /// <summary>
+        /// Updates an existing TournamentDetails record by its ID.
+        /// </summary>
+        /// <param name="id">The ID of the tournament to update. Must match an existing record.</param>
+        /// <param name="tournamentUpdateDto">The data transfer object containing updated tournament fields (e.g., Title, StartDate).</param>
+        /// <returns>
+        /// Returns 204 No Content if the update is successful.
+        /// Returns 400 Bad Request if the model is invalid.
+        /// Returns 404 Not Found if the tournament with the specified ID does not exist.
+        /// </returns>
+        /// <remarks>
+        /// This method uses the Unit of Work pattern to update the entity.
+        /// It validates the incoming model using data annotations and applies changes only for the fields provided in the DTO.
+        /// </remarks>
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutTournamentDetails(int id, TournamentDetails tournamentDetails)
+        public async Task<IActionResult> PutTournamentDetails(int id, [FromBody] TournamentUpdateDto tournamentUpdateDto)
         {
-            // Ensure the route ID matches the payload ID
-            if(id != tournamentDetails.Id) {
-                // 400 Bad Request if IDs don't match
-                return BadRequest();
+            // Validate the model state, checks data annotations.
+            if(!ModelState.IsValid) {
+                // Return 400 Bad Request with validation errors
+                return BadRequest(ModelState);
             }
+
+            // Retrieve the existing entity by ID
+            TournamentDetails? existingTournamentDetails = await uoW.TournamentDetailsRepository.GetAsync(id);
+
+            // Ensure the route ID matches the payload ID
+            //if(id != tournamentDetails.Id) {
+            if(existingTournamentDetails == null || existingTournamentDetails.Id != id) {
+                // 400 Bad Request if IDs don't match
+                //return BadRequest();
+                //return BadRequest($"ID in the route ({id}) does not match ID in the payload ({tournamentUpdateDto.Id}).");
+                return NotFound($"Tournament with ID {id} was not found.");
+            }
+
+            // Map the update DTO to the existing entity.
+            // This will update only the fields specified in the DTO.
+            mapper.Map(tournamentUpdateDto, existingTournamentDetails);
 
             // Mark the entity as modified in the Unit of Work pattern
             //uoW.TournamentDetailsRepository.Update(tournamentDetails);
@@ -102,7 +127,7 @@ namespace Tournament.Api.Controllers
 
             try {
                 // Attempt to save changes to the database
-                uoW.TournamentDetailsRepository.Update(tournamentDetails);
+                uoW.TournamentDetailsRepository.Update(existingTournamentDetails);
                 // Alternatively, for direct context access:
                 //await context.SaveChangesAsync();
 
@@ -111,9 +136,9 @@ namespace Tournament.Api.Controllers
             } catch(DbUpdateConcurrencyException) {
 
                 // If the entity no longer exists, return 404 Not Found
-                bool exists = await TournamentDetailsExists(tournamentDetails);
+                bool exists = await TournamentDetailsExists(existingTournamentDetails);
                 if(!exists) {
-                    return NotFound($"TournamentDetails with ID {tournamentDetails.Id} was not found. It may have been deleted or does not exist.");
+                    return NotFound($"TournamentDetails with ID {existingTournamentDetails.Id} was not found. It may have been deleted or does not exist.");
                 } else {
                     // Otherwise re-throw the exception to bubble up
                     throw;
