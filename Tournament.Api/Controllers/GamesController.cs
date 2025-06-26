@@ -9,8 +9,9 @@ using Tournament.Core.Repositories;
 
 namespace Tournament.Api.Controllers
 {
+    //api/tournamentDetails/{tournametId}/games"
     [ApiController]
-    [Route("api/games")]
+    [Route("/tournamentDetails/{tournametId}/games\"")]
     //public class GamesController(TournamentApiContext context) : ControllerBase
     public class GamesController(IMapper mapper, IUoW uoW) : ControllerBase
     {
@@ -22,7 +23,8 @@ namespace Tournament.Api.Controllers
         // Data is accessed through the Unit of Work abstraction.
         //Note that the route is overridden and it is important to add a root "/api/..." and 
         //not "api/..." there is a difference.
-        [HttpGet("/api/tournamentDetails/{tournametId}/games")]
+        //[HttpGet("/api/tournamentDetails/{tournametId}/games")]
+        [HttpGet]
         public async Task<ActionResult<IEnumerable<GameDto>>> GetTournamentGame(int tournametId)
         {
             // Validate the tournament ID from the route parameter
@@ -51,7 +53,7 @@ namespace Tournament.Api.Controllers
         // This method retrieves a single Game entity by its ID.
         // If the game is not found, it returns a 404 Not Found response.
         // Otherwise, it returns the game object with a 200 OK response.
-        [HttpGet("{id}")]
+        [HttpGet("/api/games/{id}")]
         public async Task<ActionResult<Game>> GetGame(int id)
         {
             // Attempt to retrieve the game using the GameRepository
