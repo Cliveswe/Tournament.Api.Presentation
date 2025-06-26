@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-
-namespace Tournament.Core.Entities
+﻿namespace Tournament.Core.Entities
 {
     /// <summary>
     /// Represents a game that is part of a tournament, including its title, scheduled time, 
@@ -31,7 +29,6 @@ namespace Tournament.Core.Entities
         /// <summary>
         /// Navigation property to the related <see cref="TournamentDetails"/> entity.
         /// </summary>
-        [ForeignKey(nameof(TournamentDetailsId))]
         public TournamentDetails TournamentDetails { get; set; }
     }
 }

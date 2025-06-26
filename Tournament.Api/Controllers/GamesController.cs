@@ -81,34 +81,64 @@ namespace Tournament.Api.Controllers
 
         #region PUT api/Games/5
 
-        // PUT: api/Games/5
-        // To protect from over-posting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutGame(int id, Game game)
+        /// <summary>
+        /// Updates an existing game identified by its ID with the provided data. PUT: api/Games/5
+        /// </summary>
+        /// <param name="id">The ID of the game to update.</param>
+        /// <param name="gameUpdateDto">The updated game data provided in the request body.</param>
+        /// <returns>
+        /// Returns a <see cref="BadRequestResult"/> if the model state is invalid or the ID doesn't match.
+        /// Returns <see cref="NotFoundResult"/> if the game does not exist.
+        /// Returns <see cref="NoContentResult"/> if the update is successful.
+        /// </returns>
+        /// <remarks>
+        /// This endpoint follows REST conventions for PUT operations. It uses AutoMapper to apply changes from the DTO to the entity.
+        /// The GameUpdateDto includes only the fields allowed to be updated (e.g., Title).
+        /// A 204 No Content response indicates that the update succeeded without returning a body.
+        /// </remarks>
+        [HttpPut("/api/games/{id}")]
+        //public async Task<IActionResult> PutGame(int id, Game game)
+        public async Task<IActionResult> PutGame(int id, [FromBody] GameUpdateDto gameUpdateDto)
         {
+            if(!ModelState.IsValid) {
+                // Return 400 Bad Request if the model state is invalid
+                return BadRequest(ModelState);
+            }
+
+            Game? existingGame = await uoW.GameRepository.GetAsync(id);
+
             // Ensure the route ID matches the payload ID
-            if(id != game.Id) {
+            //if(id != game.Id) {
+            if(existingGame == null || existingGame.Id != id) {
                 // 400 Bad Request if IDs don't match
                 return BadRequest();
             }
 
             // Mark the entity as modified in the Unit of Work pattern
-            uoW.GameRepository.Update(game);
+            // uoW.GameRepository.Update(game);
             // Alternatively, for direct context access:
             // context.Entry(game).State = EntityState.Modified;
 
+            // Map the DTO to the existing entity.
+            // This will update only the fields specified in the DTO.
+            mapper.Map(gameUpdateDto, existingGame);
+
             try {
                 // Attempt to save changes to the database
+                uoW.GameRepository.Update(existingGame);
+
+                // Persist the changes to the database
                 await uoW.CompleteAsync();
+
                 // Alternatively, for direct context access:
                 //await context.SaveChangesAsync();
 
             } catch(DbUpdateConcurrencyException) {
 
-                bool exists = await GameExists(game);
+                bool exists = await GameExists(existingGame);
                 // If the entity no longer exists, return 404 Not Found
                 if(!exists) {
-                    return NotFound($"Game with ID {game.Id} was not found. It may have been deleted or does not exist.");
+                    return NotFound($"Game with ID {existingGame.Id} was not found. It may have been deleted or does not exist.");
                 } else {
                     // Otherwise re-throw the exception to bubble up
                     throw;
