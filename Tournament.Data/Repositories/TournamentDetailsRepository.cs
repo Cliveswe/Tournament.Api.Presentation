@@ -72,9 +72,14 @@ public class TournamentDetailsRepository(TournamentApiContext context) : ITourna
     /// <param name="tournamentId">The unique identifier of the tournament to retrieve.</param>
     /// <returns>A <see cref="TournamentDetails"/> object containing the tournament's details if found;  otherwise, <see
     /// langword="null"/>.</returns>
-    public async Task<TournamentDetails?> GetAsync(int tournamentId)
+    public async Task<TournamentDetails?> GetAsync(int tournamentId, bool includeGAmes = false)
     {
-        return await context.TournamentDetails.FindAsync(tournamentId);
+        // return await context.TournamentDetails.FindAsync(tournamentId);
+        // Use Include to load related games if necessary
+        return includeGAmes ? await context.TournamentDetails
+            .Include(t => t.Games) // include related games
+            .FirstOrDefaultAsync(t => t.Id == tournamentId) :
+            await context.TournamentDetails.FindAsync(tournamentId);
     }
 
     /// <summary>

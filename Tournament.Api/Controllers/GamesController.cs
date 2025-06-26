@@ -1,4 +1,4 @@
-﻿// Ignore Spelling: Api
+﻿// Ignore Spelling: Api Dto Ok
 
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
@@ -9,29 +9,33 @@ using Tournament.Core.Repositories;
 
 namespace Tournament.Api.Controllers
 {
-    //api/tournamentDetails/{tournametId}/games"
+
     [ApiController]
-    [Route("/tournamentDetails/{tournametId}/games\"")]
+    [Route("api/tournamentDetails/{tournamentId}/games")]
     //public class GamesController(TournamentApiContext context) : ControllerBase
     public class GamesController(IMapper mapper, IUoW uoW) : ControllerBase
     {
         #region GET api/Games api/1/Games/
 
-        // GET: api/Games
-        // This method retrieves all Game entities from the database.
-        // It returns a 200 OK response containing the full list of games.
-        // Data is accessed through the Unit of Work abstraction.
-        //Note that the route is overridden and it is important to add a root "/api/..." and 
-        //not "api/..." there is a difference.
-        //[HttpGet("/api/tournamentDetails/{tournametId}/games")]
+        /// <summary>
+        /// Retrieves all Game entities associated with a specific TournamentDetails ID.
+        /// [HttpGet("/api/tournamentDetails/{tournametId}/games")]
+        /// </summary>
+        /// <param name="tournamentId">The ID of the tournament for which to fetch games.</param>
+        /// <returns>
+        /// Returns a 200 OK response containing a collection of GameDto objects if the tournament exists.
+        /// Returns 404 Not Found if the tournament with the specified ID does not exist.
+        /// </returns>
+        /// Note that the route is overridden and it is important to add a root "/api/..." and 
+        /// not "api/..." there is a difference.
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<GameDto>>> GetTournamentGame(int tournametId)
+        public async Task<ActionResult<IEnumerable<GameDto>>> GetTournamentGame(int tournamentId)
         {
             // Validate the tournament ID from the route parameter
-            bool exists = await uoW.TournamentDetailsRepository.AnyAsync(tournametId);
+            bool exists = await uoW.TournamentDetailsRepository.AnyAsync(tournamentId);
             // If the tournament with the specified ID does not exist, return 404 Not Found
             if(!exists) {
-                return NotFound($"Tournament with ID {tournametId} does not exist.");
+                return NotFound($"Tournament with ID {tournamentId} does not exist.");
             }
 
             // Fetch all Game records using the GameRepository
@@ -39,7 +43,7 @@ namespace Tournament.Api.Controllers
 
             // Check if any games exist for the specified tournament ID
             IEnumerable<Game> gamesExist = await uoW.GameRepository.GetAllAsync();
-            List<Game> gamesResult = gamesExist.Where(g => g.TournamentDetailsId == tournametId).ToList();
+            List<Game> gamesResult = gamesExist.Where(g => g.TournamentDetailsId == tournamentId).ToList();
 
             IEnumerable<GameDto> games = mapper.Map<IEnumerable<GameDto>>(gamesResult);
             // Alternatively, direct EF Core access could be used:
@@ -49,10 +53,14 @@ namespace Tournament.Api.Controllers
             return Ok(games);
         }
 
-        // GET: api/Games/5
-        // This method retrieves a single Game entity by its ID.
-        // If the game is not found, it returns a 404 Not Found response.
-        // Otherwise, it returns the game object with a 200 OK response.
+        /// <summary>
+        /// Retrieves a single Game entity by its ID. GET: api/Games/5
+        /// </summary>
+        /// <param name="id">The ID of the game to retrieve.</param>
+        /// <returns>
+        /// Returns a 200 OK response with the game data if found;
+        /// otherwise, returns 404 Not Found.
+        /// </returns>
         [HttpGet("/api/games/{id}")]
         public async Task<ActionResult<Game>> GetGame(int id)
         {
@@ -61,12 +69,12 @@ namespace Tournament.Api.Controllers
 
             // Return 404 if the game does not exist
             if(game == null) {
-                return NotFound();
+                return NotFound($"Game with ID {id} was not found.");
             }
-
+            GameDto gameDto = mapper.Map<GameDto>(game);
             // Return the game with HTTP 200 OK
             // ASP.NET Core infers this as Ok(game) for ActionResult<T>
-            return game;// Returns 200 OK + JSON by default
+            return Ok(gameDto);// Returns 200 OK + JSON by default
         }
 
         #endregion

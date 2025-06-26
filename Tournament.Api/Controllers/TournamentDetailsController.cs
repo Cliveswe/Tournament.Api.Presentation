@@ -1,4 +1,4 @@
-﻿// Ignore Spelling: Api
+﻿// Ignore Spelling: Api Dto Ok
 
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
@@ -9,6 +9,7 @@ using Tournament.Core.Repositories;
 
 namespace Tournament.Api.Controllers
 {
+
     [Route("api/tournamentDetails")]
     [ApiController]
     //public class TournamentDetailsController(TournamentApiContext context, IUoW uoW) : ControllerBase
@@ -16,11 +17,15 @@ namespace Tournament.Api.Controllers
     {
         #region GET api/TournamentDetails api/TournamentDetails/5
 
-
+        /// <summary>
+        /// Retrieves all TournamentDetails entities.
+        /// </summary>
+        /// <param name="includeGames">Optional query parameter indicating whether to include related games.</param>
+        /// <returns>A 200 OK response containing a collection of TournamentDto objects, including games if requested.</returns>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<TournamentDto>>> GetTournamentDetails(bool includeGames)
+        public async Task<ActionResult<IEnumerable<TournamentDto>>> GetTournamentDetails([FromQuery] bool includeGames)
         {
-            var tournamentDetails = includeGames
+            IEnumerable<TournamentDto> tournamentDetails = includeGames
                 ? mapper.Map<IEnumerable<TournamentDto>>(await uoW.TournamentDetailsRepository.GetAllAsync(includeGames))
                 : mapper.Map<IEnumerable<TournamentDto>>(await uoW.TournamentDetailsRepository.GetAllAsync());
 
@@ -44,24 +49,32 @@ namespace Tournament.Api.Controllers
         //}
         #endregion
 
-        // GET: api/TournamentDetails/5
-        // This method retrieves a single TournamentDetails entity by its ID.
-        // If the entity is not found, it returns a 404 Not Found response.
-        // If found, the entity is returned with a 200 OK response.
+        /// <summary>
+        /// Retrieves a single TournamentDetails record by its ID.
+        /// </summary>
+        /// <param name="id">The ID of the tournament to retrieve.</param>
+        /// <param name="includeGames">Optional. Whether to include related games in the result.</param>
+        /// <returns>
+        /// Returns a 200 OK response with the tournament data if found; 
+        /// otherwise, returns 404 Not Found.
+        /// </returns>
         [HttpGet("{id}")]
-        public async Task<ActionResult<TournamentDetails>> GetTournamentDetails(int id)
+        public async Task<ActionResult<TournamentDto>> GetTournamentDetails(int id, [FromQuery] bool includeGames = false)
         {
             // Attempt to find the entity using the Unit of Work pattern
-            TournamentDetails? tournamentDetails = await uoW.TournamentDetailsRepository.GetAsync(id);
+            TournamentDetails? tournamentEntity = await uoW.TournamentDetailsRepository.GetAsync(id, includeGames);
 
             // Return 404 Not Found if the entity doesn't exist
-            if(tournamentDetails == null) {
-                return NotFound();
+            if(tournamentEntity == null) {
+                return NotFound($"Tournament with ID {id} was not found.");
             }
 
-            // Return the found entity with HTTP 200 OK
+            //Map to the Dto.
+            TournamentDto tournamentDto = mapper.Map<TournamentDto>(tournamentEntity);
+
+            // Return the found entity with HTTP 200 OK + JSON by default.
             // ASP.NET Core automatically wraps it as Ok(tournamentDetails)
-            return tournamentDetails;// Returns 200 OK + JSON by default
+            return Ok(tournamentDto);
         }
 
         #endregion
