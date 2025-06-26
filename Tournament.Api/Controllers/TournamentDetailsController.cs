@@ -153,13 +153,23 @@ namespace Tournament.Api.Controllers
 
         #region POST api/TournamentDetails
 
-        // POST: api/TournamentDetails
-        // This method creates a new TournamentDetails entity.
-        // It follows REST conventions by returning 201 Created with a location header pointing to the new resource.
-        // To protect against over-posting attacks, bind only the fields you want to allow clients to set.
-        // To protect from over-posting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        /// <summary>
+        /// Creates a new <see cref="TournamentDetails"/> entity. POST: api/TournamentDetails
+        /// </summary>
+        /// <param name="tournamentDetailsCreateDto">The data transfer object containing details to create a new tournament.</param>
+        /// <returns>
+        /// Returns a 201 Created response with the created tournament data if successful.
+        /// Returns 400 Bad Request if the model state is invalid or the input is null.
+        /// Returns 409 Conflict if a tournament with the same title and start date already exists.
+        /// </returns>
+        /// <remarks>
+        /// This method validates the input, checks for duplicates to prevent conflicts,
+        /// maps the DTO to the entity, adds it to the repository, and saves changes asynchronously.
+        /// It follows RESTful conventions by returning the location of the newly created resource in the response.
+        /// </remarks>
         [HttpPost]
-        public async Task<ActionResult<TournamentDetails>> PostTournamentDetails(TournamentDetails tournamentDetails)
+        // public async Task<ActionResult<TournamentDetails>> PostTournamentDetails(TournamentDetails tournamentDetails)
+        public async Task<ActionResult<TournamentDetails>> PostTournamentDetails(TournamentDetailsCreateDto tournamentDetailsCreateDto)
         {
             // Validate the model stat, checks data annotations.
             if(!ModelState.IsValid) {
@@ -168,16 +178,20 @@ namespace Tournament.Api.Controllers
             }
 
             // Check for null input.
-            if(tournamentDetails == null) {
+            if(tournamentDetailsCreateDto == null) {
                 return BadRequest("TournamentDetails cannot be null.");
             }
 
+
             // Optional: check for duplicate tournament by Id.
-            bool exists = await TournamentDetailsExists(tournamentDetails);
+            bool exists = await TournamentDetailsExists(tournamentDetailsCreateDto.Title,tournamentDetailsCreateDto.StartDate);
 
             if(exists) {
-                return Conflict("A tournament with the same name and start date already exists.");
+                return Conflict($"A tournament with the same name \"{tournamentDetailsCreateDto.Title}\" and start date already exists.");
             }
+
+            // Map the DTO to the TournamentDetails entity.
+            TournamentDetails tournamentDetails = mapper.Map<TournamentDetails>(tournamentDetailsCreateDto);
 
             // Add the new TournamentDetails entity to the repository
             uoW.TournamentDetailsRepository.Add(tournamentDetails);
@@ -189,8 +203,12 @@ namespace Tournament.Api.Controllers
             // Alternatively, using direct DbContext access:
             //await context.SaveChangesAsync();
 
-            // Return 201 Created with the route to access the new resource
-            return CreatedAtAction("GetTournamentDetails", new { id = tournamentDetails.Id }, tournamentDetails);
+            // Map the created entity back to a DTO for the response
+            // this is useful if you want to return a simplified view of the created resource.
+            var tournamentDto = mapper.Map<TournamentDto>(tournamentDetails);
+            // Return 201 Created with the route to access the new resource.
+            // This follows REST conventions by providing a location header pointing to the new resource.
+            return CreatedAtAction(nameof(GetTournamentDetails), new { id = tournamentDetails.Id }, tournamentDto);
         }
 
         #endregion
@@ -243,5 +261,12 @@ namespace Tournament.Api.Controllers
             // Alternatively, using direct DbContext access:
             //return context.TournamentDetails.Any(e => e.Id == id);
         }
+
+        private async Task<bool> TournamentDetailsExists(string title, DateTime startDate)
+        {
+            return await uoW.TournamentDetailsRepository
+                .ExistsByTitleAndStartDateAsync(title, startDate);
+        }
+
     }
 }

@@ -72,11 +72,11 @@ public class TournamentDetailsRepository(TournamentApiContext context) : ITourna
     /// <param name="tournamentId">The unique identifier of the tournament to retrieve.</param>
     /// <returns>A <see cref="TournamentDetails"/> object containing the tournament's details if found;  otherwise, <see
     /// langword="null"/>.</returns>
-    public async Task<TournamentDetails?> GetAsync(int tournamentId, bool includeGAmes = false)
+    public async Task<TournamentDetails?> GetAsync(int tournamentId, bool includeGames = false)
     {
         // return await context.TournamentDetails.FindAsync(tournamentId);
         // Use Include to load related games if necessary
-        return includeGAmes ? await context.TournamentDetails
+        return includeGames ? await context.TournamentDetails
             .Include(t => t.Games) // include related games
             .FirstOrDefaultAsync(t => t.Id == tournamentId) :
             await context.TournamentDetails.FindAsync(tournamentId);
@@ -103,5 +103,21 @@ public class TournamentDetailsRepository(TournamentApiContext context) : ITourna
     {
         context.Entry(tournament).State = EntityState.Modified;
         //context.TournamentDetails.Update(tournament);
+    }
+
+    /// <summary>
+    /// Asynchronously checks if any tournament exists with the specified title and start date.
+    /// </summary>
+    /// <param name="title">The title of the tournament to check for.</param>
+    /// <param name="startDate">The start date of the tournament to check for.</param>
+    /// <returns>
+    /// A task that represents the asynchronous operation.
+    /// The task result contains <c>true</c> if a tournament with the specified title (case-insensitive)
+    /// and start date exists; otherwise, <c>false</c>.
+    /// </returns>
+    public Task<bool> ExistsByTitleAndStartDateAsync(string title, DateTime startDate)
+    {
+        return context.TournamentDetails
+         .AnyAsync(t => t.Title.ToLower() == title.ToLower() && t.StartDate.Date == startDate.Date);
     }
 }
