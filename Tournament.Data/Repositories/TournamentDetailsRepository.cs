@@ -1,17 +1,36 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿// -----------------------------------------------------------------------------
+// File: TournamentDetailsRepository.cs
+// Summary: Implements repository methods for managing tournament details within the data store.
+//          Provides functionality for adding, updating, removing, and querying tournaments,
+//          including optional loading of related games. Supports asynchronous operations to ensure
+//          efficient database access and transactional consistency.
+// <author> [Clive Leddy] </author>
+// <created> [2025-06-27] </created>
+// Notes: Uses Entity Framework Core for data access. Includes methods for existence checks,
+//        retrieval by ID, and filtering by title and start date.
+// 
+using Microsoft.EntityFrameworkCore;
 using Tournament.Core.Entities;
 using Tournament.Core.Repositories;
 using Tournament.Data.Data;
 
 namespace Tournament.Data.Repositories;
 /// <summary>
-/// Provides methods for managing tournament details in the data store.
+/// Provides a robust repository implementation for managing <see cref="TournamentDetails"/> entities within the data persistence layer.
 /// </summary>
-/// <remarks>This repository offers functionality to add, update, remove, and query tournament details. It
-/// supports asynchronous operations for retrieving tournament data and checking for the existence of specific
-/// tournament details. Use this class to interact with the underlying data context for tournament-related
-/// operations.</remarks>
-/// <param name="context"></param>
+/// <remarks>
+/// This class serves as the data access gateway for tournament-related operations, encapsulating all interactions with the
+/// <see cref="TournamentApiContext"/> to facilitate Create, Read, Update, and Delete (CRUD) functionality. It supports asynchronous
+/// execution patterns to optimize database communication and system scalability.
+///
+/// The repository enables conditional eager loading of related <see cref="Game"/> entities to efficiently retrieve comprehensive
+/// tournament data sets. It also incorporates validation methods to check for the existence of tournaments by identifier,
+/// title, and start date, thereby enforcing data integrity and preventing duplication.
+///
+/// Designed following the Repository pattern, this implementation promotes separation of concerns, testability, and maintainability
+/// of the data access layer within the application architecture.
+/// </remarks>
+/// <param name="context">The EF Core database context used for querying and persisting tournament data.</param>
 public class TournamentDetailsRepository(TournamentApiContext context) : ITournamentDetailsRepository
 {
     /// <summary>
@@ -53,6 +72,17 @@ public class TournamentDetailsRepository(TournamentApiContext context) : ITourna
     //}
     #endregion
 
+    /// <summary>
+    /// Asynchronously retrieves all tournament details from the data store.
+    /// </summary>
+    /// <param name="includeGames">
+    /// Optional parameter indicating whether to include the related games for each tournament.
+    /// If <c>true</c>, the returned tournament details include their associated games; otherwise, games are excluded.
+    /// </param>
+    /// <returns>
+    /// A task representing the asynchronous operation, containing an <see cref="IEnumerable{TournamentDetails}"/>
+    /// with all tournament details, optionally including related games.
+    /// </returns>
     public async Task<IEnumerable<TournamentDetails>> GetAllAsync(bool includeGames = false)
     {
         return includeGames

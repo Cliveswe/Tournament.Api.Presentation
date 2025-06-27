@@ -1,11 +1,33 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿// Ignore Spelling: Dto
+
+// -----------------------------------------------------------------------------
+// File: TournamentUpdateDto.cs
+// Summary: Defines the DTO used for updating tournament data, exposing only
+//          fields that clients are allowed to modify.
+// <author> [Clive Leddy] </author>
+// <created> [2025-06-27] </created>
+// Notes: Contains validation attributes to enforce required fields and length
+//        constraints, promoting data integrity during update operations.
+// -----------------------------------------------------------------------------
+using System.ComponentModel.DataAnnotations;
 
 namespace Tournament.Core.Dto;
 
 /// <summary>
-/// Data Transfer Object for updating an existing tournament.
-/// Includes only the properties that are permitted to be changed by the client.
+/// Represents a data transfer object (DTO) used to update existing tournament information.
 /// </summary>
+/// <remarks>
+/// This DTO is designed specifically for update operations, exposing only the modifiable properties
+/// of a tournament to ensure data integrity and prevent unauthorized changes to immutable fields
+/// such as identifiers or related entities.
+///
+/// Validation constraints:
+/// - <see cref="Title"/>: Required field with a maximum length of 100 characters.
+///
+/// This class is typically used in API operations where clients submit partial updates to an existing
+/// tournament entity. It supports model validation through data annotations to enforce business rules
+/// before the update is applied to the persistence layer.
+/// </remarks>
 public class TournamentUpdateDto
 {
     /// <summary>

@@ -42,8 +42,12 @@ namespace Tournament.Api.Controllers
             //IEnumerable<Game> games = await uoW.GameRepository.GetAllAsync();
 
             // Check if any games exist for the specified tournament ID
-            IEnumerable<Game> gamesExist = await uoW.GameRepository.GetAllAsync();
-            List<Game> gamesResult = gamesExist.Where(g => g.TournamentDetailsId == tournamentId).ToList();
+            //IEnumerable<Game> gamesExist = await uoW.GameRepository.GetAllAsync();
+            //List<Game> gamesResult = gamesExist.Where(g => g.TournamentDetailsId == tournamentId).ToList();
+
+            IEnumerable<Game?> gamesResult = await uoW.GameRepository.GetByTournamentIdAsync(tournamentId);
+
+
 
             IEnumerable<GameDto> games = mapper.Map<IEnumerable<GameDto>>(gamesResult);
             // Alternatively, direct EF Core access could be used:
@@ -56,24 +60,24 @@ namespace Tournament.Api.Controllers
         /// <summary>
         /// Retrieves a single Game entity by its ID. GET: api/Games/5
         /// </summary>
-        /// <param name="id">The ID of the game to retrieve.</param>
+        /// <param name="id">The ID of the gameEntity to retrieve.</param>
         /// <returns>
-        /// Returns a 200 OK response with the game data if found;
+        /// Returns a 200 OK response with the gameEntity data if found;
         /// otherwise, returns 404 Not Found.
         /// </returns>
         [HttpGet("/api/games/{id}")]
         public async Task<ActionResult<Game>> GetGame(int id)
         {
-            // Attempt to retrieve the game using the GameRepository
+            // Attempt to retrieve the gameEntity using the GameRepository
             Game? game = await uoW.GameRepository.GetAsync(id);
 
-            // Return 404 if the game does not exist
+            // Return 404 if the gameEntity does not exist
             if(game == null) {
                 return NotFound($"Game with ID {id} was not found.");
             }
             GameDto gameDto = mapper.Map<GameDto>(game);
-            // Return the game with HTTP 200 OK
-            // ASP.NET Core infers this as Ok(game) for ActionResult<T>
+            // Return the gameEntity with HTTP 200 OK
+            // ASP.NET Core infers this as Ok(gameEntity) for ActionResult<T>
             return Ok(gameDto);// Returns 200 OK + JSON by default
         }
 
@@ -82,13 +86,13 @@ namespace Tournament.Api.Controllers
         #region PUT api/Games/5
 
         /// <summary>
-        /// Updates an existing game identified by its ID with the provided data. PUT: api/Games/5
+        /// Updates an existing gameEntity identified by its ID with the provided data. PUT: api/Games/5
         /// </summary>
-        /// <param name="id">The ID of the game to update.</param>
-        /// <param name="gameUpdateDto">The updated game data provided in the request body.</param>
+        /// <param name="id">The ID of the gameEntity to update.</param>
+        /// <param name="gameUpdateDto">The updated gameEntity data provided in the request body.</param>
         /// <returns>
         /// Returns a <see cref="BadRequestResult"/> if the model state is invalid or the ID doesn't match.
-        /// Returns <see cref="NotFoundResult"/> if the game does not exist.
+        /// Returns <see cref="NotFoundResult"/> if the gameEntity does not exist.
         /// Returns <see cref="NoContentResult"/> if the update is successful.
         /// </returns>
         /// <remarks>
@@ -97,7 +101,7 @@ namespace Tournament.Api.Controllers
         /// A 204 No Content response indicates that the update succeeded without returning a body.
         /// </remarks>
         [HttpPut("/api/games/{id}")]
-        //public async Task<IActionResult> PutGame(int id, Game game)
+        //public async Task<IActionResult> PutGame(int id, Game gameEntity)
         public async Task<IActionResult> PutGame(int id, [FromBody] GameUpdateDto gameUpdateDto)
         {
             if(!ModelState.IsValid) {
@@ -108,16 +112,16 @@ namespace Tournament.Api.Controllers
             Game? existingGame = await uoW.GameRepository.GetAsync(id);
 
             // Ensure the route ID matches the payload ID
-            //if(id != game.Id) {
+            //if(id != gameEntity.Id) {
             if(existingGame == null || existingGame.Id != id) {
                 // 400 Bad Request if IDs don't match
                 return BadRequest();
             }
 
             // Mark the entity as modified in the Unit of Work pattern
-            // uoW.GameRepository.Update(game);
+            // uoW.GameRepository.Update(gameEntity);
             // Alternatively, for direct context access:
-            // context.Entry(game).State = EntityState.Modified;
+            // context.Entry(gameEntity).State = EntityState.Modified;
 
             // Map the DTO to the existing entity.
             // This will update only the fields specified in the DTO.
@@ -159,8 +163,12 @@ namespace Tournament.Api.Controllers
         // It follows REST conventions by returning 201 Created with a location header pointing to the new resource.
         // To protect against over-posting attacks, bind only the fields you want to allow clients to set.
         [HttpPost]
-        public async Task<ActionResult<Game>> PostGame(Game game)
+        public async Task<ActionResult<GameDto>> PostGame([FromBody] GameCreateDto gameCreateDto, [FromRoute] int tournamentId)
         {
+            if(gameCreateDto == null) {
+                // Return 400 Bad Request if the request body is null
+                return BadRequest("Game data must be provided.");
+            }
 
             // Validate the model state using data annotations.
             if(!ModelState.IsValid) {
@@ -168,40 +176,85 @@ namespace Tournament.Api.Controllers
                 return BadRequest(ModelState);
             }
 
-            // Check for null input.
-            if(game == null) {
-                return BadRequest("Game cannot be null.");
+            if(gameCreateDto.TournamentDetailsId != tournamentId) {
+                return BadRequest("Mismatch between route tournamentId and request body.");
             }
 
-            // Optional: check if a similar game already exists.
-            //var exists = await GameExists(game);
+            // Trim whitespace from the gameEntity name
+            gameCreateDto.Name = gameCreateDto.Name.Trim();
+            if(string.IsNullOrWhiteSpace(gameCreateDto.Name)) {
+                return BadRequest("Game name is required.");
+            }
+
+            // Map the DTO to the TournamentDto
+            TournamentDetails? existingTournament = await uoW.TournamentDetailsRepository.GetAsync(tournamentId);
+            // Validate tournament existence
+            if(existingTournament == null) {
+                // Return 404 Not Found if the tournament does not exist
+                return NotFound($"Tournament with ID {tournamentId} does not exist.");
+            }
+
+            // Validate that the gameEntity time is within the tournament's start and end dates
+            //if(gameCreateDto.Time <= tournamentDetailsDto.StartDate ||
+            //    gameCreateDto.Time >= tournamentDetailsDto.EndDate) {
+            //    return BadRequest($"Game time must be within the tournament's start \"{tournamentDetailsDto.StartDate}\" and end \"{tournamentDetailsDto.EndDate}\" dates.");
+            //}
+
+            TournamentDto tournamentDetailsDto = mapper.Map<TournamentDto>(existingTournament);
+            if(!IsGameTimeValid(gameCreateDto.Time, tournamentDetailsDto)) {
+                return BadRequest($"Game time must be within the tournament's start \"{tournamentDetailsDto.StartDate}\" and end \"{tournamentDetailsDto.EndDate}\" dates.");
+            }
+
+            // Optional: check if a similar gameEntity already exists.
+            Game duplicateGame = await FindDuplicateGameAsync(gameCreateDto, tournamentId);
 
             // Use the new method to check for duplicate by name & date
-            bool exists = await uoW.GameRepository.ExistsByNameAndDateAsync(game.Title, game.Time);
 
-            if(exists) {
-                // Return 409 Conflict if a duplicate game is found
-                return Conflict("A game with the same name and date already exists.");
+            // bool exists = await uoW.GameRepository.ExistsByNameAndDateAsync(gameEntity.Title, gameEntity.Time);
+
+            if(duplicateGame != null) {
+                // Return 409 Conflict if a duplicate gameEntity is found
+                //return Conflict($"A gameEntity with the same name \"{gameCreateDto.Name}\" and date already exists.");
+                return Conflict($"A gameEntity named \"{gameCreateDto.Name}\" already exists on {gameCreateDto.Time:yyyy-MM-dd HH:mm}.");
+
             }
 
             // Add the new Game entity to the repository
-            uoW.GameRepository.Add(game);
+            Game gameEntity = mapper.Map<Game>(gameCreateDto); // map DTO to Game entity
+            uoW.GameRepository.Add(gameEntity);
             // Alternatively, using direct DbContext access:
-            // context.Game.Add(game);
+            // context.Game.Add(gameEntity);
 
-            // Persist the changes to the database
-            var changes  = await uoW.CompleteAsync();
-
-            if(changes == 0) {
-                // No changes saved - something went wrong
-                return StatusCode(StatusCodes.Status500InternalServerError, "Failed to save the new game.");
+            try {
+                // Persist the changes to the database
+                var changes  = await uoW.CompleteAsync();
+                if(changes == 0) {
+                    // No changes saved - something went wrong
+                    return StatusCode(StatusCodes.Status500InternalServerError, "Failed to save the new gameEntity.");
+                }
+            } catch(DbUpdateException) {
+                // Log exception if you have logging setup
+                return StatusCode(StatusCodes.Status500InternalServerError, "Database update error occurred.");
             }
             // Alternatively, using direct DbContext access:
             //await context.SaveChangesAsync();
 
             // Return 201 Created with the route to access the new resource
-            return CreatedAtAction("GetGame", new { id = game.Id }, game);
+            return CreatedAtAction(nameof(GetGame), new { id = gameEntity.Id }, mapper.Map<GameDto>(gameEntity));
         }
+
+        private async Task<Game> FindDuplicateGameAsync(GameCreateDto gameCreateDto, int tournamentId)
+        {
+
+            // Check if a gameEntity with the same name and time already exists in the specified tournament
+            return await uoW.GameRepository.GetByNameAndDateAsync(gameCreateDto.Name, tournamentId);
+        }
+
+        private bool IsGameTimeValid(DateTime gameTime, TournamentDto tournament)
+        {
+            return gameTime > tournament.StartDate && gameTime < tournament.EndDate;
+        }
+
 
         #endregion
 
@@ -217,7 +270,7 @@ namespace Tournament.Api.Controllers
             // Attempt to retrieve the Game entity by ID from the repository
             var game = await uoW.GameRepository.GetAsync(id);
             // Alternatively, using direct DbContext access:
-            // var game = await context.Game.FindAsync(id);
+            // var gameEntity = await context.Game.FindAsync(id);
 
             // If the entity does not exist, return 404 Not Found
             if(game == null) {
@@ -227,7 +280,7 @@ namespace Tournament.Api.Controllers
             // Remove the Game entity from the repository
             uoW.GameRepository.Remove(game);
             // Alternatively, using direct DbContext access:
-            // context.Game.Remove(game);
+            // context.Game.Remove(gameEntity);
 
             // Persist the change to the database
             await uoW.CompleteAsync();
@@ -249,7 +302,7 @@ namespace Tournament.Api.Controllers
             return await uoW.GameRepository.AnyAsync(game.Id);
 
             // Alternatively, using direct DbContext access:
-            // return context.Game.Any(e => e.Id == game.Id);
+            // return context.Game.Any(e => e.Id == gameEntity.Id);
 
         }
     }

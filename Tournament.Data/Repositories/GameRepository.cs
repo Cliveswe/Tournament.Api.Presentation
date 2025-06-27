@@ -1,4 +1,15 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿// -----------------------------------------------------------------------------
+// File: GameRepository.cs
+// Summary: Implements repository methods for managing Game entities in the database,
+//          including CRUD operations and queries by game attributes or tournament association.
+//          Supports asynchronous operations for fetching, adding, updating, and removing games.
+// Author: [Clive Leddy]
+// Created: [2025-06-27]
+// Notes: Uses Entity Framework Core for data access via the TournamentApiContext. 
+//        Ensures data consistency by tracking entity states and querying with LINQ.
+// -----------------------------------------------------------------------------
+
+using Microsoft.EntityFrameworkCore;
 using Tournament.Core.Entities;
 using Tournament.Core.Repositories;
 using Tournament.Data.Data;
@@ -6,13 +17,20 @@ using Tournament.Data.Data;
 namespace Tournament.Data.Repositories;
 
 /// <summary>
-/// Provides methods for managing game entities in the database.
+/// Provides a repository implementation for managing <see cref="Game"/> entities in the application's data layer.
+/// Utilizes Entity Framework Core to perform asynchronous Create, Read, Update, and Delete (CRUD) operations
+/// on game records, including filtering by attributes such as title, date, and tournament association.
 /// </summary>
-/// <remarks>The <see cref="GameRepository"/> class serves as a repository for performing CRUD operations on game
-/// entities. It interacts with the underlying database context to add, retrieve, update, and remove game records. This
-/// class is designed to abstract the data access layer, providing a consistent interface for managing game
-/// data.</remarks>
-/// <param name="context"></param>
+/// <remarks>
+/// Key responsibilities include:
+/// - Adding, updating, and removing <see cref="Game"/> entities in the database context.
+/// - Querying games by unique identifiers, title and date combinations, or tournament ID.
+/// - Checking for the existence of games to avoid duplication.
+/// - Supporting efficient data access using LINQ and EF Core’s change tracking.
+///
+/// This class encapsulates data access logic, promoting separation of concerns, testability,
+/// and data consistency across the application.
+/// </remarks>
 public class GameRepository(TournamentApiContext context) : IGameRepository
 {
     /// <summary>
@@ -55,11 +73,26 @@ public class GameRepository(TournamentApiContext context) : IGameRepository
     /// Ensure that the title and date values are normalized before calling this method 
     /// to avoid false negatives due to formatting differences.
     /// </remarks>
-
     public async Task<bool> ExistsByNameAndDateAsync(string name, DateTime date)
     {
         return await context.Game.AnyAsync(g => g.Title == name && g.Time == date);
     }
+
+    /// <summary>
+    /// Asynchronously retrieves a game by its title and associated tournament identifier.
+    /// </summary>
+    /// <param name="name">The title of the game to retrieve.</param>
+    /// <param name="tournamentId">The unique identifier of the tournament the game belongs to.</param>
+    /// <returns>
+    /// A task representing the asynchronous operation. The task result contains the <see cref="Game"/>
+    /// object matching the specified title and tournament ID if found; otherwise, <c>null</c>.
+    /// </returns>
+    public async Task<Game?> GetByNameAndDateAsync(string name, int tournamentId)
+    {
+        return await context.Game
+            .FirstOrDefaultAsync(g => g.Title == name && g.TournamentDetailsId == tournamentId);
+    }
+
 
     /// <summary>
     /// Asynchronously retrieves all games from the database.
@@ -104,5 +137,19 @@ public class GameRepository(TournamentApiContext context) : IGameRepository
     {
         context.Entry(game).State = EntityState.Modified;
         //context.Game.Update(game);
+    }
+    /// <summary>
+    /// Asynchronously retrieves all games associated with a specific tournament.
+    /// </summary>
+    /// <param name="tournamentId">The unique identifier of the tournament whose games are to be retrieved.</param>
+    /// <returns>
+    /// A task representing the asynchronous operation. The task result contains a collection of
+    /// <see cref="Game"/> objects related to the specified tournament. If no games are found, the collection will be empty.
+    /// </returns>
+    public async Task<IEnumerable<Game?>> GetByTournamentIdAsync(int tournamentId)
+    {
+        return await context.Game
+            .Where(g => g.TournamentDetailsId == tournamentId)
+            .ToListAsync();
     }
 }

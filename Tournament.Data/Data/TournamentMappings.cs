@@ -7,8 +7,9 @@ public class TournamentMappings : Profile
 {
     public TournamentMappings()
     {
-        // Map TournamentDetails to TournamentDto
-        _ = CreateMap<TournamentDetails, TournamentDto>();
+        // Create mappings between DTOs and entities.
+        _ = CreateMap<TournamentDetails, TournamentDto>()
+            .ForMember(dest => dest.Games, opt => opt.MapFrom(src => src.Games));
 
         // Map TournamentUpdateDto to TournamentDetails.
         // Ignore StartDate and Id as they are not part of the update DTO
@@ -21,10 +22,12 @@ public class TournamentMappings : Profile
         _ = CreateMap<TournamentDetailsCreateDto, TournamentDetails>()
             .ForMember(dest => dest.Id, opt => opt.Ignore());
 
-        _ = CreateMap<TournamentDetails, TournamentDto>();
-
         _ = CreateMap<GameCreateDto, Game>()
-            .ForMember(dest => dest.Id, opt => opt.Ignore());
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+        .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.Name.Trim())); // Trim whitespace from Title
+
+        CreateMap<Game, GameDto>();
+
 
         //Show users a more descriptive name like StartDate instead of the raw database property name Time.
         //Mapping lets you decouple your database model from the API contract.

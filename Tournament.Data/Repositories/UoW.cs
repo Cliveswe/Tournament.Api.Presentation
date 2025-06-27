@@ -1,16 +1,33 @@
 ﻿// Ignore Spelling: Uo
 
+// -----------------------------------------------------------------------------
+// File: UoW.cs
+// Summary: Implements the Unit of Work pattern for managing tournament and game repositories,
+//          coordinating data operations, and committing changes to the data store.
+// <author> [Clive Leddy] </author>
+// <created> [2025-06-27] </created>
+// Notes: Encapsulates repository instances and provides a method to save changes asynchronously
+//        to ensure transactional consistency in data operations.
+// -----------------------------------------------------------------------------
+
 using Tournament.Core.Repositories;
 using Tournament.Data.Data;
 
 namespace Tournament.Data.Repositories;
 /// <summary>
-/// Provides a unit of work implementation for managing repositories and saving changes to the data store.
+/// Implements the Unit of Work (UoW) pattern to coordinate operations across multiple repositories
+/// using a shared database context. This class centralizes repository access and ensures that
+/// all changes are committed as a single, atomic transaction.
 /// </summary>
-/// <remarks>This class encapsulates the repositories for accessing and managing tournament and game-related data,
-/// and provides a method to save changes to the underlying data store. It is designed to ensure that operations on the
-/// data context are performed in a consistent and transactional manner.</remarks>
-/// <param name="context"></param>
+/// <remarks>
+/// Responsibilities:
+/// - Provides controlled access to <see cref="ITournamentDetailsRepository"/> and <see cref="IGameRepository"/> instances.
+/// - Manages the lifecycle of the <see cref="TournamentApiContext"/> to track changes and unify operations.
+/// - Facilitates asynchronous saving of changes, preserving consistency and enabling rollback on failure.
+///
+/// This implementation promotes separation of concerns, improves testability, and simplifies transaction handling
+/// within the data access layer.
+/// </remarks>
 public class UoW(TournamentApiContext context) : IUoW
 {
     /// <summary>

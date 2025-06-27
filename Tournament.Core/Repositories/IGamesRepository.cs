@@ -9,6 +9,10 @@ public interface IGameRepository
     Task<bool> AnyAsync(int id);
 
     Task<bool> ExistsByNameAndDateAsync(string name, DateTime date);
+    Task<Game?> GetByNameAndDateAsync(string name, int tournamentId);
+
+    Task<IEnumerable<Game?>> GetByTournamentIdAsync(int tournamentId);
+
     void Add(Game game);
     void Update(Game game);
     void Remove(Game game);

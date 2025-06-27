@@ -1,11 +1,29 @@
 ﻿// Ignore Spelling: Dto
+
+// -----------------------------------------------------------------------------
+// File: GameUpdateDto.cs
+// Summary: Data Transfer Object (DTO) for updating an existing Game entity,
+//          including validation attributes for modifiable fields.
+// <author> [Clive Leddy] </author>
+// <created> [2025-06-27] </created>
+// Notes: Contains only the properties allowed to be updated, enforcing data integrity
+//        via required and length constraints.
+// -----------------------------------------------------------------------------
+
 using System.ComponentModel.DataAnnotations;
 
 namespace Tournament.Core.Dto
 {
     /// <summary>
-    /// Data Transfer Object (DTO) used to update an existing game.
-    /// Contains only the fields that are allowed to be modified during an update operation.
+    /// Data Transfer Object (DTO) designed specifically for updating an existing <see cref="Game"/> entity.
+    /// This class includes only the modifiable properties, enforcing validation constraints to ensure data integrity.
+    /// 
+    /// Key features:
+    /// - Contains the <see cref="Title"/> property with required and length validation.
+    /// - Supports partial updates by restricting modifiable fields to those intended for change.
+    /// 
+    /// This DTO facilitates safe and controlled update operations by exposing only allowed fields
+    /// and preventing modification of immutable or sensitive properties.
     /// </summary>
     public class GameUpdateDto
     {
