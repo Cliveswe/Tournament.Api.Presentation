@@ -112,16 +112,10 @@ namespace Tournament.Api.Controllers
             Game? existingGame = await uoW.GameRepository.GetAsync(id);
 
             // Ensure the route ID matches the payload ID
-            //if(id != gameEntity.Id) {
             if(existingGame == null || existingGame.Id != id) {
                 // 400 Bad Request if IDs don't match
                 return BadRequest();
             }
-
-            // Mark the entity as modified in the Unit of Work pattern
-            // uoW.GameRepository.Update(gameEntity);
-            // Alternatively, for direct context access:
-            // context.Entry(gameEntity).State = EntityState.Modified;
 
             // Map the DTO to the existing entity.
             // This will update only the fields specified in the DTO.
@@ -133,9 +127,6 @@ namespace Tournament.Api.Controllers
 
                 // Persist the changes to the database
                 await uoW.CompleteAsync();
-
-                // Alternatively, for direct context access:
-                //await context.SaveChangesAsync();
 
             } catch(DbUpdateConcurrencyException) {
 
@@ -258,37 +249,52 @@ namespace Tournament.Api.Controllers
 
         #endregion
 
-        #region DELETE api/Games/5
+        #region DELETE api/tournamentDetails/1/Games/5
 
-        // DELETE: api/Games/5
-        // This method deletes an existing Game entity by ID.
-        // It follows REST conventions by returning 204 No Content if the deletion is successful.
-        // If the specified entity does not exist, it returns 404 Not Found.
+        /// <summary>
+        /// Deletes a game entity by its ID.
+        /// </summary>
+        /// <param name="id">The ID of the game to delete.</param>
+        /// <returns>
+        /// Returns:
+        /// - <see cref="BadRequestObjectResult"/> (400) if the ID is invalid.
+        /// - <see cref="NotFoundObjectResult"/> (404) if no game with the specified ID exists.
+        /// - <see cref="StatusCodeResult"/> (500) if a database error occurs during deletion.
+        /// - <see cref="OkObjectResult"/> (200) with a confirmation message if the deletion succeeds.
+        /// </returns>
+        /// <remarks>
+        /// This method attempts to remove a game from the database using the Unit of Work pattern.
+        /// It validates the input ID, checks existence, and handles potential database exceptions.
+        /// </remarks>
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteGame(int id)
+        public async Task<IActionResult> DeleteGame([FromRoute] int id)
         {
+            // Validate the ID to ensure it is a positive integer.
+            // If the ID is less than or equal to zero, return 400 Bad Request.
+            if(id <= 0) {
+                return BadRequest($"Invalid {id} specified for deletion.");
+            }
+
             // Attempt to retrieve the Game entity by ID from the repository
             var game = await uoW.GameRepository.GetAsync(id);
-            // Alternatively, using direct DbContext access:
-            // var gameEntity = await context.Game.FindAsync(id);
 
             // If the entity does not exist, return 404 Not Found
             if(game == null) {
-                return NotFound("Game with the specified ID was not found.");
+                return NotFound($"Game with the specified {id} was not found.");
             }
 
-            // Remove the Game entity from the repository
-            uoW.GameRepository.Remove(game);
-            // Alternatively, using direct DbContext access:
-            // context.Game.Remove(gameEntity);
+            try {
+                // Remove the Game entity from the repository
+                uoW.GameRepository.Remove(game);
+                // Persist the change to the database
+                await uoW.CompleteAsync();
+            } catch(DbUpdateException) {
+                // Return 500 Internal Server Error if a database update error occurs
+                return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected concurrency error occurred.");
+            }
 
-            // Persist the change to the database
-            await uoW.CompleteAsync();
-            // Alternatively, using direct DbContext access:
-            //await context.SaveChangesAsync();
-
-            // Return 204 No Content to indicate successful deletion
-            return NoContent();
+            // Return 200 OK with a confirmation message
+            return Ok(new { message = $"Game with ID {id} has bee deleted successfully." });
         }
 
         #endregion
