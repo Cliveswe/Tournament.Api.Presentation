@@ -1,5 +1,18 @@
 ﻿// Ignore Spelling: Api Dto Ok
 
+// -----------------------------------------------------------------------------
+// File: GamesController.cs
+// Summary: Handles HTTP API requests related to game entities within tournaments,
+//          including retrieving, creating, updating, and deleting games.
+//          Utilizes AutoMapper for DTO mapping and the Unit of Work pattern for
+//          reliable and efficient data access management.
+// <author> [Clive Leddy] </author>
+// <created> [2025-06-28] </created>
+// Notes: Implements RESTful endpoints with proper validation, status codes,
+//        and comprehensive error handling to ensure API robustness and data integrity.
+// -----------------------------------------------------------------------------
+
+
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -9,7 +22,15 @@ using Tournament.Core.Repositories;
 
 namespace Tournament.Api.Controllers
 {
-
+    /// <summary>
+    /// API controller for managing <see cref="Game"/> entities associated with tournaments.
+    /// </summary>
+    /// <remarks>
+    /// Provides endpoints to retrieve, create, update, and delete games linked to specific tournament details.
+    /// Utilizes AutoMapper for mapping between entities and DTOs, and implements the Unit of Work pattern for database operations.
+    /// Validates game data including ensuring game times fall within the tournament period and preventing duplicates.
+    /// Returns appropriate HTTP responses such as 200 OK, 201 Created, 204 No Content, 400 Bad Request, 404 Not Found, and 409 Conflict.
+    /// </remarks>
     [ApiController]
     [Route("api/tournamentDetails/{tournamentId}/games")]
     //public class GamesController(TournamentApiContext context) : ControllerBase
@@ -147,12 +168,29 @@ namespace Tournament.Api.Controllers
 
         #endregion
 
-        #region POST api/Games
-        // POST: api/Games
-        // To protect from over-posting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        // This method creates a new Game entity.
-        // It follows REST conventions by returning 201 Created with a location header pointing to the new resource.
-        // To protect against over-posting attacks, bind only the fields you want to allow clients to set.
+        #region POST api/tournamentDetails/1/Games
+
+        // POST: api/tournamentDetails/1/Games
+        /// <summary>
+        /// Creates a new game associated with the specified tournament.
+        /// </summary>
+        /// <param name="gameCreateDto">The data transfer object containing information about the game to create.</param>
+        /// <param name="tournamentId">The ID of the tournament to which the game belongs (from route).</param>
+        /// <returns>
+        /// Returns:
+        /// <list type="bullet">
+        ///   <item><description><see cref="BadRequestObjectResult"/> if the input is invalid or IDs mismatch.</description></item>
+        ///   <item><description><see cref="NotFoundResult"/> if the specified tournament does not exist.</description></item>
+        ///   <item><description><see cref="ConflictResult"/> if a duplicate game exists with the same name and time.</description></item>
+        ///   <item><description><see cref="ObjectResult"/> with HTTP 500 if saving to the database fails.</description></item>
+        ///   <item><description><see cref="CreatedAtActionResult"/> with the created game if successful.</description></item>
+        /// </list>
+        /// </returns>
+        /// <remarks>
+        /// Validates the game data, checks for tournament existence and time constraints, 
+        /// prevents duplicates, and saves the game to the database. 
+        /// On success, returns the newly created game and its URI.
+        /// </remarks>
         [HttpPost]
         public async Task<ActionResult<GameDto>> PostGame([FromBody] GameCreateDto gameCreateDto, [FromRoute] int tournamentId)
         {
@@ -162,18 +200,26 @@ namespace Tournament.Api.Controllers
             }
 
             // Validate the model state using data annotations.
+            // ModelState contains validation errors if the DTO does not meet the required constraints.
+            // This includes checks for required fields, string lengths, and range constraints.
             if(!ModelState.IsValid) {
-                // Return 400 Bad Request with validation errors
+                // Return a 400 Bad Request with the validation errors.
                 return BadRequest(ModelState);
             }
 
+            // This ensures that the game is being created for the correct tournament.
+            // It is important to prevent mismatches between the route and the request body.
+            // The route parameter is the tournamentId from the URL, while the DTO contains the tournamentDetailsId.
+            // This check ensures that the game being created is associated with the correct tournament.
             if(gameCreateDto.TournamentDetailsId != tournamentId) {
-                return BadRequest("Mismatch between route tournamentId and request body.");
+                // Return 400 Bad Request if the tournament ID in the DTO does not match the route parameter.
+                return BadRequest($"Mismatch between route tournament with Id {tournamentId} and request body.");
             }
 
             // Trim whitespace from the gameEntity name
             gameCreateDto.Name = gameCreateDto.Name.Trim();
             if(string.IsNullOrWhiteSpace(gameCreateDto.Name)) {
+                // Return 400 Bad Request if the game name is empty or whitespace.
                 return BadRequest("Game name is required.");
             }
 
@@ -185,38 +231,33 @@ namespace Tournament.Api.Controllers
                 return NotFound($"Tournament with ID {tournamentId} does not exist.");
             }
 
-            // Validate that the gameEntity time is within the tournament's start and end dates
-            //if(gameCreateDto.Time <= tournamentDetailsDto.StartDate ||
-            //    gameCreateDto.Time >= tournamentDetailsDto.EndDate) {
-            //    return BadRequest($"Game time must be within the tournament's start \"{tournamentDetailsDto.StartDate}\" and end \"{tournamentDetailsDto.EndDate}\" dates.");
-            //}
-
             TournamentDto tournamentDetailsDto = mapper.Map<TournamentDto>(existingTournament);
             if(!IsGameTimeValid(gameCreateDto.Time, tournamentDetailsDto)) {
+                // Return 400 Bad Request if the game time is not within the tournament's start and end dates.
                 return BadRequest($"Game time must be within the tournament's start \"{tournamentDetailsDto.StartDate}\" and end \"{tournamentDetailsDto.EndDate}\" dates.");
             }
 
             // Optional: check if a similar gameEntity already exists.
             Game duplicateGame = await FindDuplicateGameAsync(gameCreateDto, tournamentId);
 
-            // Use the new method to check for duplicate by name & date
-
-            // bool exists = await uoW.GameRepository.ExistsByNameAndDateAsync(gameEntity.Title, gameEntity.Time);
-
             if(duplicateGame != null) {
                 // Return 409 Conflict if a duplicate gameEntity is found
                 //return Conflict($"A gameEntity with the same name \"{gameCreateDto.Name}\" and date already exists.");
-                return Conflict($"A gameEntity named \"{gameCreateDto.Name}\" already exists on {gameCreateDto.Time:yyyy-MM-dd HH:mm}.");
-
+                return Conflict($"A game named \"{gameCreateDto.Name}\" already exists on {gameCreateDto.Time:yyyy-MM-dd HH:mm}.");
             }
 
-            // Add the new Game entity to the repository
+            // This mapping will convert the DTO properties to the corresponding Game entity properties.
+            // The Game entity will be used to persist the new game to the database.
+            // This is necessary to ensure that the game is associated with the correct tournament.
             Game gameEntity = mapper.Map<Game>(gameCreateDto); // map DTO to Game entity
-            uoW.GameRepository.Add(gameEntity);
-            // Alternatively, using direct DbContext access:
-            // context.Game.Add(gameEntity);
 
             try {
+                // Add the new Game entity to the repository
+                // This will prepare the entity to be inserted into the database.
+                // The Unit of Work pattern is used to manage the database context and repositories.
+                // This ensures that the game is added to the correct tournament.
+                uoW.GameRepository.Add(gameEntity);
+
                 // Persist the changes to the database
                 var changes  = await uoW.CompleteAsync();
                 if(changes == 0) {
@@ -227,25 +268,13 @@ namespace Tournament.Api.Controllers
                 // Log exception if you have logging setup
                 return StatusCode(StatusCodes.Status500InternalServerError, "Database update error occurred.");
             }
-            // Alternatively, using direct DbContext access:
-            //await context.SaveChangesAsync();
 
-            // Return 201 Created with the route to access the new resource
+            // Return 201 Created with the location header pointing to access the new resource.
+            //nameof(GetGame): Specifies the action method (e.g., GetGame(int id)) that can be used to retrieve the created Game.
+            //new { id = gameEntity.Id }: Supplies route values for the URL generation — here, it uses the newly created game’s ID.
+            //mapper.Map<GameDto>(gameEntity): Returns the newly created game data in DTO form as the response body.
             return CreatedAtAction(nameof(GetGame), new { id = gameEntity.Id }, mapper.Map<GameDto>(gameEntity));
         }
-
-        private async Task<Game> FindDuplicateGameAsync(GameCreateDto gameCreateDto, int tournamentId)
-        {
-
-            // Check if a gameEntity with the same name and time already exists in the specified tournament
-            return await uoW.GameRepository.GetByNameAndDateAsync(gameCreateDto.Name, tournamentId);
-        }
-
-        private bool IsGameTimeValid(DateTime gameTime, TournamentDto tournament)
-        {
-            return gameTime > tournament.StartDate && gameTime < tournament.EndDate;
-        }
-
 
         #endregion
 
@@ -299,17 +328,63 @@ namespace Tournament.Api.Controllers
 
         #endregion
 
-        // This method checks whether a Game entity with the specified ID exists in the database.
-        // It is used to verify existence before update or delete operations to avoid conflicts or exceptions.
+        #region Private Methods
+
+        /// <summary>
+        /// Checks whether a <see cref="Game"/> entity with the specified ID exists in the database.
+        /// </summary>
+        /// <param name="game">The <see cref="Game"/> entity whose ID is used to check for existence.</param>
+        /// <returns>
+        /// A <see cref="Task{Boolean}"/> representing the asynchronous operation, 
+        /// with a result of <c>true</c> if a game with the given ID exists; otherwise, <c>false</c>.
+        /// </returns>
+        /// <remarks>
+        /// This method is typically used before performing update or delete operations to avoid conflicts 
+        /// or exceptions when the entity no longer exists.
+        /// </remarks>
         private async Task<bool> GameExists(Game game)
         {
             // Check for existence using the Game ID
             // Returns true if a Game with the same ID exists, otherwise false
             return await uoW.GameRepository.AnyAsync(game.Id);
-
-            // Alternatively, using direct DbContext access:
-            // return context.Game.Any(e => e.Id == gameEntity.Id);
-
         }
+
+        /// <summary>
+        /// Asynchronously checks for an existing game with the same name and date 
+        /// within the specified tournament.
+        /// </summary>
+        /// <param name="gameCreateDto">The game data containing the name and time of the game to check for duplicates.</param>
+        /// <param name="tournamentId">The ID of the tournament to search within.</param>
+        /// <returns>
+        /// A <see cref="Game"/> instance if a duplicate is found; otherwise, <c>null</c>.
+        /// </returns>
+        /// <remarks>
+        /// This method delegates to the repository to determine if a game with the same name and 
+        /// scheduled time already exists within the given tournament.
+        /// </remarks>
+        private async Task<Game> FindDuplicateGameAsync(GameCreateDto gameCreateDto, int tournamentId)
+        {
+
+            // Check if a gameEntity with the same name and time already exists in the specified tournament
+            return await uoW.GameRepository.GetByNameAndDateAsync(gameCreateDto.Name, tournamentId);
+        }
+
+        /// <summary>
+        /// Validates whether the specified game time falls within the start and end dates of the tournament.
+        /// </summary>
+        /// <param name="gameTime">The time of the game to validate.</param>
+        /// <param name="tournament">The tournament against which the game time is validated.</param>
+        /// <returns>
+        /// <c>true</c> if the game time is strictly between the tournament's start and end dates; otherwise, <c>false</c>.
+        /// </returns>
+        /// <remarks>
+        /// This method ensures that the game is scheduled within the tournament's valid timeframe.
+        /// </remarks>
+        private bool IsGameTimeValid(DateTime gameTime, TournamentDto tournament)
+        {
+            return gameTime > tournament.StartDate && gameTime < tournament.EndDate;
+        }
+
+        #endregion
     }
 }
