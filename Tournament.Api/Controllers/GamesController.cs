@@ -3,17 +3,18 @@
 // -----------------------------------------------------------------------------
 // File: GamesController.cs
 // Summary: Handles HTTP API requests related to game entities within tournaments,
-//          including retrieving, creating, updating, and deleting games.
+//          including retrieving, creating, updating, patching, and deleting games.
 //          Utilizes AutoMapper for DTO mapping and the Unit of Work pattern for
 //          reliable and efficient data access management.
 // <author> [Clive Leddy] </author>
 // <created> [2025-06-28] </created>
-// Notes: Implements RESTful endpoints with proper validation, status codes,
-//        and comprehensive error handling to ensure API robustness and data integrity.
+// Notes: Implements RESTful endpoints with proper validation, concurrency control,
+//        appropriate status codes (200, 201, 204, 400, 404, 409, 500), and
+//        comprehensive error handling to ensure API robustness and data integrity.
 // -----------------------------------------------------------------------------
 
-
 using AutoMapper;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Tournament.Core.Dto;
@@ -26,10 +27,17 @@ namespace Tournament.Api.Controllers
     /// API controller for managing <see cref="Game"/> entities associated with tournaments.
     /// </summary>
     /// <remarks>
-    /// Provides endpoints to retrieve, create, update, and delete games linked to specific tournament details.
-    /// Utilizes AutoMapper for mapping between entities and DTOs, and implements the Unit of Work pattern for database operations.
-    /// Validates game data including ensuring game times fall within the tournament period and preventing duplicates.
-    /// Returns appropriate HTTP responses such as 200 OK, 201 Created, 204 No Content, 400 Bad Request, 404 Not Found, and 409 Conflict.
+    /// This controller provides endpoints to perform CRUD operations on games within specific tournaments:
+    /// <list type="number">
+    /// <item>Retrieves games by tournament ID or by game ID.</item>
+    /// <item>Creates new games linked to tournaments, ensuring data validity and preventing duplicates.</item>
+    /// <item>Updates or partially updates existing games with full validation and concurrency handling.</item>
+    /// <item>Deletes games by their ID with appropriate validation and error handling.</item>
+    /// <item>Utilizes AutoMapper to map between entity models and data transfer objects (DTOs).</item>
+    /// <item>Implements the Unit of Work pattern to coordinate database operations through repositories.</item>
+    /// <item>Validates that game times fall within the tournament’s start and end dates.</item>
+    /// <item>Returns standard HTTP response codes such as 200 OK, 201 Created, 204 No Content, 400 Bad Request, 404 Not Found, 409 Conflict, and 500 Internal Server Error.</item>
+    /// </list>
     /// </remarks>
     [ApiController]
     [Route("api/tournamentDetails/{tournamentId}/games")]
@@ -165,6 +173,123 @@ namespace Tournament.Api.Controllers
             // The update was successful; return HTTP 204 No Content as per REST convention
             return NoContent();
         }
+
+        #endregion
+
+        #region PATCH api/Games/5
+
+        /// <summary>
+        /// Applies a JSON Patch document to an existing game within a specified tournament,
+        /// allowing partial updates to game properties such as the title or start date.
+        /// </summary>
+        /// <param name="tournamentId">The ID of the tournament the game belongs to.</param>
+        /// <param name="id">The ID of the game to be patched.</param>
+        /// <param name="patchDocument">The JSON Patch document containing the operations to be applied to the game.</param>
+        /// <returns>
+        /// Returns:
+        /// - <see cref="BadRequestResult"/> if the patch document or IDs are invalid, or if the patched model fails validation.
+        /// - <see cref="NotFoundResult"/> if the game or tournament is not found.
+        /// - <see cref="OkObjectResult"/> with the updated <see cref="GameDto"/> if the patch is successfully applied.
+        /// </returns>
+        /// <remarks>
+        /// This endpoint uses the JSON Patch standard (RFC 6902) to support partial updates.
+        /// It ensures the updated game's start date remains within the tournament's scheduled date range,
+        /// and validates all changes before committing to the data store.
+        /// </remarks>
+        [HttpPatch("{id}")]
+        public async Task<IActionResult> PatchGame(int tournamentId, int id, [FromBody] JsonPatchDocument<GameDto> patchDocument)
+        {
+            #region Validation of Input Parameters
+
+            // Validate the model state, checks data annotations.
+            if(patchDocument == null) {
+                // If the model state is invalid, return 400 Bad Request with validation errors.
+                return BadRequest("Patch document cannot be null.");
+            }
+
+            // Check if the tournament ID is valid.
+            if(tournamentId <= 0) {
+                // If the tournament ID is invalid, return 400 Bad Request with an error message.
+                return BadRequest($"Invalid tournament ID {tournamentId} specified for patching.");
+            }
+
+            // Check if the game ID is valid.
+            if(id <= 0) {
+                // If the game ID is invalid, return 400 Bad Request with an error message.
+                return BadRequest($"Invalid game ID {id} specified for patching.");
+            }
+            #endregion
+
+            // Fetch the existing game by ID
+            Game? existingGame = await uoW.GameRepository.GetAsync(id);
+            // If the game does not exist or the tournament ID does not match, return 404 Not Found
+            if(existingGame == null || existingGame.TournamentDetailsId != tournamentId) {
+                return NotFound($"Game with ID {id} in Tournament {tournamentId} was not found.");
+            }
+
+            //TODO: ** need to check the tournament ID and the dates in the game entity. Update the game entity with the patch document. Update the db with the patched game entity. Return the gamedto to the user.
+
+
+            // Map existing game to GameDto
+            var gameToPatch = mapper.Map<GameDto>(existingGame);
+
+            // Apply patch to DTO and validate model state
+            patchDocument.ApplyTo(gameToPatch, ModelState);
+
+            #region Validation of Model State after Patch Application
+
+            // Validate the model state after applying the patch
+            if(!TryValidateModel(gameToPatch)) {
+                // If the model state is invalid after applying the patch, return 400 Bad Request with validation errors.
+                return ValidationProblem(ModelState);
+            }
+
+            // Fetch the tournament to validate StartDate
+            var tournament = await uoW.TournamentDetailsRepository.GetAsync(tournamentId);
+            if(tournament == null) {
+                // If the tournament does not exist, return 404 Not Found
+                // Note: This is a different check than the one above, as it checks the tournament existence.
+                return NotFound($"Tournament with ID {tournamentId} does not exist.");
+            }
+
+            // Map tournament to TournamentDto for validation
+            var tournamentDto = mapper.Map<TournamentDto>(tournament);
+
+            // Validate StartDate is within tournament period
+            if(!IsGameTimeValid(gameToPatch.StartDate, tournamentDto)) {
+                return BadRequest($"StartDate must be within the tournament's start \"{tournamentDto.StartDate}\" and end \"{tournamentDto.EndDate}\" dates.");
+            }
+
+            #endregion
+
+            // Map patched DTO back to the game
+            existingGame.Title = gameToPatch.Title;
+            existingGame.Time = gameToPatch.StartDate;
+
+            // Attempt to update the game in the repository
+            try {
+                // Update the existing gameEntity in the repository
+                uoW.GameRepository.Update(existingGame);
+                // Persist the changes to the database
+                await uoW.CompleteAsync();
+            } catch(DbUpdateConcurrencyException) {
+                // If a concurrency exception occurs, check if the game still exists
+                if(!await GameExists(existingGame)) {
+                    // If the game does not exist, return 404 Not Found
+                    return NotFound($"Game with ID {existingGame.Id} was not found. It may have been deleted.");
+                } else {
+                    throw;
+                }
+            }
+
+            // Return 200 OK with the updated GameDto.
+            // This indicates that the patch operation was successful and the game has been updated.
+            // The mapper converts the updated Game entity back to a GameDto for the response.
+            // This ensures a clean API boundary and separation of concerns by returning only the necessary data.
+            return Ok(mapper.Map<GameDto>(existingGame));
+        }
+
+
 
         #endregion
 

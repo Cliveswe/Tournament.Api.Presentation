@@ -160,6 +160,7 @@ namespace Tournament.Api.Controllers
         [HttpPatch("{tournamentId}")]
         public async Task<ActionResult<TournamentDto>> PatchTournament(int tournamentId, JsonPatchDocument<TournamentDto> patchDocument)
         {
+            #region Validation of Input Parameters
             // Validate the model state, checks data annotations.
             if(patchDocument == null) {
                 // If the model state is invalid, return 400 Bad Request with validation errors.
@@ -171,6 +172,8 @@ namespace Tournament.Api.Controllers
                 // If the tournament ID is invalid, return 400 Bad Request with an error message.
                 return BadRequest($"Invalid tournament ID {tournamentId} specified for patching.");
             }
+
+            #endregion
 
             // Retrieve the existing tournament details from the repository using the Unit of Work pattern.
             TournamentDetails? existingTournament = await uoW.TournamentDetailsRepository.GetAsync(tournamentId);
@@ -194,6 +197,7 @@ namespace Tournament.Api.Controllers
                 return BadRequest(ModelState);
             }
 
+            // Attempt to update the game in the repository
             try {
                 // Map the patched DTO back to the existing tournament entity.
                 _ = mapper.Map(tournamentDto, existingTournament);// This updates only the fields specified in the DTO.
