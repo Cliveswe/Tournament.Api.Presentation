@@ -227,9 +227,6 @@ namespace Tournament.Api.Controllers
                 return NotFound($"Game with ID {id} in Tournament {tournamentId} was not found.");
             }
 
-            //TODO: ** need to check the tournament ID and the dates in the game entity. Update the game entity with the patch document. Update the db with the patched game entity. Return the gamedto to the user.
-
-
             // Map existing game to GameDto
             var gameToPatch = mapper.Map<GameDto>(existingGame);
 
@@ -507,7 +504,7 @@ namespace Tournament.Api.Controllers
         /// </remarks>
         private bool IsGameTimeValid(DateTime gameTime, TournamentDto tournament)
         {
-            return gameTime > tournament.StartDate && gameTime < tournament.EndDate;
+            return gameTime >= tournament.StartDate && gameTime <= tournament.EndDate;
         }
 
         #endregion
