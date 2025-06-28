@@ -3,36 +3,40 @@
 // -----------------------------------------------------------------------------
 // File: TournamentDetailsController.cs
 // Summary: Handles HTTP API requests related to tournament details,
-//          including retrieving, creating, updating, and deleting tournaments.
+//          including retrieving, creating, updating, patching, and deleting tournaments.
 //          Uses AutoMapper for DTO mapping and a Unit of Work pattern for data access.
 // <author> [Clive Leddy] </author>
 // <created> [2025-06-27] </created>
-// Notes: Implements RESTful endpoints with proper status codes and error handling.
+// Notes: Implements RESTful endpoints with proper status codes and error handling,
+//        including partial updates via JSON Patch.
 // -----------------------------------------------------------------------------
 
 using AutoMapper;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Tournament.Core.Dto;
 using Tournament.Core.Entities;
 using Tournament.Core.Repositories;
 
-/// <summary>
-/// Provides RESTful API endpoints to manage tournament details, including
-/// operations to create, read, update, and delete tournaments.
-/// </summary>
-/// <remarks>
-/// This controller uses the Unit of Work pattern and AutoMapper to handle
-/// data operations and DTO mappings. It supports query options such as
-/// including related games in the responses. It returns standard HTTP status
-/// codes and messages to indicate operation results.
-/// </remarks>
 namespace Tournament.Api.Controllers
 {
 
     [Route("api/tournamentDetails")]
     [ApiController]
-    //public class TournamentDetailsController(TournamentApiContext context, IUoW uoW) : ControllerBase
+    /// <summary>
+    /// Provides RESTful API endpoints to manage tournament details, including
+    /// operations to create, read, update, partially update (patch), and delete tournaments.
+    /// </summary>
+    /// <remarks>
+    /// This controller uses the Unit of Work pattern and AutoMapper to handle
+    /// data operations and DTO mappings. It supports query options such as
+    /// including related games in the responses. It returns standard HTTP status
+    /// codes and messages to indicate operation results.
+    /// 
+    /// The <see cref="PatchTournament(int, JsonPatchDocument{TournamentDto})"/> method
+    /// supports partial updates on tournament entities using JSON Patch.
+    /// </remarks>
     public class TournamentDetailsController(IMapper mapper, IUoW uoW) : ControllerBase
     {
         #region GET api/TournamentDetails api/TournamentDetails/5
@@ -122,6 +126,96 @@ namespace Tournament.Api.Controllers
             // Return the found entity with HTTP 200 OK + JSON by default.
             // ASP.NET Core automatically wraps it as Ok(tournamentDetails)
             return Ok(tournamentDto);
+        }
+
+        #endregion
+
+        #region PATCH api/TournamentDetails/5
+
+        /// <summary>
+        /// Partially updates an existing tournament identified by <paramref name="tournamentId"/> using a JSON Patch document.
+        /// </summary>
+        /// <param name="tournamentId">The ID of the tournament to be patched. Must be greater than zero.</param>
+        /// <param name="patchDocument">A <see cref="JsonPatchDocument{TournamentDto}"/> representing the JSON Patch operations to apply to the tournament DTO.</param>
+        /// <returns>
+        /// Returns an <see cref="ActionResult{TournamentDto}"/> containing the updated tournament data if the patch succeeds.
+        /// </returns>
+        /// <remarks>
+        /// This method performs the following steps:
+        /// <list type="number">
+        /// <item>Validates that the patch document is not null.</item>
+        /// <item>Validates that the tournament ID is valid (greater than zero).</item>
+        /// <item>Retrieves the existing tournament entity from the repository via the Unit of Work pattern.</item>
+        /// <item>If the tournament does not exist, returns 404 Not Found.</item>
+        /// <item>Maps the existing tournament entity to a <see cref="TournamentDto"/> for patching.</item>
+        /// <item>Applies the patch document to the DTO and validates the patched model state.</item>
+        /// <item>If validation fails, returns 400 Bad Request with validation errors.</item>
+        /// <item>Maps the patched DTO back to the entity and updates it in the repository.</item>
+        /// <item>Handles concurrency exceptions and checks if the tournament still exists.</item>
+        /// <item>Persists changes via Unit of Work.</item>
+        /// <item>Returns the updated tournament DTO with HTTP 200 OK on success.</item>
+        /// </list>
+        /// </remarks>
+        /// <exception cref="DbUpdateConcurrencyException">Thrown if a concurrency conflict occurs during update and the tournament still exists.</exception>
+        [HttpPatch("{tournamentId}")]
+        public async Task<ActionResult<TournamentDto>> PatchTournament(int tournamentId, JsonPatchDocument<TournamentDto> patchDocument)
+        {
+            // Validate the model state, checks data annotations.
+            if(patchDocument == null) {
+                // If the model state is invalid, return 400 Bad Request with validation errors.
+                return BadRequest("Patch document cannot be null.");
+            }
+
+            // Check if the tournament ID is valid.
+            if(tournamentId <= 0) {
+                // If the tournament ID is invalid, return 400 Bad Request with an error message.
+                return BadRequest($"Invalid tournament ID {tournamentId} specified for patching.");
+            }
+
+            // Retrieve the existing tournament details from the repository using the Unit of Work pattern.
+            TournamentDetails? existingTournament = await uoW.TournamentDetailsRepository.GetAsync(tournamentId);
+
+            // Check if the tournament exists.
+            if(existingTournament == null) {
+                // If the tournament does not exist, return 404 Not Found with an error message.
+                return NotFound($"Tournament with ID {tournamentId} was not found.");
+            }
+
+            // Map the existing tournament entity to a DTO for patching.
+            TournamentDto tournamentDto = mapper.Map<TournamentDto>(existingTournament);
+            // Apply the patch document to the DTO, updating its properties.
+            patchDocument.ApplyTo(tournamentDto, ModelState);
+            // Validate the patched DTO against the model state.
+            TryValidateModel(tournamentDto);
+
+            // Validate the patched model state after applying the patch document.
+            if(!ModelState.IsValid) {
+                // If the model state is invalid after patching, return 400 Bad Request with validation errors.
+                return BadRequest(ModelState);
+            }
+
+            try {
+                // Map the patched DTO back to the existing tournament entity.
+                _ = mapper.Map(tournamentDto, existingTournament);// This updates only the fields specified in the DTO.
+                // Attempt to update the existing tournament entity in the repository.
+                uoW.TournamentDetailsRepository.Update(existingTournament);
+                // Persist the changes to the database using the Unit of Work pattern.
+                await uoW.CompleteAsync();
+            } catch(DbUpdateConcurrencyException) {
+                // Check if the tournament still exists after the concurrency exception.
+                bool exists = await TournamentDetailsExists(existingTournament.Id);
+                if(!exists) {
+                    // If the tournament no longer exists, return 404 Not Found with an error message.
+                    return NotFound($"Tournament with ID {tournamentId} was not found. It may have been deleted or does not exist.");
+                } else {
+                    throw;
+                }
+            }
+
+            // Return the updated tournament details with HTTP 200 OK.
+            // The mapper converts the updated entity back to a DTO for the response.
+            // This ensures a clean API boundary by returning only the necessary data.
+            return Ok(mapper.Map<TournamentDto>(existingTournament));
         }
 
         #endregion

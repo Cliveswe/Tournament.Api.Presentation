@@ -9,7 +9,8 @@ public class TournamentMappings : Profile
     {
         // Create mappings between DTOs and entities.
         _ = CreateMap<TournamentDetails, TournamentDto>()
-            .ForMember(dest => dest.Games, opt => opt.MapFrom(src => src.Games));
+            .ForMember(dest => dest.Games, opt => opt.MapFrom(src => src.Games))
+            .ReverseMap();
 
         // Map TournamentUpdateDto to TournamentDetails.
         // Ignore StartDate and Id as they are not part of the update DTO
