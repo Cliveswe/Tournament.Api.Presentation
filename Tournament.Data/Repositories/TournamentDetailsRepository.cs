@@ -94,22 +94,46 @@ public class TournamentDetailsRepository(TournamentApiContext context) : ITourna
     }
 
     /// <summary>
-    /// Retrieves the details of a tournament by its unique identifier.
+    /// Retrieves the details of a tournament by its unique identifier, optionally including related games.
     /// </summary>
-    /// <remarks>This method performs an asynchronous database query to locate the tournament details 
-    /// associated with the specified <paramref name="tournamentId"/>. If no matching tournament  is found, the method
-    /// returns <see langword="null"/>.</remarks>
+    /// <remarks>
+    /// This method performs an asynchronous database query to locate the tournament details associated with the specified <paramref name="tournamentId"/>.
+    /// If <paramref name="includeGames"/> is <see langword="true"/>, the related games are loaded and ordered by their title.
+    /// If no matching tournament is found, the method returns <see langword="null"/>.
+    /// </remarks>
     /// <param name="tournamentId">The unique identifier of the tournament to retrieve.</param>
-    /// <returns>A <see cref="TournamentDetails"/> object containing the tournament's details if found;  otherwise, <see
-    /// langword="null"/>.</returns>
+    /// <param name="includeGames">If <see langword="true"/>, includes the related games ordered by their title; otherwise, games are not included.</param>
+    /// <returns>
+    /// A <see cref="TournamentDetails"/> object containing the tournament's details and optionally its ordered games if found; otherwise, <see langword="null"/>.
+    /// </returns>
+
     public async Task<TournamentDetails?> GetAsync(int tournamentId, bool includeGames = false)
     {
         // return await context.TournamentDetails.FindAsync(tournamentId);
         // Use Include to load related games if necessary
-        return includeGames ? await context.TournamentDetails
-            .Include(t => t.Games) // include related games
-            .FirstOrDefaultAsync(t => t.Id == tournamentId) :
-            await context.TournamentDetails.FindAsync(tournamentId);
+        //return includeGames ? await context.TournamentDetails
+        //    .Include(t => t.Games) // include related games
+        //    .FirstOrDefaultAsync(t => t.Id == tournamentId) :
+        //    await context.TournamentDetails.FindAsync(tournamentId);
+
+        TournamentDetails? tournament = null;
+        // Check if we need to include games.
+        if(includeGames) {
+            // If includeGames is true, load the tournament with its games.
+            tournament = await context.TournamentDetails
+                .Include(t => t.Games)
+                .FirstOrDefaultAsync(t => t.Id == tournamentId);
+            // If the tournament is found, order its games by title.
+            if(tournament != null) {
+                tournament.Games = tournament.Games.OrderBy(g => g.Title).ToList();
+            }
+        } else {
+            // If includeGames is false, just load the tournament without games.
+            tournament = await context.TournamentDetails
+                .FirstOrDefaultAsync(t => t.Id == tournamentId);
+        }
+        // Return the found tournament or null if not found.
+        return tournament;
     }
 
     /// <summary>

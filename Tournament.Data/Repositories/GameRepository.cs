@@ -31,6 +31,7 @@ namespace Tournament.Data.Repositories;
 /// This class encapsulates data access logic, promoting separation of concerns, testability,
 /// and data consistency across the application.
 /// </remarks>
+/// 
 public class GameRepository(TournamentApiContext context) : IGameRepository
 {
     /// <summary>
@@ -105,14 +106,35 @@ public class GameRepository(TournamentApiContext context) : IGameRepository
     }
 
     /// <summary>
-    /// Asynchronously retrieves a game by its unique identifier.
+    /// Asynchronously retrieves a <see cref="Game"/> entity by its unique identifier.
     /// </summary>
     /// <param name="gameId">The unique identifier of the game to retrieve.</param>
-    /// <returns>A <see cref="Game"/> object representing the game with the specified identifier,  or <see langword="null"/> if
-    /// no game with the given identifier exists.</returns>
-    public async Task<Game?> GetAsync(int gameId)
+    /// <returns>
+    /// A <see cref="Task{Game}"/> representing the asynchronous operation, with a result of the matching <see cref="Game"/> if found; otherwise, <c>null</c>.
+    /// </returns>
+    /// <remarks>
+    /// This method uses Entity Framework's <c>FindAsync</c> to efficiently locate a game by its primary key.
+    /// It first checks the context's local cache before querying the database.
+    /// </remarks>
+    public async Task<Game?> GetByIdAsync(int gameId)
     {
+
         return await context.Game.FindAsync(gameId);
+    }
+
+    /// <summary>
+    /// Asynchronously retrieves a <see cref="Game"/> entity by its title, using a case-insensitive comparison.
+    /// </summary>
+    /// <param name="gameTitle">The title of the game to retrieve.</param>
+    /// <returns>
+    /// A <see cref="Task{Game}"/> representing the asynchronous operation, with a result of the first <see cref="Game"/> that matches the given title; otherwise, <c>null</c>.
+    /// </returns>
+    /// <remarks>
+    /// This method performs a case-insensitive search using <see cref="string.Equals(string, string, StringComparison)"/> with <c>OrdinalIgnoreCase</c>.
+    /// </remarks>
+    public async Task<Game?> GetByTitleAsync(string gameTitle)
+    {
+        return await context.Game.FirstOrDefaultAsync(g => g.Title.Equals(gameTitle, StringComparison.OrdinalIgnoreCase));
     }
 
     /// <summary>

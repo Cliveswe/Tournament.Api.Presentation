@@ -112,6 +112,11 @@ namespace Tournament.Api.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<TournamentDto>> GetTournamentDetails(int id, [FromQuery] bool includeGames = false)
         {
+            if(id <= 0) {
+                // If the ID is invalid, return 400 Bad Request with an error message.
+                return BadRequest($"Invalid tournament ID {id} specified.");
+            }
+
             // Attempt to find the entity using the Unit of Work pattern
             TournamentDetails? tournamentEntity = await uoW.TournamentDetailsRepository.GetAsync(id, includeGames);
 

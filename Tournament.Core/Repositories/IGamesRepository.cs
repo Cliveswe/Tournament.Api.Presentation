@@ -5,7 +5,10 @@ public interface IGameRepository
 {
 
     Task<IEnumerable<Game>> GetAllAsync();
-    Task<Game?> GetAsync(int gameId);
+    Task<Game?> GetByIdAsync(int gameId);
+
+    Task<Game?> GetByTitleAsync(string gameTitle);
+
     Task<bool> AnyAsync(int id);
 
     Task<bool> ExistsByNameAndDateAsync(string name, DateTime date);
