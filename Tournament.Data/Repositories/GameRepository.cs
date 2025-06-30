@@ -1,4 +1,4 @@
-﻿// -----------------------------------------------------------------------------
+﻿// ------------------------------------------------------------------------------------------------
 // File: GameRepository.cs
 // Summary: Implements repository methods for managing Game entities in the database,
 //          including CRUD operations and queries by game attributes or tournament association.
@@ -7,7 +7,7 @@
 // Created: [2025-06-27]
 // Notes: Uses Entity Framework Core for data access via the TournamentApiContext. 
 //        Ensures data consistency by tracking entity states and querying with LINQ.
-// -----------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
 
 using Microsoft.EntityFrameworkCore;
 using Tournament.Core.Entities;

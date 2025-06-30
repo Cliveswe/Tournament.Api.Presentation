@@ -1,4 +1,4 @@
-﻿// -----------------------------------------------------------------------------
+﻿// ------------------------------------------------------------------------------------------------
 // File: TournamentDetailsRepository.cs
 // Summary: Implements repository methods for managing tournament details within the data store.
 //          Provides functionality for adding, updating, removing, and querying tournaments,
@@ -8,7 +8,7 @@
 // <created> [2025-06-27] </created>
 // Notes: Uses Entity Framework Core for data access. Includes methods for existence checks,
 //        retrieval by ID, and filtering by title and start date.
-// 
+// ------------------------------------------------------------------------------------------------
 using Microsoft.EntityFrameworkCore;
 using Tournament.Core.Entities;
 using Tournament.Core.Repositories;
@@ -72,25 +72,55 @@ public class TournamentDetailsRepository(TournamentApiContext context) : ITourna
     //}
     #endregion
 
-    /// <summary>
-    /// Asynchronously retrieves all tournament details from the data store.
+
+    /// /// <summary>
+    /// Asynchronously retrieves all tournament details from the data store, with optional inclusion of related games.
     /// </summary>
     /// <param name="includeGames">
     /// Optional parameter indicating whether to include the related games for each tournament.
-    /// If <c>true</c>, the returned tournament details include their associated games; otherwise, games are excluded.
+    /// If <c>true</c>, each tournament includes its associated games, which are ordered by title.
+    /// If <c>false</c>, games are excluded from the results.
     /// </param>
     /// <returns>
-    /// A task representing the asynchronous operation, containing an <see cref="IEnumerable{TournamentDetails}"/>
-    /// with all tournament details, optionally including related games.
+    /// A task representing the asynchronous operation. The result contains an <see cref="IEnumerable{TournamentDetails}"/>
+    /// representing all tournaments, ordered by title. If <paramref name="includeGames"/> is <c>true</c>,
+    /// each tournament's games are also included and ordered by title.
     /// </returns>
+
     public async Task<IEnumerable<TournamentDetails>> GetAllAsync(bool includeGames = false)
     {
-        return includeGames
-             ? await context.TournamentDetails
-                 .Include(t => t.Games)
-                 .ToListAsync()
-             : await context.TournamentDetails
-                 .ToListAsync();
+        //return includeGames
+        //     ? await context.TournamentDetails
+        //         .Include(t => t.Games)
+        //         .ToListAsync()
+        //     : await context.TournamentDetails
+        //         .ToListAsync();
+        // If includeGames is true, we will include the related games in the query.
+        List<TournamentDetails> tournaments;
+        if(includeGames) {
+            // If includeGames is true, load tournaments with their games.
+            tournaments = await context.TournamentDetails
+                .Include(t => t.Games)
+                .ToListAsync();
+            // If we have tournaments, order their games by title.
+            if(tournaments != null && tournaments.Any()) {
+                // If we have tournaments, order their games by title.
+                foreach(var tournament in tournaments) {
+                    tournament.Games = tournament.Games
+                        .OrderBy(g => g.Title)
+                        .ToList();
+                }
+            }
+        } else {
+            // If includeGames is false, just load the tournaments without games.
+            tournaments = await context.TournamentDetails
+                .ToListAsync();
+        }
+
+        // Return the list of tournaments, ordered by their title.
+        return tournaments
+            !.OrderBy(t => t.Title)
+            .ToList();
     }
 
     /// <summary>
