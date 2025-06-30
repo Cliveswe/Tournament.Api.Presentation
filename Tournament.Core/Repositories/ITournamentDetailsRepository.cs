@@ -1,4 +1,17 @@
-﻿using Tournament.Core.Entities;
+﻿// -----------------------------------------------------------------------------
+// File: TournamentDetailsRepository.cs
+// Summary: Implements repository methods for managing tournament details within
+//          the data store. Supports CRUD operations, existence checks, and
+//          conditional loading of related games.
+// Author: [Clive Leddy]
+// Created: [2025-06-27]
+// Notes: Utilizes Entity Framework Core for data access via TournamentApiContext.
+//        Supports asynchronous queries and enforces data integrity through
+//        validation and sorting logic for related game entities.
+// -----------------------------------------------------------------------------
+
+
+using Tournament.Core.Entities;
 
 namespace Tournament.Core.Repositories;
 

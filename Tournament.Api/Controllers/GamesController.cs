@@ -1,6 +1,6 @@
 ﻿// Ignore Spelling: Api Dto Ok
 
-// -----------------------------------------------------------------------------
+// --------------------------------------------------------------------------------
 // File: GamesController.cs
 // Summary: Handles HTTP API requests related to game entities within tournaments,
 //          including retrieving, creating, updating, patching, and deleting games.
@@ -11,8 +11,7 @@
 // Notes: Implements RESTful endpoints with proper validation, concurrency control,
 //        appropriate status codes (200, 201, 204, 400, 404, 409, 500), and
 //        comprehensive error handling to ensure API robustness and data integrity.
-// -----------------------------------------------------------------------------
-
+// --------------------------------------------------------------------------------
 using AutoMapper;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
@@ -36,7 +35,8 @@ namespace Tournament.Api.Controllers
     /// <item>Utilizes AutoMapper to map between entity models and data transfer objects (DTOs).</item>
     /// <item>Implements the Unit of Work pattern to coordinate database operations through repositories.</item>
     /// <item>Validates that game times fall within the tournament’s start and end dates.</item>
-    /// <item>Returns standard HTTP response codes such as 200 OK, 201 Created, 204 No Content, 400 Bad Request, 404 Not Found, 409 Conflict, and 500 Internal Server Error.</item>
+    /// <item>Returns standard HTTP response codes such as 200 OK, 201 Created, 204 No Content, 
+    /// 400 Bad Request, 404 Not Found, 409 Conflict, and 500 Internal Server Error.</item>
     /// </list>
     /// </remarks>
     [ApiController]
@@ -147,7 +147,8 @@ namespace Tournament.Api.Controllers
             GameDto gameDto = mapper.Map<GameDto>(gameEntity);
             // Return the gameEntity with HTTP 200 OK
             // ASP.NET Core infers this as Ok(gameEntity) for ActionResult<T>
-            return Ok(gameDto);// Returns 200 OK + JSON by default
+            //return Ok(gameDto);// Returns 200 OK + JSON by default
+            return Ok(gameDto);
         }
 
         #endregion

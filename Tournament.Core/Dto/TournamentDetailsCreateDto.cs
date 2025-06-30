@@ -1,12 +1,13 @@
 ﻿// Ignore Spelling: Dto
-// -----------------------------------------------------------------------------
+
+// -----------------------------------------------------------------------------------
 // File: TournamentDetailsCreateDto.cs
 // Summary: Defines a data transfer object used for creating new tournaments.
 //          Includes validation attributes to ensure required fields and constraints.
 // <author> [Clive Leddy] </author>
 // <created> [2025-06-27] </created>
 // Notes: Utilizes data annotations for input validation on title and start date.
-// -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------
 
 
 using System.ComponentModel.DataAnnotations;

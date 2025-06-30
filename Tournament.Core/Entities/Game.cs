@@ -1,11 +1,11 @@
-﻿// -----------------------------------------------------------------------------
+﻿// -----------------------------------------------------------------------------------------------
 // File: Game.cs
 // Summary: Defines the Game entity representing an individual game within a tournament,
 //          including its unique ID, title, scheduled time, and link to the parent tournament.
 // <author> [Clive Leddy] </author>
 // <created> [2025-06-27] </created>
 // Notes: This class models the game entity with a foreign key relationship to TournamentDetails.
-// -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------------------
 
 namespace Tournament.Core.Entities
 {

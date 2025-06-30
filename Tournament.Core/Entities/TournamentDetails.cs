@@ -1,11 +1,11 @@
-﻿// -----------------------------------------------------------------------------
+﻿// --------------------------------------------------------------------------------------------
 // File: TournamentDetails.cs
 // Summary: Defines the TournamentDetails entity representing a tournament's core data,
 //          including its unique ID, title, start date, and related games.
 // <author> [Clive Leddy] </author>
 // <created> [2025-06-27] </created>
 // Notes: This class models the tournament entity and includes navigation to associated games.
-// -----------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------
 
 namespace Tournament.Core.Entities
 {

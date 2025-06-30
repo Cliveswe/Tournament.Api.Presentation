@@ -1,6 +1,6 @@
 ﻿// Ignore Spelling: Api Dto Ok
 
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------
 // File: TournamentDetailsController.cs
 // Summary: Handles HTTP API requests related to tournament details,
 //          including retrieving, creating, updating, patching, and deleting tournaments.
@@ -9,7 +9,7 @@
 // <created> [2025-06-27] </created>
 // Notes: Implements RESTful endpoints with proper status codes and error handling,
 //        including partial updates via JSON Patch.
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------
 
 using AutoMapper;
 using Microsoft.AspNetCore.JsonPatch;

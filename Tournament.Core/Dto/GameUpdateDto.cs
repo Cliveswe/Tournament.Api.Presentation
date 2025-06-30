@@ -1,6 +1,6 @@
 ﻿// Ignore Spelling: Dto
 
-// -----------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------
 // File: GameUpdateDto.cs
 // Summary: Data Transfer Object (DTO) for updating an existing Game entity,
 //          including validation attributes for modifiable fields.
@@ -8,7 +8,7 @@
 // <created> [2025-06-27] </created>
 // Notes: Contains only the properties allowed to be updated, enforcing data integrity
 //        via required and length constraints.
-// -----------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------
 
 using System.ComponentModel.DataAnnotations;
 

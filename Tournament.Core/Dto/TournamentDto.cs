@@ -1,6 +1,6 @@
 ﻿// Ignore Spelling: Dto
 
-// -----------------------------------------------------------------------------
+// --------------------------------------------------------------------------------
 // File: TournamentDto.cs
 // Summary: Data Transfer Object (DTO) representing tournament details, including
 //          title, start date, calculated end date, and a list of associated games.
@@ -8,7 +8,7 @@
 // <created> [2025-06-27] </created>
 // Notes: Used for transferring tournament data with an auto-calculated EndDate
 //        and nested GameDto list for related games.
-// -----------------------------------------------------------------------------
+// --------------------------------------------------------------------------------
 
 using System.ComponentModel.DataAnnotations;
 

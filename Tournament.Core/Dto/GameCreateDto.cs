@@ -1,6 +1,6 @@
 ﻿// Ignore Spelling: Dto
 
-// -----------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------
 // File: GameCreateDto.cs
 // Summary: Data Transfer Object (DTO) for creating a new Game entity,
 //          including validation attributes to ensure required fields and constraints.
@@ -8,7 +8,7 @@
 // <created> [2025-06-27] </created>
 // Notes: Used to encapsulate input data for creating a game,
 //        enforcing validation on title, scheduled time, and tournament association.
-// -----------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------
 
 using System.ComponentModel.DataAnnotations;
 

@@ -9,6 +9,8 @@
 // Notes: Used to transfer game information between application layers.
 // -----------------------------------------------------------------------------
 
+using System.ComponentModel.DataAnnotations;
+
 namespace Tournament.Core.Dto;
 
 /// <summary>
@@ -32,10 +34,13 @@ public class GameDto
     /// <summary>
     /// Gets or sets the title of the game.
     /// </summary>
-    public string Title { get; set; }
+    [Required(ErrorMessage = "Game title is required.")]
+    [MaxLength(100, ErrorMessage = "Maximum length for the Title is 100 characters.")]
+    public required string Title { get; set; }
 
     /// <summary>
     /// Gets or sets the scheduled start date and time of the game.
     /// </summary>
-    public DateTime StartDate { get; set; }
+    [Required(ErrorMessage = "Time is required.")]
+    public required DateTime StartDate { get; set; }
 }

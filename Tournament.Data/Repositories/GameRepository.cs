@@ -134,7 +134,8 @@ public class GameRepository(TournamentApiContext context) : IGameRepository
     /// </remarks>
     public async Task<Game?> GetByTitleAsync(string gameTitle)
     {
-        return await context.Game.FirstOrDefaultAsync(g => g.Title.Equals(gameTitle, StringComparison.OrdinalIgnoreCase));
+        Game? game = await context.Game.FirstOrDefaultAsync(g => g.Title.ToLower() == gameTitle.ToLower());
+        return game;
     }
 
     /// <summary>

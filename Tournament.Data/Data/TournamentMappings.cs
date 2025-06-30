@@ -1,14 +1,14 @@
-﻿// -----------------------------------------------------------------------------
+﻿// -------------------------------------------------------------------------------
 // File: TournamentMappings.cs
-// Summary: Defines AutoMapper profile for mapping between domain entities and DTOs 
-//          within the Tournament API. Handles transformations for tournament and game 
-//          data models across create, update, and read operations.
+// Summary: Defines AutoMapper profile for mapping between domain entities and
+//          DTOs within the Tournament API. Handles transformations for tournament
+//          and game data models across create, update, and read operations.
 // Author: [Clive Leddy]
 // Created: [2025-06-30]
 // Notes: Inherits from AutoMapper.Profile to register mapping configurations.
 //        Includes trimming, property ignoring, and renaming logic to decouple 
 //        persistence layer models from API-facing DTOs.
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------
 
 
 using AutoMapper;

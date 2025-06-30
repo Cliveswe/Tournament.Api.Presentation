@@ -2,12 +2,12 @@
 
 // -----------------------------------------------------------------------------
 // File: UoW.cs
-// Summary: Implements the Unit of Work pattern for managing tournament and game repositories,
-//          coordinating data operations, and committing changes to the data store.
+// Summary: Implements the Unit of Work (UoW) pattern to coordinate repository
+// operations and manage transactional data persistence in the Tournament API.
 // <author> [Clive Leddy] </author>
 // <created> [2025-06-27] </created>
-// Notes: Encapsulates repository instances and provides a method to save changes asynchronously
-//        to ensure transactional consistency in data operations.
+// Notes:Provides a centralized interface for accessing multiple repositories
+// and committing changes to the data store using a shared EF Core context.
 // -----------------------------------------------------------------------------
 
 using Tournament.Core.Repositories;
