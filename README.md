@@ -1,3 +1,5 @@
+# Note: This is not a complete solution but a starting point for a tournament managing application.
+
 # Tournament Management Solution
 
 This repository provides a modular solution for managing tournaments and games, built with .NET 8. It includes a RESTful API, data access layer, and core business logic, making it suitable for sports leagues, e-sports, or any event requiring tournament scheduling and management.
