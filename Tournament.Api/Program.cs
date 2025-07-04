@@ -1,8 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Tournament.Api.Extensions;
-using Tournament.Core.Repositories;
 using Tournament.Data.Data;
-using Tournament.Data.Repositories;
 
 
 // Ignore Spelling: Api
@@ -24,10 +22,15 @@ namespace Tournament.Api
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+
             //Not needed because using Unit of Work creates instances of the repositories.
             //builder.Services.AddScoped<ITournamentDetailsRepository, TournamentDetailsRepository>();
             //builder.Services.AddScoped<IGameRepository, GameRepository>();
-            builder.Services.AddScoped<IUoW, UoW>();
+            //builder.Services.AddScoped<IUoW, UoW>();
+
+            // Register repositories and Unit of Work with lazy loading
+            builder.Services.ConfigureRepositories();
+
             builder.Services.AddAutoMapper(typeof(TournamentMappings));
             var app = builder.Build();
 

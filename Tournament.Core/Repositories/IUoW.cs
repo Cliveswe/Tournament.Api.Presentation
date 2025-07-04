@@ -4,10 +4,13 @@
 // File: IUoW.cs
 // Summary: Defines the interface for the Unit of Work pattern, providing
 // coordinated access to repository instances and transactional commits.
+//          Recent updates include support for lazy loading of repositories
+//          to improve performance and dependency injection flexibility.
 // Author: [Clive Leddy]
 // Created: [2025-06-27]
 // Notes: Facilitates centralized repository handling and asynchronous
-// persistence of changes.
+// persistence of changes. Interface remains unchanged, while the implementation
+// was enhanced to use Lazy<T> for repository instantiation.
 // -----------------------------------------------------------------------------
 
 namespace Tournament.Core.Repositories;
