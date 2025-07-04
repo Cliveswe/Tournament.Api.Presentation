@@ -28,6 +28,7 @@ namespace Tournament.Api
             //builder.Services.AddScoped<IGameRepository, GameRepository>();
             //builder.Services.AddScoped<IUoW, UoW>();
 
+            builder.Services.ConfigureServiceLayerServices();
             // Register repositories and Unit of Work with lazy loading
             builder.Services.ConfigureRepositories();
 

@@ -11,7 +11,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tournament.Data", "Tourname
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tournament.Services", "Tournament.Services\Tournament.Services.csproj", "{61725903-6CDF-4756-9630-61A3AE340F4E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tournament.Contracts", "Tournament.Contracts\Tournament.Contracts.csproj", "{177E845C-51E6-40F5-ADCA-986889A7EA74}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Service.Contracts", "Tournament.Contracts\Service.Contracts.csproj", "{177E845C-51E6-40F5-ADCA-986889A7EA74}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tournament.Presentation", "Tournament.Presentation\Tournament.Presentation.csproj", "{3E35AF59-C388-48B0-9320-9FCF6DD8F282}"
 EndProject
