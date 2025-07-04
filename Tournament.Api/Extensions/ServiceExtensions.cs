@@ -22,10 +22,11 @@ namespace Tournament.Api.Extensions;
 public static class ServiceExtensions
 {
 
-    /// <summary>
-    /// Registers the Unit of Work and repository services into the <see cref="IServiceCollection"/>,
-    /// including support for lazy loading of repositories.
+    /// /// <summary>
+    /// Extension method for <see cref="IServiceCollection"/> that registers the Unit of Work
+    /// and repository services, including support for lazy loading of repositories.
     /// </summary>
+    /// <param name="services">The service collection to which the repositories and Unit of Work are added.</param>
     public static void ConfigureRepositories(this IServiceCollection services)
     {
 
