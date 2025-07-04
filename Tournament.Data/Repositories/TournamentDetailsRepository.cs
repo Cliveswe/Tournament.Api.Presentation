@@ -31,6 +31,7 @@ namespace Tournament.Data.Repositories;
 /// of the data access layer within the application architecture.
 /// </remarks>
 /// <param name="context">The EF Core database context used for querying and persisting tournament data.</param>
+//public class TournamentDetailsRepository(TournamentApiContext context) : RepositoryBase<TournamentDetails>(context), ITournamentDetailsRepository
 public class TournamentDetailsRepository(TournamentApiContext context) : RepositoryBase<TournamentDetails>(context), ITournamentDetailsRepository
 {
 
@@ -214,9 +215,9 @@ public class TournamentDetailsRepository(TournamentApiContext context) : Reposit
     /// <param name="tournament">The tournament details to update. Cannot be null.</param>
     public void Update(TournamentDetails tournament)
     {
-        //TODO: update this method to use repository base method
-        context.Entry(tournament).State = EntityState.Modified;
+        //context.Entry(tournament).State = EntityState.Modified;
         //context.TournamentDetails.Update(tournament);
+        Update(tournament);
     }
 
     /// <summary>
@@ -232,8 +233,11 @@ public class TournamentDetailsRepository(TournamentApiContext context) : Reposit
     public Task<bool> ExistsByTitleAndStartDateAsync(string title, DateTime startDate)
     {
         //TODO: update this method to use repository base method
-        return context.TournamentDetails
-         .AnyAsync(t => t.Title.ToLower() == title.ToLower() && t.StartDate.Date == startDate.Date);
+        // return FindByCondition(t => t.Id.Equals(id), false).AnyAsync();
+
+        return FindByCondition(t => t.Title.ToLower().Equals(title.ToLower()) && t.StartDate.Date == startDate.Date, false).AnyAsync();
+        //return context.TournamentDetails
+        // .AnyAsync(t => t.Title.ToLower() == title.ToLower() && t.StartDate.Date == startDate.Date);
     }
 
 
