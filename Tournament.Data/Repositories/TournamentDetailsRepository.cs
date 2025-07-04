@@ -237,7 +237,7 @@ public class TournamentDetailsRepository(TournamentApiContext context) : Reposit
     /// </returns>
     public Task<bool> ExistsByTitleAndStartDateAsync(string title, DateTime startDate)
     {
-        //TODO: update this method to use repository base method
+
         // return FindByCondition(t => t.Id.Equals(id), false).AnyAsync();
 
         // using ToLower() (which can be translated), is acceptable, although slightly less efficient.
