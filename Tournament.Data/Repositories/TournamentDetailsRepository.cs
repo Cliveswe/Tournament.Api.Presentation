@@ -119,14 +119,10 @@ public class TournamentDetailsRepository(TournamentApiContext context) : Reposit
             tournaments = await FindAll(trackChanges)
                 .Include(t => t.Games).ToListAsync();
 
-            if(tournaments != null && tournaments.Any()) {
+            //if(tournaments != null && tournaments.Any()) {
 
-                foreach(var tournament in tournaments) {
-                    tournament.Games = tournament.Games
-                        .OrderBy(g => g.Title)
-                        .ToList();
-                }
-            }
+            OrderGamesByTitle(tournaments);
+            //}
 
         } else {
             // If includeGames is false, just load the tournaments without games.
@@ -139,6 +135,15 @@ public class TournamentDetailsRepository(TournamentApiContext context) : Reposit
         return tournaments!
             .OrderBy(t => t.Title)
             .ToList();
+    }
+
+    private static void OrderGamesByTitle(List<TournamentDetails> tournaments)
+    {
+        foreach(var tournament in tournaments) {
+            tournament.Games = tournament.Games
+                .OrderBy(g => g.Title)
+                .ToList();
+        }
     }
 
     /// <summary>
@@ -235,7 +240,10 @@ public class TournamentDetailsRepository(TournamentApiContext context) : Reposit
         //TODO: update this method to use repository base method
         // return FindByCondition(t => t.Id.Equals(id), false).AnyAsync();
 
-        return FindByCondition(t => t.Title.ToLower().Equals(title.ToLower()) && t.StartDate.Date == startDate.Date, false).AnyAsync();
+        // using ToLower() (which can be translated), is acceptable, although slightly less efficient.
+        //return FindByCondition(t => t.Title.ToLower().Equals(title.ToLower()) && t.StartDate.Date == startDate.Date, false).AnyAsync();
+        return FindByCondition(t => EF.Functions.Like(t.Title, title), false).AnyAsync();
+
         //return context.TournamentDetails
         // .AnyAsync(t => t.Title.ToLower() == title.ToLower() && t.StartDate.Date == startDate.Date);
     }
