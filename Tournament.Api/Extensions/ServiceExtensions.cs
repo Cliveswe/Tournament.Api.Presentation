@@ -14,7 +14,7 @@ using Tournament.Data.Repositories;
 
 namespace Tournament.Api.Extensions;
 
-
+#region ServiceExtensions
 /// <summary>
 /// Contains extension methods for configuring repository services and enabling
 /// lazy loading support within the application's dependency injection container.
@@ -41,7 +41,16 @@ public static class ServiceExtensions
         services.AddLazy<ITournamentDetailsRepository>();
         services.AddLazy<IGameRepository>();
     }
-}
+
+    public static void ConfigureServiceLayerServices(this IServiceCollection services)
+    {
+    }
+
+}// End of Class ServiceExtensions.
+
+#endregion
+
+#region ServiceCollectionExtensions
 
 /// <summary>
 /// Provides extension method to add lazy loading support for services.
@@ -59,4 +68,6 @@ public static class ServiceCollectionExtensions
     {
         return services.AddScoped(provider => new Lazy<TService>(() => provider.GetRequiredService<TService>()));
     }
-}
+}// End of Class ServiceCollectionExtensions.
+
+#endregion ServiceCollectionExtensions
