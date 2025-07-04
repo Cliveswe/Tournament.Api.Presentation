@@ -37,7 +37,7 @@ public interface ITournamentDetailsRepository
     /// <param name="includeGames">If true, includes related game entities in the result.</param>
     /// <returns>A task that represents the asynchronous operation.
     /// The task result contains the <see cref="TournamentDetails"/> if found; otherwise, <c>null</c>.</returns>
-    Task<TournamentDetails?> GetAsync(int tournamentId, bool includeGames = false);
+    Task<TournamentDetails?> GetAsync(int tournamentId, bool includeGames = false, bool trackChanges = false);
 
     /// <summary>
     /// Checks asynchronously whether a tournament detail exists with the specified ID.

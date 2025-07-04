@@ -40,7 +40,8 @@ public class TournamentDetailsRepository(TournamentApiContext context) : Reposit
     /// <param name="tournament">The details of the tournament to add. Cannot be null.</param>
     public void Add(TournamentDetails tournament)
     {
-        context.TournamentDetails.Add(tournament);
+        //context.TournamentDetails.Add(tournament);
+        Create(tournament);
 
     }
 
@@ -54,7 +55,9 @@ public class TournamentDetailsRepository(TournamentApiContext context) : Reposit
     /// tournament detail with the specified identifier exists;  otherwise, <see langword="false"/>.</returns>
     public Task<bool> AnyAsync(int id)
     {
-        return context.TournamentDetails.AnyAsync(t => t.Id == id);
+        // return context.TournamentDetails.AnyAsync(t => t.Id == id);
+        return FindByCondition(t => t.Id.Equals(id), false)
+            .AnyAsync();
     }
 
     #region old code
@@ -150,8 +153,7 @@ public class TournamentDetailsRepository(TournamentApiContext context) : Reposit
     /// <returns>
     /// A <see cref="TournamentDetails"/> object containing the tournament's details and optionally its ordered games if found; otherwise, <see langword="null"/>.
     /// </returns>
-
-    public async Task<TournamentDetails?> GetAsync(int tournamentId, bool includeGames = false)
+    public async Task<TournamentDetails?> GetAsync(int tournamentId, bool includeGames = false, bool trackChanges = false)
     {
         // return await context.TournamentDetails.FindAsync(tournamentId);
         // Use Include to load related games if necessary
@@ -160,23 +162,35 @@ public class TournamentDetailsRepository(TournamentApiContext context) : Reposit
         //    .FirstOrDefaultAsync(t => t.Id == tournamentId) :
         //    await context.TournamentDetails.FindAsync(tournamentId);
 
-        TournamentDetails? tournament = null;
+        //IEnumerable<TournamentDetails?> tournament;
+        TournamentDetails? tournament;
         // Check if we need to include games.
         if(includeGames) {
             // If includeGames is true, load the tournament with its games.
-            tournament = await context.TournamentDetails
+            //tournament = await context.TournamentDetails
+            //    .Include(t => t.Games)
+            //    .FirstOrDefaultAsync(t => t.Id == tournamentId);
+
+            tournament = await FindByCondition(t => t.Id.Equals(tournamentId), trackChanges)
                 .Include(t => t.Games)
-                .FirstOrDefaultAsync(t => t.Id == tournamentId);
+                .FirstOrDefaultAsync();
+
             // If the tournament is found, order its games by title.
-            if(tournament != null) {
-                tournament.Games = tournament.Games.OrderBy(g => g.Title).ToList();
+            if((tournament != null) && (tournament.Games?.Any() == true)) {
+                tournament.Games = tournament
+                    .Games
+                    .OrderBy(g => g.Title)
+                    .ToList();
             }
         } else {
             // If includeGames is false, just load the tournament without games.
-            tournament = await context.TournamentDetails
-                .FirstOrDefaultAsync(t => t.Id == tournamentId);
+            //tournament = await context.TournamentDetails
+            //   .FirstOrDefaultAsync(t => t.Id == tournamentId);
+            tournament = await FindByCondition(t => t.Id.Equals(tournamentId), trackChanges)
+                .FirstOrDefaultAsync();
         }
         // Return the found tournament or null if not found.
+
         return tournament;
     }
 
@@ -188,7 +202,8 @@ public class TournamentDetailsRepository(TournamentApiContext context) : Reposit
     /// <param name="tournament">The tournament to be removed. Cannot be null.</param>
     public void Remove(TournamentDetails tournament)
     {
-        context.TournamentDetails.Remove(tournament);
+        //context.TournamentDetails.Remove(tournament);
+        Delete(tournament);
     }
 
     /// <summary>
@@ -199,6 +214,7 @@ public class TournamentDetailsRepository(TournamentApiContext context) : Reposit
     /// <param name="tournament">The tournament details to update. Cannot be null.</param>
     public void Update(TournamentDetails tournament)
     {
+        //TODO: update this method to use repository base method
         context.Entry(tournament).State = EntityState.Modified;
         //context.TournamentDetails.Update(tournament);
     }
@@ -215,7 +231,10 @@ public class TournamentDetailsRepository(TournamentApiContext context) : Reposit
     /// </returns>
     public Task<bool> ExistsByTitleAndStartDateAsync(string title, DateTime startDate)
     {
+        //TODO: update this method to use repository base method
         return context.TournamentDetails
          .AnyAsync(t => t.Title.ToLower() == title.ToLower() && t.StartDate.Date == startDate.Date);
     }
+
+
 }
