@@ -31,9 +31,11 @@ public static class ServiceExtensions
 
         //Register the unit of work.
         services.AddScoped<IUoW, UoW>();
+
         //Register the repositories.
         services.AddScoped<ITournamentDetailsRepository, TournamentDetailsRepository>();
         services.AddScoped<IGameRepository, GameRepository>();
+
         //Register the repositories as lazy loaded services.
         services.AddLazy<ITournamentDetailsRepository>();
         services.AddLazy<IGameRepository>();
