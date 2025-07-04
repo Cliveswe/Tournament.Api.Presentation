@@ -12,6 +12,7 @@
 
 
 using Microsoft.EntityFrameworkCore;
+using Tournament.Core.Entities;
 
 namespace Tournament.Data.Data
 {
@@ -42,7 +43,8 @@ namespace Tournament.Data.Data
         /// <summary>
         /// Gets or sets the <see cref="DbSet{TournamentDetails}"/> representing tournament detail entities.
         /// </summary>
-        public DbSet<Core.Entities.TournamentDetails> TournamentDetails { get; set; } = default!;
+        //public DbSet<Core.Entities.TournamentDetails> TournamentDetails { get; set; } = default!;
+        public DbSet<TournamentDetails> TournamentDetails => Set<TournamentDetails>();
 
         /// <summary>
         /// Gets or sets the <see cref="DbSet{Game}"/> representing game entities.

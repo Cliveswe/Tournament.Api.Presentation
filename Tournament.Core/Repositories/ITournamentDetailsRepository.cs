@@ -28,7 +28,7 @@ public interface ITournamentDetailsRepository
     /// <param name="includeGames">If true, includes related game entities in the results.</param>
     /// <returns>A task that represents the asynchronous operation.
     /// The task result contains a collection of <see cref="TournamentDetails"/>.</returns>
-    Task<IEnumerable<TournamentDetails>> GetAllAsync(bool includeGames = false);
+    Task<IEnumerable<TournamentDetails>> GetAllAsync(bool includeGames = false, bool trackChanges = false);
 
     /// <summary>
     /// Asynchronously retrieves a tournament detail by its unique identifier.

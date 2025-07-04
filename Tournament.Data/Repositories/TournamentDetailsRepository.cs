@@ -31,8 +31,9 @@ namespace Tournament.Data.Repositories;
 /// of the data access layer within the application architecture.
 /// </remarks>
 /// <param name="context">The EF Core database context used for querying and persisting tournament data.</param>
-public class TournamentDetailsRepository(TournamentApiContext context) : ITournamentDetailsRepository
+public class TournamentDetailsRepository(TournamentApiContext context) : RepositoryBase<TournamentDetails>(context), ITournamentDetailsRepository
 {
+
     /// <summary>
     /// Adds a new tournament to the data store.
     /// </summary>
@@ -87,7 +88,7 @@ public class TournamentDetailsRepository(TournamentApiContext context) : ITourna
     /// each tournament's games are also included and ordered by title.
     /// </returns>
 
-    public async Task<IEnumerable<TournamentDetails>> GetAllAsync(bool includeGames = false)
+    public async Task<IEnumerable<TournamentDetails>> GetAllAsync(bool includeGames = false, bool trackChanges = false)
     {
         //return includeGames
         //     ? await context.TournamentDetails
@@ -99,27 +100,40 @@ public class TournamentDetailsRepository(TournamentApiContext context) : ITourna
         List<TournamentDetails> tournaments;
         if(includeGames) {
             // If includeGames is true, load tournaments with their games.
-            tournaments = await context.TournamentDetails
-                .Include(t => t.Games)
-                .ToListAsync();
-            // If we have tournaments, order their games by title.
+            //tournaments = await context.TournamentDetails
+            //    .Include(t => t.Games)
+            //    .ToListAsync();
+            //// If we have tournaments, order their games by title.
+            //if(tournaments != null && tournaments.Any()) {
+            //    // If we have tournaments, order their games by title.
+            //    foreach(var tournament in tournaments) {
+            //        tournament.Games = tournament.Games
+            //            .OrderBy(g => g.Title)
+            //            .ToList();
+            //    }
+
+            tournaments = await FindAll(trackChanges)
+                .Include(t => t.Games).ToListAsync();
+
             if(tournaments != null && tournaments.Any()) {
-                // If we have tournaments, order their games by title.
+
                 foreach(var tournament in tournaments) {
                     tournament.Games = tournament.Games
                         .OrderBy(g => g.Title)
                         .ToList();
                 }
             }
+
         } else {
             // If includeGames is false, just load the tournaments without games.
-            tournaments = await context.TournamentDetails
-                .ToListAsync();
+            //tournaments = await context.TournamentDetails
+            //    .ToListAsync();
+            tournaments = await FindAll(trackChanges).ToListAsync();
         }
 
         // Return the list of tournaments, ordered by their title.
-        return tournaments
-            !.OrderBy(t => t.Title)
+        return tournaments!
+            .OrderBy(t => t.Title)
             .ToList();
     }
 
