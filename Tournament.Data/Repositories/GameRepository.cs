@@ -3,11 +3,14 @@
 // Summary: Implements repository methods for managing Game entities in the database,
 //          including CRUD operations and queries by game attributes or tournament association.
 //          Supports asynchronous operations for fetching, adding, updating, and removing games.
+//          Allows optional tracking of entity changes via the trackChanges parameter.
 // Author: [Clive Leddy]
 // Created: [2025-06-27]
 // Notes: Uses Entity Framework Core for data access via the TournamentApiContext. 
 //        Ensures data consistency by tracking entity states and querying with LINQ.
+//        The trackChanges parameter controls EF Core change tracking behavior for queries.
 // ------------------------------------------------------------------------------------------------
+
 
 using Microsoft.EntityFrameworkCore;
 using Tournament.Core.Entities;
@@ -17,101 +20,124 @@ using Tournament.Data.Data;
 namespace Tournament.Data.Repositories;
 
 /// <summary>
-/// Provides a repository implementation for managing <see cref="Game"/> entities in the application's data layer.
-/// Utilizes Entity Framework Core to perform asynchronous Create, Read, Update, and Delete (CRUD) operations
-/// on game records, including filtering by attributes such as title, date, and tournament association.
+/// Provides a repository implementation for managing <see cref="Game"/> entities within the data access layer.
 /// </summary>
 /// <remarks>
-/// Key responsibilities include:
-/// - Adding, updating, and removing <see cref="Game"/> entities in the database context.
-/// - Querying games by unique identifiers, title and date combinations, or tournament ID.
-/// - Checking for the existence of games to avoid duplication.
-/// - Supporting efficient data access using LINQ and EF Core’s change tracking.
+/// Implements the <see cref="IGameRepository"/> interface and inherits from <see cref="RepositoryBase{Game}"/>.
+/// This class encapsulates all data operations for games, including CRUD (Create, Read, Update, Delete) and
+/// query methods. It interacts with the database via Entity Framework Core using the <see cref="TournamentApiContext"/>.
 ///
-/// This class encapsulates data access logic, promoting separation of concerns, testability,
-/// and data consistency across the application.
+/// Supports asynchronous operations for improved scalability and responsiveness. Includes helper methods
+/// for retrieving games by ID, title, and tournament association, as well as checks for existence based on
+/// game attributes.
+///
+/// Designed following the Repository pattern to ensure separation of concerns and improve maintainability
+/// and testability of the data access layer.
 /// </remarks>
-/// 
+/// <example>
+/// Example usage:
+/// <code>
+/// var gameRepo = new GameRepository(context);
+/// var allGames = await gameRepo.GetAllAsync();
+/// var exists = await gameRepo.ExistsByNameAndDateAsync("Chess", DateTime.Today);
+/// </code>
+/// </example>
 public class GameRepository(TournamentApiContext context) : RepositoryBase<Game>(context), IGameRepository
 {
+
     /// <summary>
-    /// Adds the specified game to the database context for tracking and persistence.
+    /// Adds a new <see cref="Game"/> entity to the data store.
     /// </summary>
-    /// <remarks>This method adds the game entity to the database context, marking it for insertion into the
-    /// database upon saving changes. Ensure that the game object is properly initialized before calling this
-    /// method.</remarks>
-    /// <param name="game">The game to add. Cannot be null.</param>
+    /// <param name="game">The <see cref="Game"/> object to add. Must not be <c>null</c>.</param>
+    /// <remarks>
+    /// This method stages the game for insertion into the database context. The changes will be persisted
+    /// to the database when <c>SaveChanges</c> or <c>SaveChangesAsync</c> is called on the context.
+    /// </remarks>
+    /// <exception cref="ArgumentNullException">Thrown if the <paramref name="game"/> parameter is <c>null</c>.</exception>
     public void Add(Game game)
     {
-        //context.Game.Add(game);
         Create(game);
     }
 
     /// <summary>
-    /// Determines whether any game exists with the specified identifier.
+    /// Asynchronously checks whether a <see cref="Game"/> entity with the specified ID exists in the data store.
     /// </summary>
-    /// <remarks>This method performs an asynchronous query against the underlying data source to check for
-    /// the existence of a game with the given identifier.</remarks>
-    /// <param name="id">The unique identifier of the game to search for.</param>
-    /// <returns><see langword="true"/> if a game with the specified identifier exists; otherwise, <see langword="false"/>.</returns>
+    /// <param name="id">The unique identifier of the game to check.</param>
+    /// <returns>
+    /// A <see cref="Task{Boolean}"/> representing the asynchronous operation. The task result is <c>true</c>
+    /// if a game with the specified ID exists; otherwise, <c>false</c>.
+    /// </returns>
+    /// <remarks>
+    /// This method uses a non-tracking query for improved performance, as it is used only to check existence.
+    /// </remarks>
     public async Task<bool> AnyAsync(int id)
     {
-        //return await context.Game.AnyAsync(g => g.Id == id);
         return await FindByCondition(g => g.Id.Equals(id), false)
             .AnyAsync();
     }
 
-
     /// <summary>
-    /// Determines whether a game with the specified title and date exists in the database.
+    /// Asynchronously determines whether a <see cref="Game"/> entity exists with the specified title and date.
     /// </summary>
-    /// <param name="name">The title of the game to search for.</param>
-    /// <param name="date">The date and time of the game to match.</param>
+    /// <param name="name">The title of the game to check for.</param>
+    /// <param name="date">The exact date and time of the game to match.</param>
+    /// <param name="trackChanges">
+    /// A boolean indicating whether the query should track changes to the returned entity in the context.
+    /// Use <c>false</c> for read-only operations to improve performance.
+    /// </param>
     /// <returns>
-    /// A task that represents the asynchronous operation. The task result contains <see langword="true"/> 
-    /// if a game with the specified title and date exists; otherwise, <see langword="false"/>.
+    /// A <see cref="Task{Boolean}"/> representing the asynchronous operation. The task result is <c>true</c>
+    /// if a game with the specified title and date exists; otherwise, <c>false</c>.
     /// </returns>
     /// <remarks>
-    /// This method is typically used to prevent the creation of duplicate game entries 
-    /// by checking for existing records with the same title and scheduled time.
-    /// Ensure that the title and date values are normalized before calling this method 
-    /// to avoid false negatives due to formatting differences.
+    /// This method performs a case-sensitive match on the game's title and an exact match on the <c>Time</c> property.
     /// </remarks>
     public async Task<bool> ExistsByNameAndDateAsync(string name, DateTime date, bool trackChanges = false)
     {
-        //return await context.Game.AnyAsync(g => g.Title == name && g.Time == date);
         return await FindByCondition(g => g.Title.Equals(name)
         && g.Time == date, trackChanges)
             .AnyAsync();
     }
 
     /// <summary>
-    /// Asynchronously retrieves a game by its title and associated tournament identifier.
+    /// Asynchronously retrieves a <see cref="Game"/> entity by its title and associated tournament ID.
     /// </summary>
     /// <param name="name">The title of the game to retrieve.</param>
-    /// <param name="tournamentId">The unique identifier of the tournament the game belongs to.</param>
+    /// <param name="tournamentId">The identifier of the tournament to which the game belongs.</param>
+    /// <param name="trackChanges">
+    /// A boolean indicating whether the query should track changes to the returned entity in the context.
+    /// Set to <c>false</c> for read-only operations to improve performance.
+    /// </param>
     /// <returns>
-    /// A task representing the asynchronous operation. The task result contains the <see cref="Game"/>
-    /// object matching the specified title and tournament ID if found; otherwise, <c>null</c>.
+    /// A <see cref="Task{Game}"/> representing the asynchronous operation. The result is the matching <see cref="Game"/>
+    /// entity if found; otherwise, <c>null</c>.
     /// </returns>
+    /// <remarks>
+    /// This method performs an exact (case-sensitive) match on the game title and matches the specified tournament ID.
+    /// </remarks>
     public async Task<Game?> GetByNameAndDateAsync(string name, int tournamentId, bool trackChanges = false)
     {
-        //return await context.Game
-        //    .FirstOrDefaultAsync(g => g.Title == name && g.TournamentDetailsId == tournamentId);
-
         return await FindByCondition(g => g.Title == name && g.TournamentDetailsId == tournamentId, trackChanges)
             .FirstOrDefaultAsync();
     }
 
-
     /// <summary>
-    /// Asynchronously retrieves all games from the database.
+    /// Asynchronously retrieves all <see cref="Game"/> entities from the data store, ordered by title.
     /// </summary>
-    /// <returns>A task that represents the asynchronous operation. The task result contains a collection of  <see cref="Game"/>
-    /// objects representing all games in the database.</returns>
+    /// <param name="trackChanges">
+    /// A boolean value indicating whether change tracking should be enabled for the retrieved entities.
+    /// Set to <c>false</c> for read-only operations to improve performance.
+    /// </param>
+    /// <returns>
+    /// A <see cref="Task{IEnumerable{Game}}"/> representing the asynchronous operation. 
+    /// The result contains a collection of all <see cref="Game"/> entities, ordered alphabetically by title.
+    /// </returns>
+    /// <remarks>
+    /// This method queries the database for all games and returns them as an ordered list. 
+    /// Use <paramref name="trackChanges"/> to control whether EF Core should track entity changes.
+    /// </remarks>
     public async Task<IEnumerable<Game>> GetAllAsync(bool trackChanges = false)
     {
-        //return await context.Game.ToListAsync();
         return await FindAll(trackChanges)
             .OrderBy(g => g.Title)
             .ToListAsync();
@@ -121,77 +147,85 @@ public class GameRepository(TournamentApiContext context) : RepositoryBase<Game>
     /// Asynchronously retrieves a <see cref="Game"/> entity by its unique identifier.
     /// </summary>
     /// <param name="gameId">The unique identifier of the game to retrieve.</param>
+    /// <param name="trackChanges">
+    /// A boolean indicating whether change tracking should be enabled for the retrieved entity.
+    /// Set to <c>false</c> to improve performance for read-only access.
+    /// </param>
     /// <returns>
-    /// A <see cref="Task{Game}"/> representing the asynchronous operation, with a result of the matching <see cref="Game"/> if found; otherwise, <c>null</c>.
+    /// A <see cref="Task{Game}"/> representing the asynchronous operation. 
+    /// The result contains the <see cref="Game"/> entity if found; otherwise, <c>null</c>.
     /// </returns>
     /// <remarks>
-    /// This method uses Entity Framework's <c>FindAsync</c> to efficiently locate a game by its primary key.
-    /// It first checks the context's local cache before querying the database.
+    /// This method performs a database query to fetch the game with the specified <paramref name="gameId"/>.
+    /// Use <paramref name="trackChanges"/> to control whether the context tracks the returned entity.
     /// </remarks>
     public async Task<Game?> GetByIdAsync(int gameId, bool trackChanges = false)
     {
-
-        //return await context.Game.FindAsync(gameId);
         return await FindByCondition(g => g.Id == gameId, trackChanges)
             .FirstOrDefaultAsync();
     }
 
     /// <summary>
-    /// Asynchronously retrieves a <see cref="Game"/> entity by its title, using a case-insensitive comparison.
+    /// Asynchronously retrieves a <see cref="Game"/> entity by its title.
     /// </summary>
-    /// <param name="gameTitle">The title of the game to retrieve.</param>
+    /// <param name="gameTitle">The title of the game to retrieve. Case-sensitive match is used.</param>
     /// <returns>
-    /// A <see cref="Task{Game}"/> representing the asynchronous operation, with a result of the first <see cref="Game"/> that matches the given title; otherwise, <c>null</c>.
+    /// A <see cref="Task{Game}"/> representing the asynchronous operation.  
+    /// The result contains the <see cref="Game"/> entity if found; otherwise, <c>null</c>.
     /// </returns>
     /// <remarks>
-    /// This method performs a case-insensitive search using <see cref="string.Equals(string, string, StringComparison)"/> with <c>OrdinalIgnoreCase</c>.
+    /// This method performs a case-sensitive search using the exact <paramref name="gameTitle"/> value.  
+    /// Use this method when you know the exact title of the game you want to retrieve.
     /// </remarks>
     public async Task<Game?> GetByTitleAsync(string gameTitle)
     {
-        //Game? game = await context.Game.FirstOrDefaultAsync(g => g.Title.ToLower() == gameTitle.ToLower());
         Game? game = await FindByCondition(g => g.Title.Equals(gameTitle))
-            .FirstAsync();
+            .FirstOrDefaultAsync();
         return game;
     }
 
     /// <summary>
-    /// Removes the specified game from the data store.
+    /// Removes the specified <see cref="Game"/> entity from the data store.
     /// </summary>
-    /// <remarks>This method removes the provided game instance from the underlying data store. Ensure that
-    /// the  game exists in the data store before calling this method to avoid unexpected behavior.</remarks>
-    /// <param name="game">The game to be removed. Cannot be null.</param>
+    /// <param name="game">The <see cref="Game"/> entity to remove. Cannot be <c>null</c>.</param>
+    /// <remarks>
+    /// This method marks the provided entity for deletion. Changes are applied to the database
+    /// when the context is saved. Ensure the entity exists and is tracked by the context
+    /// before calling this method.
+    /// </remarks>
     public void Remove(Game game)
     {
-        //context.Game.Remove(game);
         Delete(game);
     }
 
     /// <summary>
-    /// Updates the specified game entity in the database.
+    /// Updates the specified <see cref="Game"/> entity in the data store.
     /// </summary>
-    /// <remarks>This method modifies the existing game record in the database to reflect the changes in the
-    /// provided <paramref name="game"/> object. Ensure that the <paramref name="game"/> object contains valid and
-    /// updated data before calling this method.</remarks>
-    /// <param name="game">The game entity to update. Cannot be null.</param>
+    /// <param name="game">The <see cref="Game"/> entity to update. Cannot be <c>null</c>.</param>
+    /// <remarks>
+    /// This method marks the provided entity as modified. Changes are persisted to the database
+    /// when the context is saved. Ensure the entity contains valid and updated information
+    /// before calling this method.
+    /// </remarks>
     public void Update(Game game)
     {
-        //context.Game.Update(game);
-        //context.Entry(game).State = EntityState.Modified;
         Update(game);
     }
+
     /// <summary>
-    /// Asynchronously retrieves all games associated with a specific tournament.
+    /// Asynchronously retrieves all <see cref="Game"/> entities associated with a specific tournament.
     /// </summary>
     /// <param name="tournamentId">The unique identifier of the tournament whose games are to be retrieved.</param>
+    /// <param name="trackChanges">
+    /// A boolean indicating whether to track changes on the retrieved entities. 
+    /// If <c>true</c>, the entities are tracked by the context; otherwise, they are not.
+    /// </param>
     /// <returns>
-    /// A task representing the asynchronous operation. The task result contains a collection of
-    /// <see cref="Game"/> objects related to the specified tournament. If no games are found, the collection will be empty.
+    /// A task representing the asynchronous operation. The result contains an <see cref="IEnumerable{Game}"/> 
+    /// of games related to the specified tournament, ordered by their title.
     /// </returns>
     public async Task<IEnumerable<Game?>> GetByTournamentIdAsync(int tournamentId, bool trackChanges = false)
     {
-        //return await context.Game
-        //    .Where(g => g.TournamentDetailsId == tournamentId)
-        //    .ToListAsync();
         return await FindByCondition(g => g.TournamentDetailsId == tournamentId, trackChanges)
             .OrderBy(g => g.Title)
             .ToListAsync();
