@@ -72,7 +72,7 @@ public interface IGameRepository
     /// <param name="tournamentId">The unique identifier of the tournament.</param>
     /// <param name="trackChanges">Indicates whether entity changes should be tracked.</param>
     /// <returns>A task containing the <see cref="Game"/> entity if found; otherwise, <c>null</c>.</returns>
-    Task<Game?> GetByNameAndDateAsync(string name, int tournamentId, bool trackChanges = false);
+   //Task<Game?> GetByNameAndTournamentAsync(string name, int tournamentId, bool trackChanges = false);
 
     /// <summary>
     /// Asynchronously retrieves all <see cref="Game"/> entities associated with a specific tournament.

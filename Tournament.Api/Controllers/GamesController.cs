@@ -442,8 +442,9 @@ namespace Tournament.Api.Controllers
                 return BadRequest($"Game time must be within the tournament's start \"{tournamentDetailsDto.StartDate}\" and end \"{tournamentDetailsDto.EndDate}\" dates.");
             }
 
+            // Game duplicateGame = await FindDuplicateGameAsync(gameCreateDto, tournamentId);
             // Optional: check if a similar gameEntity already exists.
-            Game duplicateGame = await FindDuplicateGameAsync(gameCreateDto, tournamentId);
+            Game? duplicateGame = await uoW.GameRepository.GetByTitleAndTournamentIdAsync(gameCreateDto.Name, tournamentId);
 
             if(duplicateGame != null) {
                 // Return 409 Conflict if a duplicate gameEntity is found
@@ -478,7 +479,7 @@ namespace Tournament.Api.Controllers
             //nameof(GetGame): Specifies the action method (e.g., GetGame(int id)) that can be used to retrieve the created Game.
             //new { id = gameEntity.Id }: Supplies route values for the URL generation — here, it uses the newly created game’s ID.
             //mapper.Map<GameDto>(gameEntity): Returns the newly created game data in DTO form as the response body.
-            return CreatedAtAction(nameof(GetGameById), new { id = gameEntity.Id }, mapper.Map<GameDto>(gameEntity));
+            return CreatedAtAction(nameof(GetGameById), new { tournamentId = gameEntity.TournamentDetailsId, id = gameEntity.Id }, mapper.Map<GameDto>(gameEntity));
         }
 
         #endregion
@@ -567,11 +568,11 @@ namespace Tournament.Api.Controllers
         /// This method delegates to the repository to determine if a game with the same name and 
         /// scheduled time already exists within the given tournament.
         /// </remarks>
-        private async Task<Game> FindDuplicateGameAsync(GameCreateDto gameCreateDto, int tournamentId)
+        private async Task<Game?> FindDuplicateGameAsync(GameCreateDto gameCreateDto, int tournamentId)
         {
 
             // Check if a gameEntity with the same name and time already exists in the specified tournament
-            return await uoW.GameRepository.GetByNameAndDateAsync(gameCreateDto.Name, tournamentId);
+            return await uoW.GameRepository.GetByTitleAndTournamentIdAsync(gameCreateDto.Name, tournamentId);
         }
 
         /// <summary>

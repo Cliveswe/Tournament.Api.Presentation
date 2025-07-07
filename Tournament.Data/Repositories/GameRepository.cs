@@ -99,27 +99,6 @@ public class GameRepository(TournamentApiContext context) : RepositoryBase<Game>
             .AnyAsync();
     }
 
-    /// <summary>
-    /// Asynchronously retrieves a <see cref="Game"/> entity by its title and associated tournament ID.
-    /// </summary>
-    /// <param name="name">The title of the game to retrieve.</param>
-    /// <param name="tournamentId">The identifier of the tournament to which the game belongs.</param>
-    /// <param name="trackChanges">
-    /// A boolean indicating whether the query should track changes to the returned entity in the context.
-    /// Set to <c>false</c> for read-only operations to improve performance.
-    /// </param>
-    /// <returns>
-    /// A <see cref="Task{Game}"/> representing the asynchronous operation. The result is the matching <see cref="Game"/>
-    /// entity if found; otherwise, <c>null</c>.
-    /// </returns>
-    /// <remarks>
-    /// This method performs an exact (case-sensitive) match on the game title and matches the specified tournament ID.
-    /// </remarks>
-    public async Task<Game?> GetByNameAndDateAsync(string name, int tournamentId, bool trackChanges = false)
-    {
-        return await FindByCondition(g => g.Title == name && g.TournamentDetailsId == tournamentId, trackChanges)
-            .FirstOrDefaultAsync();
-    }
 
     /// <summary>
     /// Asynchronously retrieves all <see cref="Game"/> entities from the data store, ordered by title.
@@ -253,4 +232,5 @@ public class GameRepository(TournamentApiContext context) : RepositoryBase<Game>
         return FindByCondition(g => g.Title.Equals(gameTitle) && g.TournamentDetailsId == tournamentId, trackChanges)
             .FirstOrDefaultAsync();
     }
+
 }
