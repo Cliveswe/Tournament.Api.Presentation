@@ -32,7 +32,7 @@ namespace Tournament.Data.Repositories;
 /// and data consistency across the application.
 /// </remarks>
 /// 
-public class GameRepository(TournamentApiContext context) : IGameRepository
+public class GameRepository(TournamentApiContext context) : RepositoryBase<Game>(context), IGameRepository
 {
     /// <summary>
     /// Adds the specified game to the database context for tracking and persistence.
@@ -43,7 +43,8 @@ public class GameRepository(TournamentApiContext context) : IGameRepository
     /// <param name="game">The game to add. Cannot be null.</param>
     public void Add(Game game)
     {
-        context.Game.Add(game);
+        //context.Game.Add(game);
+        Create(game);
     }
 
     /// <summary>
@@ -55,7 +56,9 @@ public class GameRepository(TournamentApiContext context) : IGameRepository
     /// <returns><see langword="true"/> if a game with the specified identifier exists; otherwise, <see langword="false"/>.</returns>
     public async Task<bool> AnyAsync(int id)
     {
-        return await context.Game.AnyAsync(g => g.Id == id);
+        //return await context.Game.AnyAsync(g => g.Id == id);
+        return await FindByCondition(g => g.Id.Equals(id), false)
+            .AnyAsync();
     }
 
 
@@ -88,10 +91,13 @@ public class GameRepository(TournamentApiContext context) : IGameRepository
     /// A task representing the asynchronous operation. The task result contains the <see cref="Game"/>
     /// object matching the specified title and tournament ID if found; otherwise, <c>null</c>.
     /// </returns>
-    public async Task<Game?> GetByNameAndDateAsync(string name, int tournamentId)
+    public async Task<Game?> GetByNameAndDateAsync(string name, int tournamentId, bool trackChanges = false)
     {
-        return await context.Game
-            .FirstOrDefaultAsync(g => g.Title == name && g.TournamentDetailsId == tournamentId);
+        //return await context.Game
+        //    .FirstOrDefaultAsync(g => g.Title == name && g.TournamentDetailsId == tournamentId);
+
+        return await FindByCondition(g => g.Title == name && g.TournamentDetailsId == tournamentId, trackChanges)
+            .FirstOrDefaultAsync();
     }
 
 
@@ -100,9 +106,12 @@ public class GameRepository(TournamentApiContext context) : IGameRepository
     /// </summary>
     /// <returns>A task that represents the asynchronous operation. The task result contains a collection of  <see cref="Game"/>
     /// objects representing all games in the database.</returns>
-    public async Task<IEnumerable<Game>> GetAllAsync()
+    public async Task<IEnumerable<Game>> GetAllAsync(bool trackChanges = false)
     {
-        return await context.Game.ToListAsync();
+        //return await context.Game.ToListAsync();
+        return await FindAll(trackChanges)
+            .OrderBy(g => g.Title)
+            .ToListAsync();
     }
 
     /// <summary>
@@ -119,7 +128,9 @@ public class GameRepository(TournamentApiContext context) : IGameRepository
     public async Task<Game?> GetByIdAsync(int gameId)
     {
 
-        return await context.Game.FindAsync(gameId);
+        //return await context.Game.FindAsync(gameId);
+        return await FindByCondition(g => g.Id == gameId, false)
+            .FirstOrDefaultAsync();
     }
 
     /// <summary>
@@ -146,7 +157,8 @@ public class GameRepository(TournamentApiContext context) : IGameRepository
     /// <param name="game">The game to be removed. Cannot be null.</param>
     public void Remove(Game game)
     {
-        context.Game.Remove(game);
+        //context.Game.Remove(game);
+        Delete(game);
     }
 
     /// <summary>

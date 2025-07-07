@@ -35,7 +35,7 @@ public interface IGameRepository
     /// <returns>
     /// A task that yields a collection of all stored games.
     /// </returns>
-    Task<IEnumerable<Game>> GetAllAsync();
+    Task<IEnumerable<Game>> GetAllAsync(bool trackChanges = false);
 
     /// <summary>
     /// Asynchronously retrieves a <see cref="Game"/> by its unique identifier.
@@ -44,7 +44,7 @@ public interface IGameRepository
     /// <returns>
     /// A task with the corresponding <see cref="Game"/> if found; otherwise, <c>null</c>.
     /// </returns>
-    Task<Game?> GetByIdAsync(int gameId);
+    Task<Game?> GetByIdAsync(int gameId, bool trackChanges = false);
 
     /// <summary>
     /// Asynchronously retrieves a <see cref="Game"/> by its title using a case-insensitive comparison.
@@ -92,7 +92,7 @@ public interface IGameRepository
     /// <returns>
     /// A task with a result of the matching <see cref="Game"/> if found; otherwise, <c>null</c>.
     /// </returns>
-    Task<Game?> GetByNameAndDateAsync(string name, int tournamentId);
+    Task<Game?> GetByNameAndDateAsync(string name, int tournamentId, bool trackChanges = false);
 
 
     /// <summary>
