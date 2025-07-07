@@ -82,7 +82,7 @@ public interface IGameRepository
     /// <returns>
     /// A task representing the asynchronous operation. Returns <see langword="true"/> if a matching game exists; otherwise, <see langword="false"/>.
     /// </returns>
-    Task<bool> ExistsByNameAndDateAsync(string name, DateTime date);
+    Task<bool> ExistsByNameAndDateAsync(string name, DateTime date, bool trackChanges = false);
 
     /// <summary>
     /// Asynchronously retrieves a <see cref="Game"/> by title and associated tournament ID.
@@ -102,7 +102,7 @@ public interface IGameRepository
     /// <returns>
     /// A task with a collection of all games linked to the specified tournament. Returns an empty list if none found.
     /// </returns>
-    Task<IEnumerable<Game?>> GetByTournamentIdAsync(int tournamentId);
+    Task<IEnumerable<Game?>> GetByTournamentIdAsync(int tournamentId, bool trackChanges = false);
 
     /// <summary>
     /// Adds a new <see cref="Game"/> entity to the database context.

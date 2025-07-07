@@ -77,9 +77,12 @@ public class GameRepository(TournamentApiContext context) : RepositoryBase<Game>
     /// Ensure that the title and date values are normalized before calling this method 
     /// to avoid false negatives due to formatting differences.
     /// </remarks>
-    public async Task<bool> ExistsByNameAndDateAsync(string name, DateTime date)
+    public async Task<bool> ExistsByNameAndDateAsync(string name, DateTime date, bool trackChanges = false)
     {
-        return await context.Game.AnyAsync(g => g.Title == name && g.Time == date);
+        //return await context.Game.AnyAsync(g => g.Title == name && g.Time == date);
+        return await FindByCondition(g => g.Title.Equals(name)
+        && g.Time == date, trackChanges)
+            .AnyAsync();
     }
 
     /// <summary>
@@ -125,11 +128,11 @@ public class GameRepository(TournamentApiContext context) : RepositoryBase<Game>
     /// This method uses Entity Framework's <c>FindAsync</c> to efficiently locate a game by its primary key.
     /// It first checks the context's local cache before querying the database.
     /// </remarks>
-    public async Task<Game?> GetByIdAsync(int gameId)
+    public async Task<Game?> GetByIdAsync(int gameId, bool trackChanges = false)
     {
 
         //return await context.Game.FindAsync(gameId);
-        return await FindByCondition(g => g.Id == gameId, false)
+        return await FindByCondition(g => g.Id == gameId, trackChanges)
             .FirstOrDefaultAsync();
     }
 
@@ -145,7 +148,9 @@ public class GameRepository(TournamentApiContext context) : RepositoryBase<Game>
     /// </remarks>
     public async Task<Game?> GetByTitleAsync(string gameTitle)
     {
-        Game? game = await context.Game.FirstOrDefaultAsync(g => g.Title.ToLower() == gameTitle.ToLower());
+        //Game? game = await context.Game.FirstOrDefaultAsync(g => g.Title.ToLower() == gameTitle.ToLower());
+        Game? game = await FindByCondition(g => g.Title.Equals(gameTitle))
+            .FirstAsync();
         return game;
     }
 
@@ -170,8 +175,9 @@ public class GameRepository(TournamentApiContext context) : RepositoryBase<Game>
     /// <param name="game">The game entity to update. Cannot be null.</param>
     public void Update(Game game)
     {
-        context.Entry(game).State = EntityState.Modified;
         //context.Game.Update(game);
+        //context.Entry(game).State = EntityState.Modified;
+        Update(game);
     }
     /// <summary>
     /// Asynchronously retrieves all games associated with a specific tournament.
@@ -181,10 +187,13 @@ public class GameRepository(TournamentApiContext context) : RepositoryBase<Game>
     /// A task representing the asynchronous operation. The task result contains a collection of
     /// <see cref="Game"/> objects related to the specified tournament. If no games are found, the collection will be empty.
     /// </returns>
-    public async Task<IEnumerable<Game?>> GetByTournamentIdAsync(int tournamentId)
+    public async Task<IEnumerable<Game?>> GetByTournamentIdAsync(int tournamentId, bool trackChanges = false)
     {
-        return await context.Game
-            .Where(g => g.TournamentDetailsId == tournamentId)
+        //return await context.Game
+        //    .Where(g => g.TournamentDetailsId == tournamentId)
+        //    .ToListAsync();
+        return await FindByCondition(g => g.TournamentDetailsId == tournamentId, trackChanges)
+            .OrderBy(g => g.Title)
             .ToListAsync();
     }
 }
