@@ -58,6 +58,7 @@ namespace Tournament.Api.Controllers
         /// </returns>
         /// Note that the route is overridden and it is important to add a root "/api/..." and 
         /// not "api/..." there is a difference.
+        // GET api/tournamentDetails/{tournamentId}/
         [HttpGet]
         public async Task<ActionResult<IEnumerable<GameDto>>> GetTournamentGame(int tournamentId)
         {
@@ -97,59 +98,102 @@ namespace Tournament.Api.Controllers
 
 
         /// <summary>
-        /// Retrieves a single game by either its unique identifier (<paramref name="id"/>) 
-        /// or its title (<paramref name="gameTitle"/>).
+        /// Retrieves a specific game by its unique identifier, ensuring it belongs to the specified tournament.
         /// </summary>
-        /// <param name="id">The optional ID of the game to retrieve. Must be a positive integer if provided.</param>
-        /// <param name="gameTitle">The optional title of the game to retrieve. Must be a non-empty string if provided.</param>
+        /// <param name="tournamentId">The ID of the tournament the game is associated with.</param>
+        /// <param name="id">The unique ID of the game to retrieve.</param>
         /// <returns>
-        /// Returns a 200 OK response with the matching <see cref="GameDto"/> if found; 
-        /// returns 400 Bad Request if neither identifier is provided; 
-        /// or 404 Not Found if the game does not exist.
+        /// Returns a 200 OK response with the corresponding <see cref="GameDto"/> if found and associated with the tournament.
+        /// Returns 400 Bad Request if either the game ID or tournament ID is invalid.
+        /// Returns 404 Not Found if the game does not exist or does not belong to the specified tournament.
         /// </returns>
         /// <remarks>
-        /// This method performs the following steps:
+        /// This method performs the following validations:
         /// <list type="number">
-        /// <item>Trims the <paramref name="gameTitle"/> to remove extra whitespace.</item>
-        /// <item>Validates that at least one of <paramref name="id"/> or <paramref name="gameTitle"/> is provided.</item>
-        /// <item>Retrieves the game either by ID or by title using the repository layer.</item>
-        /// <item>Returns 404 Not Found if the game cannot be located.</item>
-        /// <item>Maps the entity to a <see cref="GameDto"/> and returns it with 200 OK on success.</item>
+        /// <item>Ensures both <paramref name="tournamentId"/> and <paramref name="id"/> are positive integers.</item>
+        /// <item>Fetches the game from the repository by ID.</item>
+        /// <item>Verifies that the game's tournament ID matches the provided tournament ID.</item>
+        /// <item>Uses AutoMapper to convert the entity to a DTO and returns the result.</item>
         /// </list>
         /// </remarks>
-
-        [HttpGet("/api/games/")]
-        public async Task<ActionResult<Game>> GetGame([FromQuery] int? id = null, [FromQuery] string? gameTitle = null)
+        // GET api/tournamentDetails/{tournamentId}/games/{id}
+        [HttpGet("{id:int}")]
+        public async Task<ActionResult<GameDto>> GetGameById(int tournamentId, int id)
         {
-            string? title = gameTitle?.Trim();
-            // Validate the ID to ensure it is a positive integer.
-            if(id == null && string.IsNullOrWhiteSpace(title)) {
-                // If neither ID nor gameTitle is provided, return 400 Bad Request
-                // This ensures that the client must provide at least one identifier to retrieve a game.
-                return BadRequest("Either 'id' or 'gameTitle' must be provided to retrieve a game.");
+            // Validate the tournament ID and game ID
+            if(id <= 0 || tournamentId <= 0) {
+                return BadRequest("Invalid tournament id or game id.");
             }
 
-            Game? gameEntity = null;
+            // Check if the tournament exists
+            var gameEntity = await uoW.GameRepository.GetByIdAsync(id);
 
-            if(id.HasValue) {
-                // Attempt to retrieve the gameEntity using the GameRepository
-                gameEntity = await uoW.GameRepository.GetByIdAsync(id.Value);
-            } else if(!string.IsNullOrWhiteSpace(title)) {
-                // If gameTitle is provided, retrieve the gameEntity by title
-                gameEntity = await uoW.GameRepository.GetByTitleAsync(title);
-            }
-
-            // Return 404 if the gameEntity does not exist
+            // If the game does not exist, return 404 Not Found
             if(gameEntity == null) {
-                return NotFound($"Game with the specified identifier was not found.");
+                return NotFound($"Game with ID {id} was not found.");
             }
+
+            // Ensure the game belongs to the specified tournament.
+            // This check ensures that the game being retrieved is associated with the correct tournament.
+            if(gameEntity.TournamentDetailsId != tournamentId) {
+                return NotFound($"Game with ID {id} does not belong to the specified tournament.");
+            }
+
             // Map the Game entity to a GameDto using AutoMapper
-            GameDto gameDto = mapper.Map<GameDto>(gameEntity);
-            // Return the gameEntity with HTTP 200 OK
-            // ASP.NET Core infers this as Ok(gameEntity) for ActionResult<T>
-            //return Ok(gameDto);// Returns 200 OK + JSON by default
+            var gameDto = mapper.Map<GameDto>(gameEntity);
+
+            // Return the GameDto with HTTP 200 OK
             return Ok(gameDto);
         }
+
+        /// <summary>
+        /// Retrieves a game by its title within a specific tournament.
+        /// </summary>
+        /// <param name="tournamentId">The ID of the tournament to search within.</param>
+        /// <param name="title">The title of the game to retrieve. Cannot be null or empty.</param>
+        /// <returns>
+        /// An <see cref="ActionResult{GameDto}"/> containing the game data if found, or an appropriate HTTP error response:
+        /// - 400 Bad Request if inputs are invalid
+        /// - 404 Not Found if no matching game is found
+        /// </returns>
+        /// <remarks>
+        /// This method trims the input title and filters by both game title and tournament ID.
+        /// It ensures games from other tournaments with the same title are excluded.
+        /// </remarks>
+        // GET api/tournamentDetails/{tournamentId}/games/bytitle/{title}
+        [HttpGet("bytitle/{title}")]
+        public async Task<ActionResult<GameDto>> GetGameByTitle(int tournamentId, string title)
+        {
+            // Validate the title input.
+            if(string.IsNullOrWhiteSpace(title)) {
+                return BadRequest("Title must be a non-empty string.");
+            }
+
+            // Trim whitespace from the title to ensure accurate matching.
+            string trimmedTitle = title.Trim();
+
+            // Validate the tournament ID.
+            if(tournamentId <= 0) {
+                return BadRequest("Invalid tournament id.");
+            }
+
+            // Check if the tournament exists.
+            // This check ensures that the game being retrieved is associated with the correct tournament.
+            Game? gameEntity = await uoW.GameRepository.GetByTitleAndTournamentIdAsync(trimmedTitle, tournamentId);
+
+            // If no game with the specified title exists in the tournament, return 404 Not Found.
+            // This ensures that the API does not return a game from a different tournament with the same title.
+            if(gameEntity == null) {
+                return NotFound($"Game with title '{trimmedTitle}' was not found.");
+            }
+
+            // Map the Game entity to a GameDto using AutoMapper.
+            GameDto gameDto = mapper.Map<GameDto>(gameEntity);
+
+            // Return the GameDto with HTTP 200 OK.
+            return Ok(gameDto);
+        }
+
 
         #endregion
 
@@ -434,7 +478,7 @@ namespace Tournament.Api.Controllers
             //nameof(GetGame): Specifies the action method (e.g., GetGame(int id)) that can be used to retrieve the created Game.
             //new { id = gameEntity.Id }: Supplies route values for the URL generation — here, it uses the newly created game’s ID.
             //mapper.Map<GameDto>(gameEntity): Returns the newly created game data in DTO form as the response body.
-            return CreatedAtAction(nameof(GetGame), new { id = gameEntity.Id }, mapper.Map<GameDto>(gameEntity));
+            return CreatedAtAction(nameof(GetGameById), new { id = gameEntity.Id }, mapper.Map<GameDto>(gameEntity));
         }
 
         #endregion

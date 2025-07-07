@@ -83,6 +83,17 @@ public interface IGameRepository
     Task<IEnumerable<Game?>> GetByTournamentIdAsync(int tournamentId, bool trackChanges = false);
 
     /// <summary>
+    /// Asynchronously retrieves a <see cref="Game"/> entity by its title and associated tournament ID.
+    /// </summary>
+    /// <param name="gameTitle">The exact title of the game to retrieve. Case-sensitive match is used.</param>
+    /// <param name="tournamentId">The unique identifier of the tournament to which the game belongs.</param>
+    /// <param name="trackChanges">If <c>true</c>, enables EF Core change tracking for the returned entity; otherwise, disables tracking.</param>
+    /// <returns>
+    /// A task that represents the asynchronous operation. The task result contains the matching <see cref="Game"/> entity if found; otherwise, <c>null</c>.
+    /// </returns>
+    Task<Game?> GetByTitleAndTournamentIdAsync(string gameTitle, int tournamentId, bool trackChanges = false);
+
+    /// <summary>
     /// Adds a new <see cref="Game"/> entity to the data store.
     /// </summary>
     /// <param name="game">The <see cref="Game"/> entity to add.</param>

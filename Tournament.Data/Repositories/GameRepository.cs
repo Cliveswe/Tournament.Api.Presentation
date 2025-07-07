@@ -230,4 +230,27 @@ public class GameRepository(TournamentApiContext context) : RepositoryBase<Game>
             .OrderBy(g => g.Title)
             .ToListAsync();
     }
+
+    /// <summary>
+    /// Asynchronously retrieves a <see cref="Game"/> entity by its title and associated tournament ID.
+    /// </summary>
+    /// <param name="gameTitle">The exact title of the game to retrieve. Case-sensitive match is used.</param>
+    /// <param name="tournamentId">The unique identifier of the tournament to which the game belongs.</param>
+    /// <param name="trackChanges">
+    /// Indicates whether to enable change tracking for the retrieved entity.
+    /// Set to <c>false</c> to improve performance in read-only scenarios.
+    /// </param>
+    /// <returns>
+    /// A <see cref="Task{Game}"/> representing the asynchronous operation. 
+    /// The result contains the <see cref="Game"/> entity if found; otherwise, <c>null</c>.
+    /// </returns>
+    /// <remarks>
+    /// This method performs an exact (case-sensitive) match on the game's title and validates
+    /// that the game belongs to the specified tournament. It supports optional change tracking via EF Core.
+    /// </remarks>
+    public Task<Game?> GetByTitleAndTournamentIdAsync(string gameTitle, int tournamentId, bool trackChanges = false)
+    {
+        return FindByCondition(g => g.Title.Equals(gameTitle) && g.TournamentDetailsId == tournamentId, trackChanges)
+            .FirstOrDefaultAsync();
+    }
 }
