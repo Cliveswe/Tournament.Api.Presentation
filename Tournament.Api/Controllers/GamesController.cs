@@ -40,7 +40,6 @@ namespace Tournament.Api.Controllers
     /// </remarks>
     [ApiController]
     [Route("api/tournamentDetails/{tournamentId}/games")]
-    //public class GamesController(TournamentApiContext context) : ControllerBase
     public class GamesController(IMapper mapper, IUoW uoW) : ControllerBase
     {
         #region GET api/Games api/1/Games/
