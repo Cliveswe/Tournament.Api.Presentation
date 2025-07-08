@@ -79,23 +79,10 @@ public class TournamentMappings : Profile
             .ForMember(dest => dest.Id, opt => opt.Ignore())
             .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.Name.Trim())); // Trim whitespace from Title
 
-        /// <summary>
-        /// Maps from <see cref="Game"/> to <see cref="GameDto"/> for basic projection.
-        /// </summary>
-        CreateMap<Game, GameDto>();
-
-
-
-        /// <summary>
-        /// Maps from <see cref="Game"/> to <see cref="GameDto"/>, converting <c>Time</c> to <c>StartDate</c>
-        /// to make the API contract more descriptive and consumer-friendly.
-        /// <remarks>
-        /// Show users a more descriptive name like StartDate instead of the raw database property name Time.
-        /// Mapping lets you decouple your database model from the API contract.
-        /// </remarks>
-        /// </summary>
         _ = CreateMap<Game, GameDto>()
-            .ForMember(dest => dest.StartDate, opt => opt.MapFrom(src => src.Time)); // adjust if needed;
+            .ForMember(dest => dest.StartDate, opt => opt.MapFrom(src => src.Time))
+            .ReverseMap()
+            .ForMember(dest => dest.Time, opt => opt.MapFrom(src => src.StartDate));
 
 
         /// <summary>

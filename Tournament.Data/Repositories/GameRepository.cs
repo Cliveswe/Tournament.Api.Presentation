@@ -180,15 +180,17 @@ public class GameRepository(TournamentApiContext context) : RepositoryBase<Game>
     /// <summary>
     /// Updates the specified <see cref="Game"/> entity in the data store.
     /// </summary>
-    /// <param name="game">The <see cref="Game"/> entity to update. Cannot be <c>null</c>.</param>
+    /// <param name="game">The <see cref="Game"/> object to update. Must not be <c>null</c>.</param>
     /// <remarks>
-    /// This method marks the provided entity as modified. Changes are persisted to the database
-    /// when the context is saved. Ensure the entity contains valid and updated information
-    /// before calling this method.
+    /// This method marks the provided entity as modified in the database context. 
+    /// The actual update is committed when <c>SaveChanges</c> or <c>SaveChangesAsync</c> is called on the context.
     /// </remarks>
-    public void Update(Game game)
+    /// <exception cref="ArgumentNullException">
+    /// Thrown if the <paramref name="game"/> parameter is <c>null</c>.
+    /// </exception>
+    public new void Update(Game game)
     {
-        Update(game);
+        base.Update(game);
     }
 
     /// <summary>

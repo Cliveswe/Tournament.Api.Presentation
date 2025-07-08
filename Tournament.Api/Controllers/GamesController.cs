@@ -28,13 +28,13 @@ namespace Tournament.Api.Controllers
     /// <remarks>
     /// This controller provides endpoints to perform CRUD operations on games within specific tournaments:
     /// <list type="number">
-    /// <item>Retrieves games by tournament ID or by game ID.</item>
+    /// <item>Retrieves games by tournamentEntity ID or by game ID.</item>
     /// <item>Creates new games linked to tournaments, ensuring data validity and preventing duplicates.</item>
     /// <item>Updates or partially updates existing games with full validation and concurrency handling.</item>
     /// <item>Deletes games by their ID with appropriate validation and error handling.</item>
     /// <item>Utilizes AutoMapper to map between entity models and data transfer objects (DTOs).</item>
     /// <item>Implements the Unit of Work pattern to coordinate database operations through repositories.</item>
-    /// <item>Validates that game times fall within the tournament’s start and end dates.</item>
+    /// <item>Validates that game times fall within the tournamentEntity’s start and end dates.</item>
     /// <item>Returns standard HTTP response codes such as 200 OK, 201 Created, 204 No Content, 
     /// 400 Bad Request, 404 Not Found, 409 Conflict, and 500 Internal Server Error.</item>
     /// </list>
@@ -50,11 +50,11 @@ namespace Tournament.Api.Controllers
         /// Retrieves all Game entities associated with a specific TournamentDetails ID.
         /// [HttpGet("/api/tournamentDetails/{tournametId}/games")]
         /// </summary>
-        /// <param name="tournamentId">The ID of the tournament for which to fetch games.</param>
+        /// <param name="tournamentId">The ID of the tournamentEntity for which to fetch games.</param>
         /// <returns>
-        /// Returns a 200 OK response containing a collection of GameDto objects if the tournament exists.
-        /// Returns 400 Bad Request, if the tournament ID is invalid. 
-        /// Returns 404 Not Found if the tournament with the specified ID does not exist.
+        /// Returns a 200 OK response containing a collection of GameDto objects if the tournamentEntity exists.
+        /// Returns 400 Bad Request, if the tournamentEntity ID is invalid. 
+        /// Returns 404 Not Found if the tournamentEntity with the specified ID does not exist.
         /// </returns>
         /// Note that the route is overridden and it is important to add a root "/api/..." and 
         /// not "api/..." there is a difference.
@@ -62,17 +62,17 @@ namespace Tournament.Api.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<GameDto>>> GetTournamentGame(int tournamentId)
         {
-            // Validate the tournament ID from the route parameter
+            // Validate the tournamentEntity ID from the route parameter
             if(tournamentId <= 0) {
-                // If the tournament ID is invalid (less than or equal to zero), return 400 Bad Request.
-                // This ensures that the client must provide a valid tournament ID to retrieve games.
-                return BadRequest($"Invalid tournament ID {tournamentId}.");
+                // If the tournamentEntity ID is invalid (less than or equal to zero), return 400 Bad Request.
+                // This ensures that the client must provide a valid tournamentEntity ID to retrieve games.
+                return BadRequest($"Invalid tournamentEntity ID {tournamentId}.");
             }
 
 
-            // Validate the tournament ID from the route parameter
+            // Validate the tournamentEntity ID from the route parameter
             bool exists = await uoW.TournamentDetailsRepository.AnyAsync(tournamentId);
-            // If the tournament with the specified ID does not exist, return 404 Not Found
+            // If the tournamentEntity with the specified ID does not exist, return 404 Not Found
             if(!exists) {
                 return NotFound($"Tournament with ID {tournamentId} does not exist.");
             }
@@ -80,7 +80,7 @@ namespace Tournament.Api.Controllers
             // Fetch all Game records using the GameRepository
             //IEnumerable<Game> games = await uoW.GameRepository.GetAllAsync();
 
-            // Check if any games exist for the specified tournament ID
+            // Check if any games exist for the specified tournamentEntity ID
             //IEnumerable<Game> gamesExist = await uoW.GameRepository.GetAllAsync();
             //List<Game> gamesResult = gamesExist.Where(g => g.TournamentDetailsId == tournamentId).ToList();
 
@@ -98,21 +98,21 @@ namespace Tournament.Api.Controllers
 
 
         /// <summary>
-        /// Retrieves a specific game by its unique identifier, ensuring it belongs to the specified tournament.
+        /// Retrieves a specific game by its unique identifier, ensuring it belongs to the specified tournamentEntity.
         /// </summary>
-        /// <param name="tournamentId">The ID of the tournament the game is associated with.</param>
+        /// <param name="tournamentId">The ID of the tournamentEntity the game is associated with.</param>
         /// <param name="id">The unique ID of the game to retrieve.</param>
         /// <returns>
-        /// Returns a 200 OK response with the corresponding <see cref="GameDto"/> if found and associated with the tournament.
-        /// Returns 400 Bad Request if either the game ID or tournament ID is invalid.
-        /// Returns 404 Not Found if the game does not exist or does not belong to the specified tournament.
+        /// Returns a 200 OK response with the corresponding <see cref="GameDto"/> if found and associated with the tournamentEntity.
+        /// Returns 400 Bad Request if either the game ID or tournamentEntity ID is invalid.
+        /// Returns 404 Not Found if the game does not exist or does not belong to the specified tournamentEntity.
         /// </returns>
         /// <remarks>
         /// This method performs the following validations:
         /// <list type="number">
         /// <item>Ensures both <paramref name="tournamentId"/> and <paramref name="id"/> are positive integers.</item>
         /// <item>Fetches the game from the repository by ID.</item>
-        /// <item>Verifies that the game's tournament ID matches the provided tournament ID.</item>
+        /// <item>Verifies that the game's tournamentEntity ID matches the provided tournamentEntity ID.</item>
         /// <item>Uses AutoMapper to convert the entity to a DTO and returns the result.</item>
         /// </list>
         /// </remarks>
@@ -120,12 +120,12 @@ namespace Tournament.Api.Controllers
         [HttpGet("{id:int}")]
         public async Task<ActionResult<GameDto>> GetGameById(int tournamentId, int id)
         {
-            // Validate the tournament ID and game ID
+            // Validate the tournamentEntity ID and game ID
             if(id <= 0 || tournamentId <= 0) {
-                return BadRequest("Invalid tournament id or game id.");
+                return BadRequest("Invalid tournamentEntity id or game id.");
             }
 
-            // Check if the tournament exists
+            // Check if the tournamentEntity exists
             var gameEntity = await uoW.GameRepository.GetByIdAsync(id);
 
             // If the game does not exist, return 404 Not Found
@@ -133,10 +133,10 @@ namespace Tournament.Api.Controllers
                 return NotFound($"Game with ID {id} was not found.");
             }
 
-            // Ensure the game belongs to the specified tournament.
-            // This check ensures that the game being retrieved is associated with the correct tournament.
+            // Ensure the game belongs to the specified tournamentEntity.
+            // This check ensures that the game being retrieved is associated with the correct tournamentEntity.
             if(gameEntity.TournamentDetailsId != tournamentId) {
-                return NotFound($"Game with ID {id} does not belong to the specified tournament.");
+                return NotFound($"Game with ID {id} does not belong to the specified tournamentEntity.");
             }
 
             // Map the Game entity to a GameDto using AutoMapper
@@ -147,9 +147,9 @@ namespace Tournament.Api.Controllers
         }
 
         /// <summary>
-        /// Retrieves a game by its title within a specific tournament.
+        /// Retrieves a game by its title within a specific tournamentEntity.
         /// </summary>
-        /// <param name="tournamentId">The ID of the tournament to search within.</param>
+        /// <param name="tournamentId">The ID of the tournamentEntity to search within.</param>
         /// <param name="title">The title of the game to retrieve. Cannot be null or empty.</param>
         /// <returns>
         /// An <see cref="ActionResult{GameDto}"/> containing the game data if found, or an appropriate HTTP error response:
@@ -157,11 +157,11 @@ namespace Tournament.Api.Controllers
         /// - 404 Not Found if no matching game is found
         /// </returns>
         /// <remarks>
-        /// This method trims the input title and filters by both game title and tournament ID.
+        /// This method trims the input title and filters by both game title and tournamentEntity ID.
         /// It ensures games from other tournaments with the same title are excluded.
         /// </remarks>
-        // GET api/tournamentDetails/{tournamentId}/games/bytitle/{title}
-        [HttpGet("bytitle/{title}")]
+        // GET api/tournamentDetails/{tournamentId}/games/byTitle/{title}
+        [HttpGet("byTitle/{title}")]
         public async Task<ActionResult<GameDto>> GetGameByTitle(int tournamentId, string title)
         {
             // Validate the title input.
@@ -172,17 +172,17 @@ namespace Tournament.Api.Controllers
             // Trim whitespace from the title to ensure accurate matching.
             string trimmedTitle = title.Trim();
 
-            // Validate the tournament ID.
+            // Validate the tournamentEntity ID.
             if(tournamentId <= 0) {
-                return BadRequest("Invalid tournament id.");
+                return BadRequest("Invalid tournamentEntity id.");
             }
 
-            // Check if the tournament exists.
-            // This check ensures that the game being retrieved is associated with the correct tournament.
+            // Check if the tournamentEntity exists.
+            // This check ensures that the game being retrieved is associated with the correct tournamentEntity.
             Game? gameEntity = await uoW.GameRepository.GetByTitleAndTournamentIdAsync(trimmedTitle, tournamentId);
 
-            // If no game with the specified title exists in the tournament, return 404 Not Found.
-            // This ensures that the API does not return a game from a different tournament with the same title.
+            // If no game with the specified title exists in the tournamentEntity, return 404 Not Found.
+            // This ensures that the API does not return a game from a different tournamentEntity with the same title.
             if(gameEntity == null) {
                 return NotFound($"Game with title '{trimmedTitle}' was not found.");
             }
@@ -197,7 +197,7 @@ namespace Tournament.Api.Controllers
 
         #endregion
 
-        #region PUT api/Games/5
+        #region PUT api/tournamentDetails/1/Games/5
 
         /// <summary>
         /// Updates an existing gameEntity identified by its ID with the provided data. PUT: api/Games/5
@@ -261,43 +261,23 @@ namespace Tournament.Api.Controllers
 
         #endregion
 
-        #region PATCH api/Games/5
+        #region PATCH api/tournamentDetails/1/Games/5
 
-        /// <summary>
-        /// Applies a JSON Patch document to an existing game within a specified tournament,
-        /// allowing partial updates to game properties such as the title or start date.
-        /// </summary>
-        /// <param name="tournamentId">The ID of the tournament the game belongs to.</param>
-        /// <param name="id">The ID of the game to be patched.</param>
-        /// <param name="patchDocument">The JSON Patch document containing the operations to be applied to the game.</param>
-        /// <returns>
-        /// Returns:
-        /// - <see cref="BadRequestResult"/> if the patch document or IDs are invalid, or if the patched model fails validation.
-        /// - <see cref="NotFoundResult"/> if the game or tournament is not found.
-        /// - <see cref="OkObjectResult"/> with the updated <see cref="GameDto"/> if the patch is successfully applied.
-        /// </returns>
-        /// <remarks>
-        /// This endpoint uses the JSON Patch standard (RFC 6902) to support partial updates.
-        /// It ensures the updated game's start date remains within the tournament's scheduled date range,
-        /// and validates all changes before committing to the data store.
-        /// </remarks>
-        [HttpPatch("{id}")]
+        [HttpPatch("{id:int}")]
         public async Task<IActionResult> PatchGame(int tournamentId, int id, [FromBody] JsonPatchDocument<GameDto> patchDocument)
         {
-            //TODO: Analyze this method and see if it can be simplified.
-
             #region Validation of Input Parameters
 
-            // Validate the model state, checks data annotations.
+            // Ensure the incoming patch document is not null.
             if(patchDocument == null) {
                 // If the model state is invalid, return 400 Bad Request with validation errors.
                 return BadRequest("Patch document cannot be null.");
             }
 
-            // Check if the tournament ID is valid.
+            // Check if the tournamentEntity ID is valid.
             if(tournamentId <= 0) {
-                // If the tournament ID is invalid, return 400 Bad Request with an error message.
-                return BadRequest($"Invalid tournament ID {tournamentId} specified for patching.");
+                // If the tournamentEntity ID is invalid, return 400 Bad Request with an error message.
+                return BadRequest($"Invalid tournamentEntity ID {tournamentId} specified for patching.");
             }
 
             // Check if the game ID is valid.
@@ -307,70 +287,71 @@ namespace Tournament.Api.Controllers
             }
             #endregion
 
-            // Fetch the existing game by ID
-            Game? existingGame = await uoW.GameRepository.GetByIdAsync(id);
-            // If the game does not exist or the tournament ID does not match, return 404 Not Found
-            if(existingGame == null || existingGame.TournamentDetailsId != tournamentId) {
+            #region Validation of Model State before applying the patch
+
+            // Fetch the existing game by ID.
+            Game? gameEntity = await uoW.GameRepository.GetByIdAsync(id);
+
+            // If the game does not exist or the tournamentEntity ID does not match, return 404 Not Found.
+            if(gameEntity == null || gameEntity.TournamentDetailsId != tournamentId) {
                 return NotFound($"Game with ID {id} in Tournament {tournamentId} was not found.");
             }
 
-            // Map existing game to GameDto
-            var gameToPatch = mapper.Map<GameDto>(existingGame);
+            // Fetch the tournamentEntity to validate StartDate.
+            TournamentDetails? tournamentEntity = await uoW.TournamentDetailsRepository.GetAsync(tournamentId);
+            if(tournamentEntity == null) {
+                // If the tournamentEntity does not exist, return 404 Not Found.
+                // Note: This is a different check than the one above, as it checks the tournamentEntity existence.
+                return NotFound($"Tournament with ID {tournamentId} does not exist and the game will not be updated.");
+            }
+            #endregion
 
-            // Apply patch to DTO and validate model state
+            #region Validate Game date is within the Tournament period
+
+            // Map tournamentEntity to TournamentDto.
+            var tournamentDto = mapper.Map<TournamentDto>(tournamentEntity);
+
+            // Map gameEntity to a GameDto.
+            GameDto gameToPatch = mapper.Map<GameDto>(gameEntity);
+
+            // Validation of Model State after Patch Application.
+            // Apply patch to DTO and validate model state.
             patchDocument.ApplyTo(gameToPatch, ModelState);
 
-            #region Validation of Model State after Patch Application
-
-            // Validate the model state after applying the patch
+            // Validate the model state after applying the patch.
             if(!TryValidateModel(gameToPatch)) {
                 // If the model state is invalid after applying the patch, return 400 Bad Request with validation errors.
                 return ValidationProblem(ModelState);
             }
 
-            // Fetch the tournament to validate StartDate
-            var tournament = await uoW.TournamentDetailsRepository.GetAsync(tournamentId);
-            if(tournament == null) {
-                // If the tournament does not exist, return 404 Not Found
-                // Note: This is a different check than the one above, as it checks the tournament existence.
-                return NotFound($"Tournament with ID {tournamentId} does not exist.");
-            }
-
-            // Map tournament to TournamentDto for validation
-            var tournamentDto = mapper.Map<TournamentDto>(tournament);
-
-            // Validate StartDate is within tournament period
+            // Validate StartDate is within tournamentEntity period
             if(!IsGameTimeValid(gameToPatch.StartDate, tournamentDto)) {
-                return BadRequest($"StartDate must be within the tournament's start \"{tournamentDto.StartDate}\" and end \"{tournamentDto.EndDate}\" dates.");
+                return BadRequest($"StartDate must be within the tournamentEntity's start \"{tournamentDto.StartDate}\" and end \"{tournamentDto.EndDate}\" dates.");
             }
 
             #endregion
 
             // Map patched DTO back to the game
-            existingGame.Title = gameToPatch.Title;
-            existingGame.Time = gameToPatch.StartDate;
+            //gameEntity.Title = gameToPatch.Title;
+            //gameEntity.Time = gameToPatch.StartDate;
+            mapper.Map(gameToPatch, gameEntity);
 
             // Attempt to update the game in the repository
-            try {
-                // Update the existing gameEntity in the repository
-                uoW.GameRepository.Update(existingGame);
-                // Persist the changes to the database
-                await uoW.CompleteAsync();
-            } catch(DbUpdateConcurrencyException) {
-                // If a concurrency exception occurs, check if the game still exists
-                if(!await GameExists(existingGame)) {
-                    // If the game does not exist, return 404 Not Found
-                    return NotFound($"Game with ID {existingGame.Id} was not found. It may have been deleted.");
-                } else {
-                    throw;
-                }
+            // Update the existing gameEntity in the repository
+            uoW.GameRepository.Update(gameEntity);
+            // Persist the changes to the database
+            var result = await uoW.CompleteAsync();
+
+            // If no changes were saved, return 500 Internal Server Error
+            if(result == 0) {
+                return StatusCode(500, "Update failed. No changes were saved.");
             }
 
             // Return 200 OK with the updated GameDto.
             // This indicates that the patch operation was successful and the game has been updated.
             // The mapper converts the updated Game entity back to a GameDto for the response.
             // This ensures a clean API boundary and separation of concerns by returning only the necessary data.
-            return Ok(mapper.Map<GameDto>(existingGame));
+            return Ok(mapper.Map<GameDto>(gameEntity));
         }
 
         #endregion
@@ -378,26 +359,6 @@ namespace Tournament.Api.Controllers
         #region POST api/tournamentDetails/1/Games
 
         // POST: api/tournamentDetails/1/Games
-        /// <summary>
-        /// Creates a new game associated with the specified tournament.
-        /// </summary>
-        /// <param name="gameCreateDto">The data transfer object containing information about the game to create.</param>
-        /// <param name="tournamentId">The ID of the tournament to which the game belongs (from route).</param>
-        /// <returns>
-        /// Returns:
-        /// <list type="bullet">
-        ///   <item><description><see cref="BadRequestObjectResult"/> if the input is invalid or IDs mismatch.</description></item>
-        ///   <item><description><see cref="NotFoundResult"/> if the specified tournament does not exist.</description></item>
-        ///   <item><description><see cref="ConflictResult"/> if a duplicate game exists with the same name and time.</description></item>
-        ///   <item><description><see cref="ObjectResult"/> with HTTP 500 if saving to the database fails.</description></item>
-        ///   <item><description><see cref="CreatedAtActionResult"/> with the created game if successful.</description></item>
-        /// </list>
-        /// </returns>
-        /// <remarks>
-        /// Validates the game data, checks for tournament existence and time constraints, 
-        /// prevents duplicates, and saves the game to the database. 
-        /// On success, returns the newly created game and its URI.
-        /// </remarks>
         [HttpPost]
         public async Task<ActionResult<GameDto>> PostGame([FromBody] GameCreateDto gameCreateDto, [FromRoute] int tournamentId)
         {
@@ -407,7 +368,7 @@ namespace Tournament.Api.Controllers
                 return BadRequest("Game data must be provided.");
             }
 
-            // Ensure the tournament ID is set in the DTO, because the tournament Id is in the route.
+            // Ensure the tournamentEntity ID is set in the DTO, because the tournamentEntity Id is in the route.
             //gameCreateDto.TournamentDetailsId = tournamentId;
 
             // Trim whitespace from the gameEntity name
@@ -421,18 +382,18 @@ namespace Tournament.Api.Controllers
             #region Validation of Tournament existence and Game time.
             // Map the DTO to the TournamentDto
             TournamentDetails? existingTournament = await uoW.TournamentDetailsRepository.GetAsync(tournamentId);
-            // Validate tournament existence
+            // Validate tournamentEntity existence
             if(existingTournament == null) {
-                // Return 404 Not Found if the tournament does not exist
+                // Return 404 Not Found if the tournamentEntity does not exist
                 return NotFound($"Tournament with ID {tournamentId} does not exist.");
             }
 
-            // Map the existing tournament to a TournamentDto for validation.
+            // Map the existing tournamentEntity to a TournamentDto for validation.
             TournamentDto tournamentDetailsDto = mapper.Map<TournamentDto>(existingTournament);
-            // Validate that the game time is within the tournament's start and end dates.
+            // Validate that the game time is within the tournamentEntity's start and end dates.
             if(!IsGameTimeValid(gameCreateDto.Time, tournamentDetailsDto)) {
-                // Return 400 Bad Request if the game time is not within the tournament's start and end dates.
-                return BadRequest($"Game time must be within the tournament's start \"{tournamentDetailsDto.StartDate}\" and end \"{tournamentDetailsDto.EndDate}\" dates.");
+                // Return 400 Bad Request if the game time is not within the tournamentEntity's start and end dates.
+                return BadRequest($"Game time must be within the tournamentEntity's start \"{tournamentDetailsDto.StartDate}\" and end \"{tournamentDetailsDto.EndDate}\" dates.");
             }
             #endregion
 
@@ -450,27 +411,24 @@ namespace Tournament.Api.Controllers
 
             // This mapping will convert the DTO properties to the corresponding Game entity properties.
             // The Game entity will be used to persist the new game to the database.
-            // This is necessary to ensure that the game is associated with the correct tournament.
+            // This is necessary to ensure that the game is associated with the correct tournamentEntity.
             Game gameEntity = mapper.Map<Game>(gameCreateDto); // map DTO to Game entity
-            gameEntity.TournamentDetailsId = tournamentId; // Set the tournament ID for the new game
+            gameEntity.TournamentDetailsId = tournamentId; // Set the tournamentEntity ID for the new game
 
-            try {
-                // Add the new Game entity to the repository
-                // This will prepare the entity to be inserted into the database.
-                // The Unit of Work pattern is used to manage the database context and repositories.
-                // This ensures that the game is added to the correct tournament.
-                uoW.GameRepository.Add(gameEntity);
 
-                // Persist the changes to the database
-                var changes  = await uoW.CompleteAsync();
-                if(changes == 0) {
-                    // No changes saved - something went wrong
-                    return StatusCode(StatusCodes.Status500InternalServerError, "Failed to save the new gameEntity.");
-                }
-            } catch(DbUpdateException) {
-                // Log exception if you have logging setup
-                return StatusCode(StatusCodes.Status500InternalServerError, "Database update error occurred.");
+            // Add the new Game entity to the repository
+            // This will prepare the entity to be inserted into the database.
+            // The Unit of Work pattern is used to manage the database context and repositories.
+            // This ensures that the game is added to the correct tournamentEntity.
+            uoW.GameRepository.Add(gameEntity);
+
+            // Persist the changes to the database
+            var changes  = await uoW.CompleteAsync();
+            if(changes == 0) {
+                // No changes saved - something went wrong
+                return StatusCode(StatusCodes.Status500InternalServerError, "Failed to save the new gameEntity.");
             }
+
 
             // Return 201 Created with the location header pointing to access the new resource.
             //nameof(GetGame): Specifies the action method (e.g., GetGame(int id)) that can be used to retrieve the created Game.
@@ -483,21 +441,7 @@ namespace Tournament.Api.Controllers
 
         #region DELETE api/tournamentDetails/1/Games/5
 
-        /// <summary>
-        /// Deletes a game entity by its ID.
-        /// </summary>
-        /// <param name="id">The ID of the game to delete.</param>
-        /// <returns>
-        /// Returns:
-        /// - <see cref="BadRequestObjectResult"/> (400) if the ID is invalid.
-        /// - <see cref="NotFoundObjectResult"/> (404) if no game with the specified ID exists.
-        /// - <see cref="StatusCodeResult"/> (500) if a database error occurs during deletion.
-        /// - <see cref="OkObjectResult"/> (200) with a confirmation message if the deletion succeeds.
-        /// </returns>
-        /// <remarks>
-        /// This method attempts to remove a game from the database using the Unit of Work pattern.
-        /// It validates the input ID, checks existence, and handles potential database exceptions.
-        /// </remarks>
+
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> DeleteGame(int id, int tournamentId)
         {
@@ -505,7 +449,7 @@ namespace Tournament.Api.Controllers
             // Validate the ID to ensure it is a positive integer.
             // If the ID is less than or equal to zero, return 400 Bad Request.
             if(tournamentId <= 0) {
-                return BadRequest($"Invalid tournament Id.");
+                return BadRequest($"Invalid tournamentEntity Id.");
             }
 
             if(id <= 0) {
@@ -529,22 +473,17 @@ namespace Tournament.Api.Controllers
                 return NotFound($"Game with the specified Id {id} was not found.");
             }
 
-            //Make sure that the game does belong to the specified tournament.
+            //Make sure that the game does belong to the specified tournamentEntity.
             if(gameEntity.TournamentDetailsId != tournamentId) {
-                return NotFound("Game with the specified ID does not belong to the specified tournament.");
+                return NotFound("Game with the specified ID does not belong to the specified tournamentEntity.");
             }
 
-            #endregion 
+            #endregion
 
-            try {
-                // Remove the Game entity from the repository
-                uoW.GameRepository.Remove(gameEntity);
-                // Persist the change to the database
-                await uoW.CompleteAsync();
-            } catch(DbUpdateException) {
-                // Return 500 Internal Server Error if a database update error occurs
-                return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected concurrency error occurred.");
-            }
+            // Remove the Game entity from the repository
+            uoW.GameRepository.Remove(gameEntity);
+            // Persist the change to the database
+            await uoW.CompleteAsync();
 
             // Return 200 OK with a confirmation message
             return Ok(new { message = $"Game with ID {id} has bee deleted successfully." });
@@ -574,15 +513,15 @@ namespace Tournament.Api.Controllers
         }
 
         /// <summary>
-        /// Validates whether the specified game time falls within the start and end dates of the tournament.
+        /// Validates whether the specified game time falls within the start and end dates of the tournamentEntity.
         /// </summary>
         /// <param name="gameTime">The time of the game to validate.</param>
-        /// <param name="tournament">The tournament against which the game time is validated.</param>
+        /// <param name="tournament">The tournamentEntity against which the game time is validated.</param>
         /// <returns>
-        /// <c>true</c> if the game time is strictly between the tournament's start and end dates; otherwise, <c>false</c>.
+        /// <c>true</c> if the game time is strictly between the tournamentEntity's start and end dates; otherwise, <c>false</c>.
         /// </returns>
         /// <remarks>
-        /// This method ensures that the game is scheduled within the tournament's valid timeframe.
+        /// This method ensures that the game is scheduled within the tournamentEntity's valid timeframe.
         /// </remarks>
         private bool IsGameTimeValid(DateTime gameTime, TournamentDto tournament)
         {

@@ -53,6 +53,6 @@ namespace Tournament.Core.Entities
         /// <summary>
         /// Navigation property to the related <see cref="TournamentDetails"/> entity.
         /// </summary>
-        public TournamentDetails TournamentDetails { get; set; }
+        public TournamentDetails? TournamentDetails { get; set; }
     }
 }
