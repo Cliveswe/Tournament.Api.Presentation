@@ -15,7 +15,6 @@
 using AutoMapper;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Tournament.Core.Dto;
 using Tournament.Core.Entities;
 using Tournament.Core.Repositories;
@@ -62,13 +61,15 @@ namespace Tournament.Api.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<GameDto>>> GetTournamentGame(int tournamentId)
         {
+
+            #region Validation of input parameters
             // Validate the tournamentEntity ID from the route parameter
             if(tournamentId <= 0) {
                 // If the tournamentEntity ID is invalid (less than or equal to zero), return 400 Bad Request.
                 // This ensures that the client must provide a valid tournamentEntity ID to retrieve games.
                 return BadRequest($"Invalid tournamentEntity ID {tournamentId}.");
             }
-
+            #endregion
 
             // Validate the tournamentEntity ID from the route parameter
             bool exists = await uoW.TournamentDetailsRepository.AnyAsync(tournamentId);
@@ -77,20 +78,11 @@ namespace Tournament.Api.Controllers
                 return NotFound($"Tournament with ID {tournamentId} does not exist.");
             }
 
-            // Fetch all Game records using the GameRepository
-            //IEnumerable<Game> games = await uoW.GameRepository.GetAllAsync();
-
-            // Check if any games exist for the specified tournamentEntity ID
-            //IEnumerable<Game> gamesExist = await uoW.GameRepository.GetAllAsync();
-            //List<Game> gamesResult = gamesExist.Where(g => g.TournamentDetailsId == tournamentId).ToList();
-
+            // Retrieve all games associated with the specified tournamentEntity ID.
             IEnumerable<Game?> gamesResult = await uoW.GameRepository.GetByTournamentIdAsync(tournamentId);
 
-
-
+            // Map the Game entities to GameDto using AutoMapper.
             IEnumerable<GameDto> games = mapper.Map<IEnumerable<GameDto>>(gamesResult);
-            // Alternatively, direct EF Core access could be used:
-            //return await context.Game.ToListAsync();
 
             // Return the result with HTTP 200 OK
             return Ok(games);
@@ -120,11 +112,14 @@ namespace Tournament.Api.Controllers
         [HttpGet("{id:int}")]
         public async Task<ActionResult<GameDto>> GetGameById(int tournamentId, int id)
         {
+            #region Validation of Input parameters
             // Validate the tournamentEntity ID and game ID
             if(id <= 0 || tournamentId <= 0) {
                 return BadRequest("Invalid tournamentEntity id or game id.");
             }
+            #endregion
 
+            #region Validation of Tournament existence
             // Check if the tournamentEntity exists
             var gameEntity = await uoW.GameRepository.GetByIdAsync(id);
 
@@ -138,6 +133,7 @@ namespace Tournament.Api.Controllers
             if(gameEntity.TournamentDetailsId != tournamentId) {
                 return NotFound($"Game with ID {id} does not belong to the specified tournamentEntity.");
             }
+            #endregion 
 
             // Map the Game entity to a GameDto using AutoMapper
             var gameDto = mapper.Map<GameDto>(gameEntity);
@@ -164,6 +160,7 @@ namespace Tournament.Api.Controllers
         [HttpGet("byTitle/{title}")]
         public async Task<ActionResult<GameDto>> GetGameByTitle(int tournamentId, string title)
         {
+            #region VAlidation of input parameters
             // Validate the title input.
             if(string.IsNullOrWhiteSpace(title)) {
                 return BadRequest("Title must be a non-empty string.");
@@ -176,6 +173,7 @@ namespace Tournament.Api.Controllers
             if(tournamentId <= 0) {
                 return BadRequest("Invalid tournamentEntity id.");
             }
+            #endregion
 
             // Check if the tournamentEntity exists.
             // This check ensures that the game being retrieved is associated with the correct tournamentEntity.
@@ -198,64 +196,56 @@ namespace Tournament.Api.Controllers
         #endregion
 
         #region PUT api/tournamentDetails/1/Games/5
-
-        /// <summary>
-        /// Updates an existing gameEntity identified by its ID with the provided data. PUT: api/Games/5
-        /// </summary>
-        /// <param name="id">The ID of the gameEntity to update.</param>
-        /// <param name="gameUpdateDto">The updated gameEntity data provided in the request body.</param>
-        /// <returns>
-        /// Returns a <see cref="BadRequestResult"/> if the model state is invalid or the ID doesn't match.
-        /// Returns <see cref="NotFoundResult"/> if the gameEntity does not exist.
-        /// Returns <see cref="NoContentResult"/> if the update is successful.
-        /// </returns>
-        /// <remarks>
-        /// This endpoint follows REST conventions for PUT operations. It uses AutoMapper to apply changes from the DTO to the entity.
-        /// The GameUpdateDto includes only the fields allowed to be updated (e.g., Title).
-        /// A 204 No Content response indicates that the update succeeded without returning a body.
-        /// </remarks>
-        [HttpPut("/api/games/{id}")]
-        //public async Task<IActionResult> PutGame(int id, Game gameEntity)
-        public async Task<IActionResult> PutGame(int id, [FromBody] GameUpdateDto gameUpdateDto)
+        [HttpPut]
+        public async Task<IActionResult> PutGame(int tournamentId, [FromQuery] string title, [FromBody] GameUpdateDto gameUpdateDto)
         {
+            #region Validation of Input parameters
+            // Validate the input parameters.
             if(!ModelState.IsValid) {
                 // Return 400 Bad Request if the model state is invalid
                 return BadRequest(ModelState);
             }
 
-            Game? existingGame = await uoW.GameRepository.GetByIdAsync(id);
-
-            // Ensure the route ID matches the payload ID
-            if(existingGame == null || existingGame.Id != id) {
-                // 400 Bad Request if IDs don't match
-                return BadRequest();
+            // Validate the tournamentEntity ID from the route parameter.
+            if(tournamentId <= 0) {
+                // Return 400 Bad Request if the tournamentEntity ID is invalid
+                return BadRequest($"Invalid tournamentEntity ID {tournamentId}.");
             }
+
+            // Validate the game title input
+            title = title.Trim();
+            if(string.IsNullOrWhiteSpace(title)) {
+                return BadRequest("Game title must be a non-empty string.");
+            }
+            #endregion
+
+            #region Validation of Game entity
+            //Get a game entity by title and tournament id.
+            Game? gameEntity = await uoW.GameRepository.GetByTitleAndTournamentIdAsync(title, tournamentId);
+
+            //Validate that the game exists.
+            if(gameEntity == null) {
+                // 400 Bad Request if IDs don't match
+                return NotFound($"Game with title '{title}' was not found.");
+            }
+            #endregion
 
             // Map the DTO to the existing entity.
             // This will update only the fields specified in the DTO.
-            mapper.Map(gameUpdateDto, existingGame);
+            mapper.Map(gameUpdateDto, gameEntity);
 
-            try {
-                // Attempt to save changes to the database
-                uoW.GameRepository.Update(existingGame);
+            // Attempt to save changes to the database
+            uoW.GameRepository.Update(gameEntity);
 
-                // Persist the changes to the database
-                await uoW.CompleteAsync();
-
-            } catch(DbUpdateConcurrencyException) {
-
-                bool exists = await GameExists(existingGame);
-                // If the entity no longer exists, return 404 Not Found
-                if(!exists) {
-                    return NotFound($"Game with ID {existingGame.Id} was not found. It may have been deleted or does not exist.");
-                } else {
-                    // Otherwise re-throw the exception to bubble up
-                    throw;
-                }
+            // Persist the changes to the database.
+            var result = await uoW.CompleteAsync();
+            // If no changes were saved, return 500 Internal Server Error.
+            if(result == 0) {
+                // If no changes were saved, return 500 Internal Server Error
+                return StatusCode(500, "Update failed. No changes were saved.");
             }
 
-
-            // The update was successful; return HTTP 204 No Content as per REST convention
+            // The update was successful; return HTTP 204 No Content as per REST convention.
             return NoContent();
         }
 
