@@ -13,13 +13,14 @@
 //        comprehensive error handling to ensure API robustness and data integrity.
 // --------------------------------------------------------------------------------
 using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Tournament.Core.Dto;
 using Tournament.Core.Entities;
 using Tournament.Core.Repositories;
 
-namespace Tournament.Api.Controllers
+namespace Tournament.Presentation.Controllers.Games
 {
     /// <summary>
     /// API controller for managing <see cref="Game"/> entities associated with tournaments.

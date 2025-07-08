@@ -19,7 +19,7 @@ using Tournament.Core.Dto;
 using Tournament.Core.Entities;
 using Tournament.Core.Repositories;
 
-namespace Tournament.Api.Controllers
+namespace Tournament.Presentation.Controllers.Tournaments
 {
 
     [Route("api/tournamentDetails")]
