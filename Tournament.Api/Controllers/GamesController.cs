@@ -408,7 +408,7 @@ namespace Tournament.Api.Controllers
             }
 
             // Ensure the tournament ID is set in the DTO, because the tournament Id is in the route.
-            gameCreateDto.TournamentDetailsId = tournamentId;
+            //gameCreateDto.TournamentDetailsId = tournamentId;
 
             // Trim whitespace from the gameEntity name
             gameCreateDto.Name = gameCreateDto.Name.Trim();
@@ -452,6 +452,7 @@ namespace Tournament.Api.Controllers
             // The Game entity will be used to persist the new game to the database.
             // This is necessary to ensure that the game is associated with the correct tournament.
             Game gameEntity = mapper.Map<Game>(gameCreateDto); // map DTO to Game entity
+            gameEntity.TournamentDetailsId = tournamentId; // Set the tournament ID for the new game
 
             try {
                 // Add the new Game entity to the repository

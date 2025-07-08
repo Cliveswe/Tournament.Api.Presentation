@@ -27,7 +27,7 @@ namespace Tournament.Core.Dto
     ///
     /// This DTO is primarily used to receive input data from clients during game creation operations.
     /// </summary>
-    public class GameCreateDto
+    public record GameCreateDto
     {
         /// <summary>
         /// Gets or sets the name (title) of the game.
@@ -48,8 +48,8 @@ namespace Tournament.Core.Dto
         /// Gets or sets the identifier of the tournament to which this game belongs.
         /// This field is required and must be a positive integer greater than zero.
         /// </summary>
-        [Required(ErrorMessage = "TournamentDetailsId is required.")]
-        [Range(1, int.MaxValue, ErrorMessage = "TournamentDetailsId must be greater than 0.")]
-        public required int TournamentDetailsId { get; set; }
+        //[Required(ErrorMessage = "TournamentDetailsId is required.")]
+        //[Range(1, int.MaxValue, ErrorMessage = "TournamentDetailsId must be greater than 0.")]
+        //public required int TournamentDetailsId { get; set; }
     }
 }
