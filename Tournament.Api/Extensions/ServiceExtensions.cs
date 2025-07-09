@@ -32,7 +32,7 @@ public static class ServiceExtensions
     {
 
         //Register the unit of work.
-        services.AddScoped<IUoW, UoW>();
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         //Register the repositories.
         services.AddScoped<ITournamentDetailsRepository, TournamentDetailsRepository>();

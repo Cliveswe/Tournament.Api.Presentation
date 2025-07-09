@@ -37,7 +37,7 @@ namespace Tournament.Presentation.Controllers.Tournaments
     /// The <see cref="PatchTournament(int, JsonPatchDocument{TournamentDto})"/> method
     /// supports partial updates on tournament entities using JSON Patch.
     /// </remarks>
-    public class TournamentDetailsController(IMapper mapper, IUoW uoW) : ControllerBase
+    public class TournamentDetailsController(IMapper mapper, IUnitOfWork uoW) : ControllerBase
     {
         #region GET api/TournamentDetails api/TournamentDetails/5
 

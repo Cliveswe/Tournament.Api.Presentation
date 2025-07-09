@@ -45,7 +45,7 @@ namespace Tournament.Data.Repositories;
 /// This updated implementation enhances performance and dependency management while continuing to promote
 /// separation of concerns, testability, and maintainability within the data access layer.
 /// </remarks>
-public class UoW(TournamentApiContext context, Lazy<ITournamentDetailsRepository> tournamentDetailsRepository, Lazy<IGameRepository> gameRepository) : IUoW
+public class UnitOfWork(TournamentApiContext context, Lazy<ITournamentDetailsRepository> tournamentDetailsRepository, Lazy<IGameRepository> gameRepository) : IUnitOfWork
 {
     #region previous implementation
     //private readonly Lazy<ITournamentDetailsRepository> tournamentDetailsRepository;

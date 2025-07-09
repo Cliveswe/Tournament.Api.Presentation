@@ -24,7 +24,7 @@ namespace Domain.Contracts;
 /// and games, and includes a method to save all pending changes asynchronously.
 /// Implementations ensure transactional consistency and promote separation of concerns.
 /// </remarks>
-public interface IUoW
+public interface IUnitOfWork
 {
 
     /// <summary>

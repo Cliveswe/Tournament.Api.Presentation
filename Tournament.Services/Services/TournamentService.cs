@@ -4,7 +4,7 @@ using Service.Contracts;
 using Tournament.Shared.Dto;
 
 namespace Tournament.Services.Services;
-public class TournamentService(IMapper mapper, IUoW uoW) : ITournamentService
+public class TournamentService(IMapper mapper, IUnitOfWork uoW) : ITournamentService
 {
     public async Task<IEnumerable<TournamentDto>> GetTournamentsAsync(bool includeGames, bool trackChanges = false)
     {
