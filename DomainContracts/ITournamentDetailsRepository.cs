@@ -10,7 +10,6 @@
 //        validation and sorting logic for related game entities.
 // -----------------------------------------------------------------------------
 
-
 using Domain.Models.Entities;
 
 namespace Domain.Contracts;
