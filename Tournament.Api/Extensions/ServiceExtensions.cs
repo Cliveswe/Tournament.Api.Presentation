@@ -11,7 +11,9 @@
 
 
 using Domain.Contracts;
+using Service.Contracts;
 using Tournaments.Infrastructure.Repositories;
+using Tournaments.Services.Services;
 
 namespace Tournaments.Api.Extensions;
 
@@ -45,6 +47,14 @@ public static class ServiceExtensions
 
     public static void ConfigureServiceLayerServices(this IServiceCollection services)
     {
+        services.AddScoped<IServiceManager, ServiceManager>();
+        services.AddScoped<ITournamentService, TournamentService>();
+        //services.AddScoped<IGameService, GameService>();
+
+        // Register individual services with lazy loading.
+        services.AddLazy<ITournamentService>();
+        //services.AddLazy<IGameService>();
+        services.AddLazy<IAuthService>();
     }
 
 }// End of Class ServiceExtensions.

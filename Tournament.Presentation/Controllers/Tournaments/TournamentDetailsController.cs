@@ -17,6 +17,7 @@ using Domain.Models.Entities;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Service.Contracts;
 using Tournaments.Shared.Dto;
 
 namespace Tournaments.Presentation.Controllers.Tournaments
@@ -37,7 +38,7 @@ namespace Tournaments.Presentation.Controllers.Tournaments
     /// The <see cref="PatchTournament(int, JsonPatchDocument{TournamentDto})"/> method
     /// supports partial updates on tournament entities using JSON Patch.
     /// </remarks>
-    public class TournamentDetailsController(IMapper mapper, IUnitOfWork uoW) : ControllerBase
+    public class TournamentDetailsController(IServiceManager serviceManager, IMapper mapper, IUnitOfWork uoW) : ControllerBase
     {
         #region GET api/TournamentDetails api/TournamentDetails/5
 
@@ -62,9 +63,11 @@ namespace Tournaments.Presentation.Controllers.Tournaments
         {
             // Validate the query parameter.
             // If includeGames is not a boolean, it will be false by default.
-            IEnumerable<TournamentDto> tournamentDetails = includeGames
-                ? mapper.Map<IEnumerable<TournamentDto>>(await uoW.TournamentDetailsRepository.GetAllAsync(includeGames))
-                : mapper.Map<IEnumerable<TournamentDto>>(await uoW.TournamentDetailsRepository.GetAllAsync());
+            //IEnumerable<TournamentDto> tournamentDetails = includeGames
+            //    ? mapper.Map<IEnumerable<TournamentDto>>(await uoW.TournamentDetailsRepository.GetAllAsync(includeGames))
+            //    : mapper.Map<IEnumerable<TournamentDto>>(await uoW.TournamentDetailsRepository.GetAllAsync());
+
+            var tournamentDetails = await serviceManager.TournamentService.GetTournamentsAsync(includeGames);
 
             // If no tournaments are found, return 404 Not Found
             if(tournamentDetails == null || !tournamentDetails.Any()) {
