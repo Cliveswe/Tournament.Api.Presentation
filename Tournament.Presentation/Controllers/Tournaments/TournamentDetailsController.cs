@@ -67,7 +67,7 @@ namespace Tournaments.Presentation.Controllers.Tournaments
             //    ? mapper.Map<IEnumerable<TournamentDto>>(await uoW.TournamentDetailsRepository.GetAllAsync(includeGames))
             //    : mapper.Map<IEnumerable<TournamentDto>>(await uoW.TournamentDetailsRepository.GetAllAsync());
 
-            var tournamentDetails = await serviceManager.TournamentService.GetTournamentsAsync(includeGames);
+            IEnumerable<TournamentDto> tournamentDetails = await serviceManager.TournamentService.GetTournamentsAsync(includeGames);
 
             // If no tournaments are found, return 404 Not Found
             if(tournamentDetails == null || !tournamentDetails.Any()) {
