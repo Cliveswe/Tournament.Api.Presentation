@@ -49,11 +49,11 @@ public static class ServiceExtensions
     {
         services.AddScoped<IServiceManager, ServiceManager>();
         services.AddScoped<ITournamentService, TournamentService>();
-        //services.AddScoped<IGameService, GameService>();
+        services.AddScoped<IGameService, GameService>();
 
         // Register individual services with lazy loading.
         services.AddLazy<ITournamentService>();
-        //services.AddLazy<IGameService>();
+        services.AddLazy<IGameService>();
         services.AddLazy<IAuthService>();
     }
 
