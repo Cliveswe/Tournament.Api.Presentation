@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
+using Domain.Contracts;
 using Service.Contracts;
-using Tournament.Core.Dto;
-using Tournament.Core.Repositories;
+using Tournament.Shared.Dto;
 
 namespace Tournament.Services.Services;
 public class TournamentService(IMapper mapper, IUoW uoW) : ITournamentService

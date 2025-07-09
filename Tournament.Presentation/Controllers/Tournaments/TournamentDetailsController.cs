@@ -12,12 +12,12 @@
 // -------------------------------------------------------------------------------------
 
 using AutoMapper;
+using Domain.Contracts;
+using Domain.Models.Entities;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Tournament.Core.Dto;
-using Tournament.Core.Entities;
-using Tournament.Core.Repositories;
+using Tournament.Shared.Dto;
 
 namespace Tournament.Presentation.Controllers.Tournaments
 {

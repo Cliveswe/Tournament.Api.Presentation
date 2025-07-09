@@ -1,4 +1,4 @@
-﻿using Tournament.Core.Dto;
+﻿using Tournament.Shared.Dto;
 
 namespace Service.Contracts;
 

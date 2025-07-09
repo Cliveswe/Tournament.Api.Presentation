@@ -13,7 +13,7 @@
 // was enhanced to use Lazy<T> for repository instantiation.
 // -----------------------------------------------------------------------------
 
-namespace Tournament.Core.Repositories;
+namespace Domain.Contracts;
 
 /// <summary>
 /// Represents the Unit of Work pattern interface for coordinating multiple repositories

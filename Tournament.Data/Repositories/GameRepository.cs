@@ -12,9 +12,9 @@
 // ------------------------------------------------------------------------------------------------
 
 
+using Domain.Contracts;
+using Domain.Models.Entities;
 using Microsoft.EntityFrameworkCore;
-using Tournament.Core.Entities;
-using Tournament.Core.Repositories;
 using Tournament.Data.Data;
 
 namespace Tournament.Data.Repositories;

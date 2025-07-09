@@ -11,9 +11,23 @@
 //        The trackChanges parameter allows control over EF Core change tracking.
 // -----------------------------------------------------------------------------
 
-using Tournament.Core.Entities;
 
-namespace Tournament.Core.Repositories;
+// -----------------------------------------------------------------------------
+// File: IGameRepository.cs
+// Summary: Declares the contract for repository operations on Game entities,
+//          including CRUD methods and game-specific queries such as by title,
+//          date, and tournament association. Supports optional tracking of entity
+//          changes via the trackChanges parameter in asynchronous methods.
+// Author: [Clive Leddy]
+// Created: [2025-06-27]
+// Notes: Defines asynchronous signatures for use in dependency injection and
+//        separation of concerns. Implemented by GameRepository using EF Core.
+//        The trackChanges parameter allows control over EF Core change tracking.
+// -----------------------------------------------------------------------------
+
+using Domain.Models.Entities;
+
+namespace Domain.Contracts;
 
 /// <summary>
 /// Defines the contract for repository operations on <see cref="Game"/> entities.

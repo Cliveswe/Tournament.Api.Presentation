@@ -7,7 +7,7 @@
 // Notes: This class models the game entity with a foreign key relationship to TournamentDetails.
 // -----------------------------------------------------------------------------------------------
 
-namespace Tournament.Core.Entities
+namespace Domain.Models.Entities
 {
     /// <summary>
     /// Represents a game entity within a tournament, capturing essential details such as its

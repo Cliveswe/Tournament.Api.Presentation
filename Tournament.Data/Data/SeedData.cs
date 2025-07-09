@@ -1,8 +1,8 @@
 ﻿using Bogus;
+using Domain.Models.Entities;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Tournament.Core.Entities;
 
 namespace Tournament.Data.Data;
 public static class SeedData
@@ -25,7 +25,7 @@ public static class SeedData
                 var tournaments = GenerateTournaments(4);
                 dbContext.AddRange(tournaments);
                 await dbContext.SaveChangesAsync();
-            } catch(Exception ex) {
+            } catch(Exception) {
                 // Log the exception (ex) here if needed
                 throw;
             }
@@ -51,7 +51,7 @@ public static class SeedData
         return faker.Generate(numberOfTournaments);
     }
 
-    private static ICollection<Game> GenerateGames(int numberOfTournaments, DateTime startDate)
+    private static ICollection<Game> GenerateGames(int numberOfGames, DateTime startDate)
     {
         var gamesFaker = new Faker<Game>("sv")
         .Rules((f, g) =>
@@ -60,6 +60,6 @@ public static class SeedData
             g.Time = f.Date.Future(1, startDate);
         });
 
-        return gamesFaker.Generate(numberOfTournaments);
+        return gamesFaker.Generate(numberOfGames);
     }
 }

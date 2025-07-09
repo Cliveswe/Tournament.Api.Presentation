@@ -18,15 +18,15 @@
 // Date         | Author        | Description
 // ----------------------------------------------------------------------------------
 // 2025-06-27   | Clive Leddy   | Initial creation of UoW class with direct repository instantiation.
-// 2025-07-03   | Clive Leddy   | ✅ Refactored to use constructor-injected Lazy<T> dependencies
+// 2025-07-03   | Clive Leddy   | ✅ Re-factored to use constructor-injected Lazy<T> dependencies
 //                              |    for ITournamentDetailsRepository and IGameRepository.
-//                              |    Improved performance and lifecycle control by deferring
+//                              |    Improved performance and life-cycle control by deferring
 //                              |    repository instantiation until first use.
 //                              |    Aligned with DI best practices in ASP.NET Core.
 // -----------------------------------------------------------------------------
 
 
-using Tournament.Core.Repositories;
+using Domain.Contracts;
 using Tournament.Data.Data;
 
 namespace Tournament.Data.Repositories;

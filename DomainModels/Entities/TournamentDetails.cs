@@ -7,7 +7,7 @@
 // Notes: This class models the tournament entity and includes navigation to associated games.
 // --------------------------------------------------------------------------------------------
 
-namespace Tournament.Core.Entities
+namespace Domain.Models.Entities
 {
     /// <summary>
     /// Represents a tournament entity within the domain model, capturing essential information

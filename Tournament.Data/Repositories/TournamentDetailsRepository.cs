@@ -9,9 +9,9 @@
 // Notes: Uses Entity Framework Core for data access. Includes methods for existence checks,
 //        retrieval by ID, and filtering by title and start date.
 // ------------------------------------------------------------------------------------------------
+using Domain.Contracts;
+using Domain.Models.Entities;
 using Microsoft.EntityFrameworkCore;
-using Tournament.Core.Entities;
-using Tournament.Core.Repositories;
 using Tournament.Data.Data;
 
 namespace Tournament.Data.Repositories;
@@ -132,17 +132,13 @@ public class TournamentDetailsRepository(TournamentApiContext context) : Reposit
         }
 
         // Return the list of tournaments, ordered by their title.
-        return tournaments!
-            .OrderBy(t => t.Title)
-            .ToList();
+        return [.. tournaments!.OrderBy(t => t.Title)];
     }
 
     private static void OrderGamesByTitle(List<TournamentDetails> tournaments)
     {
         foreach(var tournament in tournaments) {
-            tournament.Games = tournament.Games
-                .OrderBy(g => g.Title)
-                .ToList();
+            tournament.Games = [.. tournament.Games.OrderBy(g => g.Title)];
         }
     }
 
@@ -183,10 +179,9 @@ public class TournamentDetailsRepository(TournamentApiContext context) : Reposit
 
             // If the tournament is found, order its games by title.
             if((tournament != null) && (tournament.Games?.Any() == true)) {
-                tournament.Games = tournament
+                tournament.Games = [.. tournament
                     .Games
-                    .OrderBy(g => g.Title)
-                    .ToList();
+                    .OrderBy(g => g.Title)];
             }
         } else {
             // If includeGames is false, just load the tournament without games.
@@ -218,7 +213,7 @@ public class TournamentDetailsRepository(TournamentApiContext context) : Reposit
     /// <remarks>This method modifies the existing tournament record in the underlying data store. Ensure that
     /// the provided <paramref name="tournament"/> object contains valid and updated information.</remarks>
     /// <param name="tournament">The tournament details to update. Cannot be null.</param>
-    public void Update(TournamentDetails tournament)
+    public new void Update(TournamentDetails tournament)
     {
         //context.Entry(tournament).State = EntityState.Modified;
         //context.TournamentDetails.Update(tournament);

@@ -12,7 +12,7 @@
 
 using System.ComponentModel.DataAnnotations;
 
-namespace Tournament.Core.Dto
+namespace Tournament.Shared.Dto
 {
     /// <summary>
     /// Data Transfer Object (DTO) designed specifically for updating an existing <see cref="Game"/> entity.

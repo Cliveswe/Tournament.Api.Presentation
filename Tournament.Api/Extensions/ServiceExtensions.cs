@@ -9,7 +9,8 @@
 //        lazy-loaded repositories for improved performance and resource management.
 // -----------------------------------------------------------------------------
 
-using Tournament.Core.Repositories;
+
+using Domain.Contracts;
 using Tournament.Data.Repositories;
 
 namespace Tournament.Api.Extensions;

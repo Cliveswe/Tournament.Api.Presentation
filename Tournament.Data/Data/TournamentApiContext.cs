@@ -11,8 +11,8 @@
 // --------------------------------------------------------------------------------------------------
 
 
+using Domain.Models.Entities;
 using Microsoft.EntityFrameworkCore;
-using Tournament.Core.Entities;
 
 namespace Tournament.Data.Data
 {
@@ -49,6 +49,6 @@ namespace Tournament.Data.Data
         /// <summary>
         /// Gets or sets the <see cref="DbSet{Game}"/> representing game entities.
         /// </summary>
-        public DbSet<Core.Entities.Game> Game { get; set; } = default!;
+        public DbSet<Game> Game { get; set; } = default!;
     }
 }

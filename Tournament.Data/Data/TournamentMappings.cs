@@ -12,8 +12,8 @@
 
 
 using AutoMapper;
-using Tournament.Core.Dto;
-using Tournament.Core.Entities;
+using Domain.Models.Entities;
+using Tournament.Shared.Dto;
 
 namespace Tournament.Data.Data;
 
