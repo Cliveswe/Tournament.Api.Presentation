@@ -121,7 +121,10 @@ namespace Tournaments.Presentation.Controllers.Tournaments
             }
 
             // Attempt to find the entity using the Unit of Work pattern
-            TournamentDetails? tournamentEntity = await uoW.TournamentDetailsRepository.GetAsync(id, includeGames);
+            //TournamentDetails? tournamentEntity = await uoW.TournamentDetailsRepository.GetAsync(id, includeGames);
+            TournamentDetails? tournamentEntity = await serviceManager
+                .TournamentService
+                .GetTournamentByIdAsync(id, includeGames);
 
             // Return 404 Not Found if the entity doesn't exist
             if(tournamentEntity == null) {
