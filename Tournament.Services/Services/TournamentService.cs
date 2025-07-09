@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using Domain.Contracts;
-using Domain.Models.Entities;
 using Service.Contracts;
 using Tournaments.Shared.Dto;
 
@@ -14,9 +13,9 @@ public class TournamentService(IMapper mapper, IUnitOfWork uoW) : ITournamentSer
             .GetAllAsync(includeGames, trackChanges));
     }
 
-    public async Task<TournamentDetails> GetTournamentByIdAsync(int id, bool trackChanges = false)
+    public async Task<TournamentDto> GetTournamentByIdAsync(int id, bool trackChanges = false)
     {
-        return mapper.Map<TournamentDetails>(await uoW
+        return mapper.Map<TournamentDto>(await uoW
             .TournamentDetailsRepository
             .GetAsync(id, trackChanges));
     }

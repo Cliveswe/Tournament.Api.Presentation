@@ -122,17 +122,17 @@ namespace Tournaments.Presentation.Controllers.Tournaments
 
             // Attempt to find the entity using the Unit of Work pattern
             //TournamentDetails? tournamentEntity = await uoW.TournamentDetailsRepository.GetAsync(id, includeGames);
-            TournamentDetails? tournamentEntity = await serviceManager
+            TournamentDto? tournamentDto = await serviceManager
                 .TournamentService
                 .GetTournamentByIdAsync(id, includeGames);
 
             // Return 404 Not Found if the entity doesn't exist
-            if(tournamentEntity == null) {
+            if(tournamentDto == null) {
                 return NotFound($"Tournament with ID {id} was not found.");
             }
 
             //Map to the Dto.
-            TournamentDto tournamentDto = mapper.Map<TournamentDto>(tournamentEntity);
+            //TournamentDto tournamentDto = mapper.Map<TournamentDto>(tournamentEntity);
 
             // Return the found entity with HTTP 200 OK + JSON by default.
             // ASP.NET Core automatically wraps it as Ok(tournamentDetails)
