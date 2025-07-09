@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Tournament.Data.Data;
+namespace Tournaments.Infrastructure.Data;
 public static class SeedData
 {
     public static async Task SeedDataAsync(IApplicationBuilder builder)

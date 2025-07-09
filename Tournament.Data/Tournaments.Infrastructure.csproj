@@ -16,8 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DomainContracts\Domain.Contracts.csproj" />
-    <ProjectReference Include="..\DomainModels\Domain.Models.csproj" />
-    <ProjectReference Include="..\Tournament.Contracts\Service.Contracts.csproj" />
+    <ProjectReference Include="..\Tournament.Shared\Tournaments.Shared.csproj" />
   </ItemGroup>
 
 </Project>

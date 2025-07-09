@@ -12,7 +12,7 @@
 
 using Service.Contracts;
 
-namespace Tournament.Services.Services;
+namespace Tournaments.Services.Services;
 
 /// <summary>
 /// Manages the creation and lifetime of core services used throughout the application,

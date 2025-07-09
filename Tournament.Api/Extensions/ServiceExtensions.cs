@@ -11,9 +11,9 @@
 
 
 using Domain.Contracts;
-using Tournament.Data.Repositories;
+using Tournaments.Infrastructure.Repositories;
 
-namespace Tournament.Api.Extensions;
+namespace Tournaments.Api.Extensions;
 
 #region ServiceExtensions
 /// <summary>

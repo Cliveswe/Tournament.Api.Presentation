@@ -13,9 +13,9 @@
 
 using AutoMapper;
 using Domain.Models.Entities;
-using Tournament.Shared.Dto;
+using Tournaments.Shared.Dto;
 
-namespace Tournament.Data.Data;
+namespace Tournaments.Infrastructure.Data;
 
 /// <summary>
 /// Provides AutoMapper configuration for mapping between domain entities and data transfer objects (DTOs)

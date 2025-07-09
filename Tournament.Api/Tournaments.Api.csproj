@@ -18,9 +18,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Tournament.Data\Tournament.Data.csproj" />
-    <ProjectReference Include="..\Tournament.Presentation\Tournament.Presentation.csproj" />
-    <ProjectReference Include="..\Tournament.Services\Tournament.Services.csproj" />
+    <ProjectReference Include="..\Tournament.Data\Tournaments.Infrastructure.csproj" />
+    <ProjectReference Include="..\Tournament.Presentation\Tournaments.Presentation.csproj" />
+    <ProjectReference Include="..\Tournament.Services\Tournaments.Services.csproj" />
   </ItemGroup>
 
 </Project>

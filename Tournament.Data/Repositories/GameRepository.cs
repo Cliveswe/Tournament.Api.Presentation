@@ -15,9 +15,9 @@
 using Domain.Contracts;
 using Domain.Models.Entities;
 using Microsoft.EntityFrameworkCore;
-using Tournament.Data.Data;
+using Tournaments.Infrastructure.Data;
 
-namespace Tournament.Data.Repositories;
+namespace Tournaments.Infrastructure.Repositories;
 
 /// <summary>
 /// Provides a repository implementation for managing <see cref="Game"/> entities within the data access layer.

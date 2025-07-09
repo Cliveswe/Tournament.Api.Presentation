@@ -1,11 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Tournament.Api.Extensions;
-using Tournament.Data.Data;
+using Tournaments.Api.Extensions;
+using Tournaments.Infrastructure.Data;
 
 
 // Ignore Spelling: Api
 
-namespace Tournament.Api
+namespace Tournaments.Api
 {
     public class Program
     {

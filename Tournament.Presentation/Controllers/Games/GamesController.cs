@@ -18,9 +18,9 @@ using Domain.Models.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
-using Tournament.Shared.Dto;
+using Tournaments.Shared.Dto;
 
-namespace Tournament.Presentation.Controllers.Games
+namespace Tournaments.Presentation.Controllers.Games
 {
     /// <summary>
     /// API controller for managing <see cref="Game"/> entities associated with tournaments.

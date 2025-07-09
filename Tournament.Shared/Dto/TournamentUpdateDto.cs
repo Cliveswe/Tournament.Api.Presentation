@@ -11,7 +11,7 @@
 // -----------------------------------------------------------------------------
 using System.ComponentModel.DataAnnotations;
 
-namespace Tournament.Shared.Dto;
+namespace Tournaments.Shared.Dto;
 
 /// <summary>
 /// Represents a data transfer object (DTO) used to update existing tournament information.

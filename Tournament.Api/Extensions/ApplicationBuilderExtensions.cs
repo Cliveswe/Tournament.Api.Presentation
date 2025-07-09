@@ -1,5 +1,5 @@
-﻿using Tournament.Data.Data;
-namespace Tournament.Api.Extensions;
+﻿using Tournaments.Infrastructure.Data;
+namespace Tournaments.Api.Extensions;
 
 public static class ApplicationBuilderExtensions
 {

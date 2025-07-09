@@ -17,9 +17,9 @@ using Domain.Models.Entities;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Tournament.Shared.Dto;
+using Tournaments.Shared.Dto;
 
-namespace Tournament.Presentation.Controllers.Tournaments
+namespace Tournaments.Presentation.Controllers.Tournaments
 {
 
     [Route("api/tournamentDetails")]

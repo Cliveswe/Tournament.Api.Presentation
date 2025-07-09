@@ -10,9 +10,9 @@
 
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
-using Tournament.Data.Data;
+using Tournaments.Infrastructure.Data;
 
-namespace Tournament.Data.Repositories;
+namespace Tournaments.Infrastructure.Repositories;
 
 /// <summary>
 /// Provides a generic implementation of the <see cref="IRepositoryBase{T}"/> interface

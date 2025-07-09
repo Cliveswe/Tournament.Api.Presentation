@@ -14,7 +14,7 @@
 using Domain.Models.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace Tournament.Data.Data
+namespace Tournaments.Infrastructure.Data
 {
     /// <summary>
     /// Represents the Entity Framework Core database context for the Tournament application,
@@ -29,16 +29,12 @@ namespace Tournament.Data.Data
     /// The context supports EF Core features such as change tracking, migrations, and LINQ queries.
     /// It serves as the primary gateway to the database for the application’s data layer.
     /// </remarks>
-    public class TournamentApiContext : DbContext
+    /// <remarks>
+    /// Initializes a new instance of the <see cref="TournamentApiContext"/> class using the specified options.
+    /// </remarks>
+    /// <param name="options">The options to configure the context, including the database provider and connection string.</param>
+    public class TournamentApiContext(DbContextOptions<TournamentApiContext> options) : DbContext(options)
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TournamentApiContext"/> class using the specified options.
-        /// </summary>
-        /// <param name="options">The options to configure the context, including the database provider and connection string.</param>
-        public TournamentApiContext(DbContextOptions<TournamentApiContext> options)
-            : base(options)
-        {
-        }
 
         /// <summary>
         /// Gets or sets the <see cref="DbSet{TournamentDetails}"/> representing tournament detail entities.

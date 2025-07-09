@@ -12,7 +12,7 @@
 
 using System.ComponentModel.DataAnnotations;
 
-namespace Tournament.Shared.Dto;
+namespace Tournaments.Shared.Dto;
 /// <summary>
 /// Represents a data transfer object (DTO) for encapsulating tournament information,
 /// including its title, start date, computed end date, and a collection of associated games.

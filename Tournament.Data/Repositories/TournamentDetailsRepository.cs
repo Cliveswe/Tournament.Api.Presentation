@@ -12,9 +12,9 @@
 using Domain.Contracts;
 using Domain.Models.Entities;
 using Microsoft.EntityFrameworkCore;
-using Tournament.Data.Data;
+using Tournaments.Infrastructure.Data;
 
-namespace Tournament.Data.Repositories;
+namespace Tournaments.Infrastructure.Repositories;
 /// <summary>
 /// Provides a robust repository implementation for managing <see cref="TournamentDetails"/> entities within the data persistence layer.
 /// </summary>
@@ -178,7 +178,7 @@ public class TournamentDetailsRepository(TournamentApiContext context) : Reposit
                 .FirstOrDefaultAsync();
 
             // If the tournament is found, order its games by title.
-            if((tournament != null) && (tournament.Games?.Any() == true)) {
+            if(tournament != null && tournament.Games?.Any() == true) {
                 tournament.Games = [.. tournament
                     .Games
                     .OrderBy(g => g.Title)];

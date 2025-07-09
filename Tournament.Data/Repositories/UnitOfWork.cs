@@ -27,9 +27,9 @@
 
 
 using Domain.Contracts;
-using Tournament.Data.Data;
+using Tournaments.Infrastructure.Data;
 
-namespace Tournament.Data.Repositories;
+namespace Tournaments.Infrastructure.Repositories;
 /// <summary>
 /// Implements the Unit of Work (UoW) pattern to coordinate operations across multiple repositories
 /// using a shared database context. This version supports lazy loading of repositories to improve performance

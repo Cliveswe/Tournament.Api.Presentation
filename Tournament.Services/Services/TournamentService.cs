@@ -1,9 +1,9 @@
 ﻿using AutoMapper;
 using Domain.Contracts;
 using Service.Contracts;
-using Tournament.Shared.Dto;
+using Tournaments.Shared.Dto;
 
-namespace Tournament.Services.Services;
+namespace Tournaments.Services.Services;
 public class TournamentService(IMapper mapper, IUnitOfWork uoW) : ITournamentService
 {
     public async Task<IEnumerable<TournamentDto>> GetTournamentsAsync(bool includeGames, bool trackChanges = false)

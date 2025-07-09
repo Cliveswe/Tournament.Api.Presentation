@@ -11,7 +11,7 @@
 
 using System.ComponentModel.DataAnnotations;
 
-namespace Tournament.Shared.Dto;
+namespace Tournaments.Shared.Dto;
 
 /// <summary>
 /// Data Transfer Object (DTO) representing the essential details of a game,
