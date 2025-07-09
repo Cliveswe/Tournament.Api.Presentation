@@ -25,7 +25,7 @@ namespace Tournaments.Api.Extensions;
 public static class ServiceExtensions
 {
 
-    /// /// <summary>
+    /// <summary>
     /// Extension method for <see cref="IServiceCollection"/> that registers the Unit of Work
     /// and repository services, including support for lazy loading of repositories.
     /// </summary>
@@ -45,6 +45,17 @@ public static class ServiceExtensions
         services.AddLazy<IGameRepository>();
     }
 
+    /// <summary>
+    /// Extension method for <see cref="IServiceCollection"/> that registers the core service layer dependencies,
+    /// including the <see cref="IServiceManager"/> and individual services such as tournament, game, and authentication services.
+    /// Also enables lazy loading for these services by registering <see cref="Lazy{T}"/> wrappers,
+    /// which defer instantiation until the service is actually needed.
+    /// </summary>
+    /// <param name="services">The <see cref="IServiceCollection"/> to which the services will be added.</param>
+    /// <remarks>
+    /// This configuration centralizes the service layer setup, ensuring that dependent components receive properly scoped instances,
+    /// and improves performance and testability by deferring service instantiation with lazy loading.
+    /// </remarks>
     public static void ConfigureServiceLayerServices(this IServiceCollection services)
     {
         services.AddScoped<IServiceManager, ServiceManager>();
