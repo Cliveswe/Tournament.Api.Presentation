@@ -1,4 +1,6 @@
-﻿using AutoMapper;
+﻿// Ignore Spelling: Dto
+
+using AutoMapper;
 using Domain.Contracts;
 using Domain.Models.Entities;
 using Service.Contracts;
@@ -26,7 +28,24 @@ public class TournamentService(IMapper mapper, IUnitOfWork uoW) : ITournamentSer
     #endregion
 
     #region PUT Tournament details
+    public async Task<bool> Update(int id, TournamentUpdateDto tournamentUpdateDto)
+    {
+        // Attempt to retrieve the tournament details by ID.
+        var tournamentDetails = await uoW.TournamentDetailsRepository.GetAsync(id);
 
+        // If the tournament exists, map the DTO to the entity.
+        if(tournamentDetails != null) {
+
+            // Map the update DTO to the existing tournament details entity.
+            mapper.Map(tournamentUpdateDto, tournamentDetails);
+            // Update the tournament details in the repository.
+            uoW.TournamentDetailsRepository.Update(tournamentDetails);
+            await uoW.CompleteAsync();
+            return true;
+        }
+
+        return false;
+    }
     #endregion
 
     #region POST Tournament details
@@ -46,9 +65,36 @@ public class TournamentService(IMapper mapper, IUnitOfWork uoW) : ITournamentSer
 
     #endregion
 
+    #region DELETE Tournament details
+
+    public async Task<bool> RemoveAsync(int id)
+    {
+        // Attempt to retrieve the tournament details by ID.
+        var tournamentDetails = await uoW.TournamentDetailsRepository.GetAsync(id);
+
+        // If the tournament exists, remove it from the repository.
+        if(tournamentDetails != null) {
+            // Remove the tournament details from the repository
+            uoW.TournamentDetailsRepository.Remove(tournamentDetails);
+            // Persist the change to the database
+            await uoW.CompleteAsync();
+            return true;
+        }
+
+        // If the tournament does not exist, return false.
+        return false;
+    }
+
+    #endregion
+
     public async Task<bool> ExistsAsync(string title, DateTime startDate)
     {
         return await uoW.TournamentDetailsRepository
             .ExistsByTitleAndStartDateAsync(title, startDate);
+    }
+
+    public async Task<bool> ExistsAsync(int id)
+    {
+        return await uoW.TournamentDetailsRepository.AnyAsync(id);
     }
 }

@@ -217,7 +217,7 @@ public class TournamentDetailsRepository(TournamentApiContext context) : Reposit
     {
         //context.Entry(tournament).State = EntityState.Modified;
         //context.TournamentDetails.Update(tournament);
-        Update(tournament);
+        base.Update(tournament);
     }
 
     /// <summary>

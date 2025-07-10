@@ -160,6 +160,8 @@ namespace Tournaments.Presentation.Controllers.Tournaments
 
             #endregion
 
+            //TODO: Consider using a service method to encapsulate the patch logic.
+
             // Retrieve the existing tournament details from the repository using the Unit of Work pattern.
             TournamentDetails? existingTournament = await uoW.TournamentDetailsRepository.GetAsync(tournamentId);
 
@@ -230,6 +232,7 @@ namespace Tournaments.Presentation.Controllers.Tournaments
         public async Task<IActionResult> PutTournamentDetails(int id, [FromBody] TournamentUpdateDto tournamentUpdateDto)
         {
             #region Validation of Input Parameters
+
             // Validate the model state, checks data annotations.
             if(!ModelState.IsValid) {
                 // Return 400 Bad Request with validation errors
@@ -240,27 +243,20 @@ namespace Tournaments.Presentation.Controllers.Tournaments
             if(tournamentUpdateDto == null) {
                 return BadRequest("Update data cannot be null.");
             }
+
             #endregion
 
-            // Retrieve the existing entity by ID
-            TournamentDetails? existingTournamentDetails = await uoW.TournamentDetailsRepository.GetAsync(id);
-
-            // Ensure the route ID matches the payload ID
-            if(existingTournamentDetails == null) {
-                // 400 Bad Request if IDs don't match
+            // If the tournament does not exist.
+            if(!await serviceManager.TournamentService.ExistsAsync(id)) {
+                // Return 404 Not Found with an error message.
                 return NotFound($"Tournament with ID {id} was not found.");
             }
 
-            // Map the update DTO to the existing entity.
-            // This will update only the fields specified in the DTO.
-            mapper.Map(tournamentUpdateDto, existingTournamentDetails);
-
-            // Attempt to save changes to the database
-            // Mark the entity as modified in the Unit of Work pattern
-            uoW.TournamentDetailsRepository.Update(existingTournamentDetails);
-
-            // Persist the changes to the database
-            await uoW.CompleteAsync();
+            // If the update was not successful.
+            if(!await serviceManager.TournamentService.Update(id, tournamentUpdateDto)) {
+                // Return 404 Not Found if the tournament with the specified ID does not exist.
+                return NotFound($"Tournament with ID {id} was not found.");
+            }
 
             // The update was successful; return HTTP 204 No Content as per REST convention
             return NoContent();
@@ -341,40 +337,19 @@ namespace Tournaments.Presentation.Controllers.Tournaments
         /// Returns 404 Not Found if a tournament with the specified ID does not exist.
         /// Returns 500 Internal Server Error if an error occurs during deletion.
         /// </returns>
-
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTournamentDetails(int id)
         {
+            // Validate the ID parameter
             if(id <= 0) {
                 return BadRequest($"Invalid {id} specified for deletion.");
             }
 
-            // Attempt to retrieve the entity by ID
-            TournamentDetails? tournamentDetails = await uoW.TournamentDetailsRepository.GetAsync(id);
-
-            // Alternatively, using direct DbContext access:
-            //var tournamentDetails = await context.TournamentDetails.FindAsync(id);
-
-            // If the entity does not exist, return 404 Not Found
-            if(tournamentDetails == null) {
-                return NotFound("Tournament with the specified ID was not found.");
+            // Attempt to remove the entity from the repository.
+            if(!await serviceManager.TournamentService.RemoveAsync(id)) {
+                // If the removal was not successful, return 404 Not Found
+                return NotFound($"Tournament with ID {id} was not found.");
             }
-
-            try {
-                // Remove the entity from the repository
-                uoW.TournamentDetailsRepository.Remove(tournamentDetails);
-                // Alternatively, using direct DbContext access:
-                //context.TournamentDetails.Remove(tournamentDetails);
-
-                // Persist the change to the database
-                await uoW.CompleteAsync();
-            } catch(DbUpdateException) {
-
-                // Return a generic 500 Internal Server Error
-                return StatusCode(500, "An error occurred while deleting the tournament.");
-            }
-            // Alternatively, using direct DbContext access:
-            //await context.SaveChangesAsync();
 
             // Return 200 OK with a success message
             return Ok(new { message = $"Tournament with ID {id} has been deleted successfully." });
