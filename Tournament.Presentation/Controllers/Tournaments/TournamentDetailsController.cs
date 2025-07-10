@@ -148,7 +148,7 @@ namespace Tournaments.Presentation.Controllers.Tournaments
             #region Validation of Input Parameters
 
             // Validate the model state, checks data annotations.
-            if(patchDocument == null) {
+            if(patchDocument is null) {
                 // If the model state is invalid, return 400 Bad Request with validation errors.
                 return BadRequest("Patch document cannot be null.");
             }
@@ -161,18 +161,28 @@ namespace Tournaments.Presentation.Controllers.Tournaments
 
             #endregion
 
-            // If the tournament does not exist.
-            if(!await serviceManager.TournamentService.ExistsAsync(id)) {
-                // Return 404 Not Found with an error message.
+            // Check if tournament exists
+            var tournamentDto = await serviceManager.TournamentService.GetByIdAsync(id, trackChanges: true);
+            if(tournamentDto is null)
                 return NotFound($"Tournament with ID {id} was not found.");
-            }
 
-            // If the patch operation failed
-            if(!await serviceManager.TournamentService.ApplyToAsync(id, patchDocument)) {
-                // Return 422 unable to process existing entity with the patch document.
-                return UnprocessableEntity(patchDocument);
-            }
-            return Ok();
+            #region PATCH Document Validation
+
+            // Apply the patch to the DTO
+            patchDocument.ApplyTo(tournamentDto, ModelState);
+
+            // Validate patched DTO
+            if(!ModelState.IsValid)
+                return UnprocessableEntity(ModelState);
+
+            #endregion
+
+            // Call service to update entity from patched DTO
+            bool updated = await serviceManager.TournamentService.ApplyToAsync(id, tournamentDto);
+            if(!updated)
+                return StatusCode(500, "An error occurred while updating the tournament.");
+
+            return NoContent();
         }
 
         #endregion

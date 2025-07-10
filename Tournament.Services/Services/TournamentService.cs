@@ -3,7 +3,6 @@
 using AutoMapper;
 using Domain.Contracts;
 using Domain.Models.Entities;
-using Microsoft.AspNetCore.JsonPatch;
 using Service.Contracts;
 using Tournaments.Shared.Dto;
 
@@ -30,30 +29,20 @@ public class TournamentService(IMapper mapper, IUnitOfWork uoW) : ITournamentSer
 
     #region PATCH Tournament details
 
-    public async Task<bool> ApplyToAsync(int id, JsonPatchDocument<TournamentDto> patchDocument)
+    public async Task<bool> ApplyToAsync(int id, TournamentDto tournamentDto)
     {
-
         // Retrieve the existing tournament details.
-        TournamentDto existingTournamentDto = await GetByIdAsync(id, trackChanges: true);
-        if(existingTournamentDto == null) {
+        TournamentDetails? existingEntity = await uoW.TournamentDetailsRepository.GetAsync(id, trackChanges: true);
+        if(existingEntity is null) {
             return false;
         }
 
-        // Apply the patch document to the existing tournament DTO.
-        patchDocument.ApplyTo(existingTournamentDto);
+        // Map the incoming DTO to the existing tournament details.
+        mapper.Map(tournamentDto, existingEntity);
 
-        // Retrieve the existing tournament entity.
-        TournamentDetails? tournamentEntity = uoW
-            .TournamentDetailsRepository
-            .GetAsync(id, trackChanges: true).Result;
-
-        // If the tournament entity does not exist, return false.
-        if(tournamentEntity == null) { return false; }
-
-        // Map the updated DTO back to the tournament entity.
-        _ = mapper.Map(existingTournamentDto, tournamentEntity);
-
-        // Persist the changes to the database using the Unit of Work pattern.
+        // Update the existing tournament details in the repository.
+        uoW.TournamentDetailsRepository.Update(existingEntity);
+        // Persist the changes to the database.
         await uoW.CompleteAsync();
 
         return true;
@@ -62,6 +51,7 @@ public class TournamentService(IMapper mapper, IUnitOfWork uoW) : ITournamentSer
     #endregion
 
     #region PUT Tournament details
+
     public async Task<bool> Update(int id, TournamentUpdateDto tournamentUpdateDto)
     {
         // Attempt to retrieve the tournament details by ID.
@@ -72,14 +62,18 @@ public class TournamentService(IMapper mapper, IUnitOfWork uoW) : ITournamentSer
 
             // Map the update DTO to the existing tournament details entity.
             mapper.Map(tournamentUpdateDto, tournamentDetails);
+
             // Update the tournament details in the repository.
             uoW.TournamentDetailsRepository.Update(tournamentDetails);
+
+            // Persist the changes to the database.
             await uoW.CompleteAsync();
             return true;
         }
 
         return false;
     }
+
     #endregion
 
     #region POST Tournament details
@@ -121,6 +115,8 @@ public class TournamentService(IMapper mapper, IUnitOfWork uoW) : ITournamentSer
 
     #endregion
 
+    #region Exists Tournament details
+
     public async Task<bool> ExistsAsync(string title, DateTime startDate)
     {
         return await uoW.TournamentDetailsRepository
@@ -131,4 +127,6 @@ public class TournamentService(IMapper mapper, IUnitOfWork uoW) : ITournamentSer
     {
         return await uoW.TournamentDetailsRepository.AnyAsync(id);
     }
+
+    #endregion
 }
