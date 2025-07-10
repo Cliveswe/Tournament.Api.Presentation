@@ -209,7 +209,7 @@ namespace Tournaments.Presentation.Controllers.Tournaments
 
         #endregion
 
-        #region PUT api/Games/5
+        #region PUT api/TournamentDetails/5
 
         /// <summary>
         /// Updates an existing tournament's details identified by the specified ID.
@@ -229,6 +229,7 @@ namespace Tournaments.Presentation.Controllers.Tournaments
         [HttpPut("{id}")]
         public async Task<IActionResult> PutTournamentDetails(int id, [FromBody] TournamentUpdateDto tournamentUpdateDto)
         {
+            #region Validation of Input Parameters
             // Validate the model state, checks data annotations.
             if(!ModelState.IsValid) {
                 // Return 400 Bad Request with validation errors
@@ -239,6 +240,7 @@ namespace Tournaments.Presentation.Controllers.Tournaments
             if(tournamentUpdateDto == null) {
                 return BadRequest("Update data cannot be null.");
             }
+            #endregion
 
             // Retrieve the existing entity by ID
             TournamentDetails? existingTournamentDetails = await uoW.TournamentDetailsRepository.GetAsync(id);
@@ -253,24 +255,12 @@ namespace Tournaments.Presentation.Controllers.Tournaments
             // This will update only the fields specified in the DTO.
             mapper.Map(tournamentUpdateDto, existingTournamentDetails);
 
-            try {
-                // Attempt to save changes to the database
-                // Mark the entity as modified in the Unit of Work pattern
-                uoW.TournamentDetailsRepository.Update(existingTournamentDetails);
+            // Attempt to save changes to the database
+            // Mark the entity as modified in the Unit of Work pattern
+            uoW.TournamentDetailsRepository.Update(existingTournamentDetails);
 
-                // Persist the changes to the database
-                await uoW.CompleteAsync();
-            } catch(DbUpdateConcurrencyException) {
-
-                // If the entity no longer exists, return 404 Not Found
-                bool exists = await TournamentDetailsExists(existingTournamentDetails.Id);
-                if(!exists) {
-                    return NotFound($"Tournament with ID {id} was not found. It may have been deleted or does not exist.");
-                } else {
-                    // Otherwise re-throw the exception to bubble up
-                    throw;
-                }
-            }
+            // Persist the changes to the database
+            await uoW.CompleteAsync();
 
             // The update was successful; return HTTP 204 No Content as per REST convention
             return NoContent();
@@ -299,6 +289,8 @@ namespace Tournaments.Presentation.Controllers.Tournaments
         // public async Task<ActionResult<TournamentDetails>> PostTournamentDetails(TournamentDetails tournamentDetails)
         public async Task<ActionResult<TournamentDetails>> PostTournamentDetails(TournamentDetailsCreateDto tournamentDetailsCreateDto)
         {
+            #region Validation of Input Parameters
+
             // Validate the model stat, checks data annotations.
             if(!ModelState.IsValid) {
                 // Return 400 Bad Request with validation errors
@@ -310,33 +302,29 @@ namespace Tournaments.Presentation.Controllers.Tournaments
                 return BadRequest("TournamentDetails cannot be null.");
             }
 
+            #endregion
 
-            // Optional: check for duplicate tournament by Id.
-            bool exists = await TournamentDetailsExists(tournamentDetailsCreateDto.Title,tournamentDetailsCreateDto.StartDate);
+            #region Validate that the tournament does not already exist
+
+            // Check if a tournament with the same title and start date already exists.
+            bool exists = await serviceManager
+                .TournamentService
+                .ExistsAsync(tournamentDetailsCreateDto.Title, tournamentDetailsCreateDto.StartDate);
 
             if(exists) {
                 return Conflict($"A tournament with the same name \"{tournamentDetailsCreateDto.Title}\" and start date already exists.");
             }
 
-            // Map the DTO to the TournamentDetails entity.
-            TournamentDetails tournamentDetails = mapper.Map<TournamentDetails>(tournamentDetailsCreateDto);
+            #endregion
 
-            // Add the new TournamentDetails entity to the repository
-            uoW.TournamentDetailsRepository.Add(tournamentDetails);
-            // Alternatively, using direct DbContext access:
-            //context.TournamentDetails.Add(tournamentDetails);
+            // This returns a tuple containing the ID of the newly created tournament and the mapped DTO.
+            (int id, TournamentDto tournamentDto) = await serviceManager
+                .TournamentService
+                .CreateAsync(tournamentDetailsCreateDto);
 
-            // Persist the changes to the database
-            await uoW.CompleteAsync();
-            // Alternatively, using direct DbContext access:
-            //await context.SaveChangesAsync();
-
-            // Map the created entity back to a DTO for the response
-            // this is useful if you want to return a simplified view of the created resource.
-            var tournamentDto = mapper.Map<TournamentDto>(tournamentDetails);
             // Return 201 Created with the route to access the new resource.
             // This follows REST conventions by providing a location header pointing to the new resource.
-            return CreatedAtAction(nameof(GetTournamentDetails), new { id = tournamentDetails.Id }, tournamentDto);
+            return CreatedAtAction(nameof(GetTournamentDetails), new { id = id }, tournamentDto);
         }
 
         #endregion
@@ -412,20 +400,6 @@ namespace Tournaments.Presentation.Controllers.Tournaments
 
             // Alternatively, using direct DbContext access:
             //return context.TournamentDetails.Any(e => e.Id == id);
-        }
-
-        /// <summary>
-        /// Checks asynchronously whether a <see cref="TournamentDetails"/> entity exists with the specified title and start date.
-        /// </summary>
-        /// <param name="title">The title of the tournament to check.</param>
-        /// <param name="startDate">The start date of the tournament to check.</param>
-        /// <returns>
-        /// Returns <c>true</c> if a tournament with the given title and start date exists; otherwise, <c>false</c>.
-        /// </returns>
-        private async Task<bool> TournamentDetailsExists(string title, DateTime startDate)
-        {
-            return await uoW.TournamentDetailsRepository
-                .ExistsByTitleAndStartDateAsync(title, startDate);
         }
 
         #endregion
