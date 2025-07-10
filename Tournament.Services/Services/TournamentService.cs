@@ -6,7 +6,7 @@ using Tournaments.Shared.Dto;
 namespace Tournaments.Services.Services;
 public class TournamentService(IMapper mapper, IUnitOfWork uoW) : ITournamentService
 {
-    #region Get
+    #region Get Tournament details
 
     public async Task<IEnumerable<TournamentDto>> GetAllAsync(bool includeGames, bool trackChanges = false)
     {
@@ -21,6 +21,10 @@ public class TournamentService(IMapper mapper, IUnitOfWork uoW) : ITournamentSer
             .TournamentDetailsRepository
             .GetAsync(id, trackChanges));
     }
+
+    #endregion
+
+    #region PUT Tournament details
 
     #endregion
 

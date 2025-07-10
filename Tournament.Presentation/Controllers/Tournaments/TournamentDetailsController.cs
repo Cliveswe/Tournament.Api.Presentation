@@ -40,7 +40,7 @@ namespace Tournaments.Presentation.Controllers.Tournaments
     /// </remarks>
     public class TournamentDetailsController(IServiceManager serviceManager, IMapper mapper, IUnitOfWork uoW) : ControllerBase
     {
-        #region GET api/TournamentDetails api/TournamentDetails/5
+        #region GET api/TournamentDetails/5
 
         /// <summary>
         /// Retrieves a list of all tournaments.
@@ -61,12 +61,7 @@ namespace Tournaments.Presentation.Controllers.Tournaments
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TournamentDto>>> GetTournamentDetails([FromQuery] bool includeGames)
         {
-            // Validate the query parameter.
-            // If includeGames is not a boolean, it will be false by default.
-            //IEnumerable<TournamentDto> tournamentDetails = includeGames
-            //    ? mapper.Map<IEnumerable<TournamentDto>>(await uoW.TournamentDetailsRepository.GetAllAsync(includeGames))
-            //    : mapper.Map<IEnumerable<TournamentDto>>(await uoW.TournamentDetailsRepository.GetAllAsync());
-
+            // Fetch all tournaments using the service manager
             IEnumerable<TournamentDto> tournamentDetails = await serviceManager.TournamentService.GetAllAsync(includeGames);
 
             // If no tournaments are found, return 404 Not Found
@@ -103,8 +98,7 @@ namespace Tournaments.Presentation.Controllers.Tournaments
                 return BadRequest($"Invalid tournament ID {id} specified.");
             }
 
-            // Attempt to find the entity using the Unit of Work pattern
-            //TournamentDetails? tournamentEntity = await uoW.TournamentDetailsRepository.GetAsync(id, includeGames);
+            // Retrieve the tournament details by ID using the service manager
             TournamentDto? tournamentDto = await serviceManager
                 .TournamentService
                 .GetByIdAsync(id, includeGames);
@@ -113,9 +107,6 @@ namespace Tournaments.Presentation.Controllers.Tournaments
             if(tournamentDto == null) {
                 return NotFound($"Tournament with ID {id} was not found.");
             }
-
-            //Map to the Dto.
-            //TournamentDto tournamentDto = mapper.Map<TournamentDto>(tournamentEntity);
 
             // Return the found entity with HTTP 200 OK + JSON by default.
             // ASP.NET Core automatically wraps it as Ok(tournamentDetails)
