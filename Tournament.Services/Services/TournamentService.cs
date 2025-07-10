@@ -3,6 +3,7 @@
 using AutoMapper;
 using Domain.Contracts;
 using Domain.Models.Entities;
+using Microsoft.AspNetCore.JsonPatch;
 using Service.Contracts;
 using Tournaments.Shared.Dto;
 
@@ -23,6 +24,39 @@ public class TournamentService(IMapper mapper, IUnitOfWork uoW) : ITournamentSer
         return mapper.Map<TournamentDto>(await uoW
             .TournamentDetailsRepository
             .GetAsync(id, trackChanges));
+    }
+
+    #endregion
+
+    #region PATCH Tournament details
+
+    public async Task<bool> ApplyToAsync(int id, JsonPatchDocument<TournamentDto> patchDocument)
+    {
+
+        // Retrieve the existing tournament details.
+        TournamentDto existingTournamentDto = await GetByIdAsync(id, trackChanges: true);
+        if(existingTournamentDto == null) {
+            return false;
+        }
+
+        // Apply the patch document to the existing tournament DTO.
+        patchDocument.ApplyTo(existingTournamentDto);
+
+        // Retrieve the existing tournament entity.
+        TournamentDetails? tournamentEntity = uoW
+            .TournamentDetailsRepository
+            .GetAsync(id, trackChanges: true).Result;
+
+        // If the tournament entity does not exist, return false.
+        if(tournamentEntity == null) { return false; }
+
+        // Map the updated DTO back to the tournament entity.
+        _ = mapper.Map(existingTournamentDto, tournamentEntity);
+
+        // Persist the changes to the database using the Unit of Work pattern.
+        await uoW.CompleteAsync();
+
+        return true;
     }
 
     #endregion

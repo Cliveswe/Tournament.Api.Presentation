@@ -118,9 +118,9 @@ namespace Tournaments.Presentation.Controllers.Tournaments
         #region PATCH api/TournamentDetails/5
 
         /// <summary>
-        /// Partially updates an existing tournament identified by <paramref name="tournamentId"/> using a JSON Patch document.
+        /// Partially updates an existing tournament identified by <paramref name="id"/> using a JSON Patch document.
         /// </summary>
-        /// <param name="tournamentId">The ID of the tournament to be patched. Must be greater than zero.</param>
+        /// <param name="id">The ID of the tournament to be patched. Must be greater than zero.</param>
         /// <param name="patchDocument">A <see cref="JsonPatchDocument{TournamentDto}"/> representing the JSON Patch operations to apply to the tournament DTO.</param>
         /// <returns>
         /// Returns an <see cref="ActionResult{TournamentDto}"/> containing the updated tournament data if the patch succeeds.
@@ -142,10 +142,11 @@ namespace Tournaments.Presentation.Controllers.Tournaments
         /// </list>
         /// </remarks>
         /// <exception cref="DbUpdateConcurrencyException">Thrown if a concurrency conflict occurs during update and the tournament still exists.</exception>
-        [HttpPatch("{tournamentId}")]
-        public async Task<ActionResult<TournamentDto>> PatchTournament(int tournamentId, JsonPatchDocument<TournamentDto> patchDocument)
+        [HttpPatch("{id}")]
+        public async Task<ActionResult<TournamentDto>> PatchTournament(int id, JsonPatchDocument<TournamentDto> patchDocument)
         {
             #region Validation of Input Parameters
+
             // Validate the model state, checks data annotations.
             if(patchDocument == null) {
                 // If the model state is invalid, return 400 Bad Request with validation errors.
@@ -153,60 +154,25 @@ namespace Tournaments.Presentation.Controllers.Tournaments
             }
 
             // Check if the tournament ID is valid.
-            if(tournamentId <= 0) {
+            if(id <= 0) {
                 // If the tournament ID is invalid, return 400 Bad Request with an error message.
-                return BadRequest($"Invalid tournament ID {tournamentId} specified for patching.");
+                return BadRequest($"Invalid tournament ID {id} specified for patching.");
             }
 
             #endregion
 
-            //TODO: Consider using a service method to encapsulate the patch logic.
-
-            // Retrieve the existing tournament details from the repository using the Unit of Work pattern.
-            TournamentDetails? existingTournament = await uoW.TournamentDetailsRepository.GetAsync(tournamentId);
-
-            // Check if the tournament exists.
-            if(existingTournament == null) {
-                // If the tournament does not exist, return 404 Not Found with an error message.
-                return NotFound($"Tournament with ID {tournamentId} was not found.");
+            // If the tournament does not exist.
+            if(!await serviceManager.TournamentService.ExistsAsync(id)) {
+                // Return 404 Not Found with an error message.
+                return NotFound($"Tournament with ID {id} was not found.");
             }
 
-            // Map the existing tournament entity to a DTO for patching.
-            TournamentDto tournamentDto = mapper.Map<TournamentDto>(existingTournament);
-            // Apply the patch document to the DTO, updating its properties.
-            patchDocument.ApplyTo(tournamentDto, ModelState);
-            // Validate the patched DTO against the model state.
-            TryValidateModel(tournamentDto);
-
-            // Validate the patched model state after applying the patch document.
-            if(!ModelState.IsValid) {
-                // If the model state is invalid after patching, return 400 Bad Request with validation errors.
-                return BadRequest(ModelState);
+            // If the patch operation failed
+            if(!await serviceManager.TournamentService.ApplyToAsync(id, patchDocument)) {
+                // Return 422 unable to process existing entity with the patch document.
+                return UnprocessableEntity(patchDocument);
             }
-
-            // Attempt to update the game in the repository
-            try {
-                // Map the patched DTO back to the existing tournament entity.
-                _ = mapper.Map(tournamentDto, existingTournament);// This updates only the fields specified in the DTO.
-                // Attempt to update the existing tournament entity in the repository.
-                uoW.TournamentDetailsRepository.Update(existingTournament);
-                // Persist the changes to the database using the Unit of Work pattern.
-                await uoW.CompleteAsync();
-            } catch(DbUpdateConcurrencyException) {
-                // Check if the tournament still exists after the concurrency exception.
-                bool exists = await TournamentDetailsExists(existingTournament.Id);
-                if(!exists) {
-                    // If the tournament no longer exists, return 404 Not Found with an error message.
-                    return NotFound($"Tournament with ID {tournamentId} was not found. It may have been deleted or does not exist.");
-                } else {
-                    throw;
-                }
-            }
-
-            // Return the updated tournament details with HTTP 200 OK.
-            // The mapper converts the updated entity back to a DTO for the response.
-            // This ensures a clean API boundary by returning only the necessary data.
-            return Ok(mapper.Map<TournamentDto>(existingTournament));
+            return Ok();
         }
 
         #endregion
