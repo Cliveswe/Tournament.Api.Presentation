@@ -11,8 +11,6 @@
 //        including partial updates via JSON Patch.
 // -------------------------------------------------------------------------------------
 
-using AutoMapper;
-using Domain.Contracts;
 using Domain.Models.Entities;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
@@ -38,7 +36,7 @@ namespace Tournaments.Presentation.Controllers.Tournaments
     /// The <see cref="PatchTournament(int, JsonPatchDocument{TournamentDto})"/> method
     /// supports partial updates on tournament entities using JSON Patch.
     /// </remarks>
-    public class TournamentDetailsController(IServiceManager serviceManager, IMapper mapper, IUnitOfWork uoW) : ControllerBase
+    public class TournamentDetailsController(IServiceManager serviceManager) : ControllerBase
     {
         #region GET api/TournamentDetails/5
 
@@ -334,25 +332,5 @@ namespace Tournaments.Presentation.Controllers.Tournaments
 
         #endregion
 
-        #region private methods
-
-        /// <summary>
-        /// Checks asynchronously whether a <see cref="TournamentDetails"/> entity exists with the specified ID.
-        /// </summary>
-        /// <param name="id">The unique identifier of the tournament to check for existence.</param>
-        /// <returns>
-        /// Returns <c>true</c> if a tournament with the given ID exists; otherwise, <c>false</c>.
-        /// </returns>
-        private async Task<bool> TournamentDetailsExists(int id)
-        {
-            // Check for existence using the Game ID
-            // Returns true if a Game with the same ID exists, otherwise false
-            return await uoW.TournamentDetailsRepository.AnyAsync(id);
-
-            // Alternatively, using direct DbContext access:
-            //return context.TournamentDetails.Any(e => e.Id == id);
-        }
-
-        #endregion
     }
 }
