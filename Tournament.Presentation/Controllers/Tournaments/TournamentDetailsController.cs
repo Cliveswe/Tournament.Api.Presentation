@@ -67,7 +67,7 @@ namespace Tournaments.Presentation.Controllers.Tournaments
             //    ? mapper.Map<IEnumerable<TournamentDto>>(await uoW.TournamentDetailsRepository.GetAllAsync(includeGames))
             //    : mapper.Map<IEnumerable<TournamentDto>>(await uoW.TournamentDetailsRepository.GetAllAsync());
 
-            IEnumerable<TournamentDto> tournamentDetails = await serviceManager.TournamentService.GetTournamentsAsync(includeGames);
+            IEnumerable<TournamentDto> tournamentDetails = await serviceManager.TournamentService.GetAllAsync(includeGames);
 
             // If no tournaments are found, return 404 Not Found
             if(tournamentDetails == null || !tournamentDetails.Any()) {
@@ -77,23 +77,6 @@ namespace Tournaments.Presentation.Controllers.Tournaments
             // Return the results with HTTP 200 OK
             return Ok(tournamentDetails);
         }
-
-        #region old code
-        // GET: api/TournamentDetails
-        // This method retrieves all TournamentDetails records from the database.
-        // It returns a 200 OK response with the collection of entities.
-        // Data access is done via the Unit of Work abstraction (uoW).
-        //public async Task<ActionResult<IEnumerable<TournamentDetails>>> GetTournamentDetails()
-        //{
-        //    // Retrieve all TournamentDetails records via the repository
-        //    IEnumerable<TournamentDetails> tournamentDetails = await uoW.TournamentDetailsRepository.GetAllAsync();
-        //    // Alternatively, you could use eager loading for related entities:
-        //    // return await context.TournamentDetails.Include(g => g.Games).ToListAsync();
-
-        //    // Return the results with HTTP 200 OK
-        //    return Ok(tournamentDetails);
-        //}
-        #endregion
 
         /// <summary>
         /// Retrieves the details of a specific tournament by its unique identifier.
@@ -124,7 +107,7 @@ namespace Tournaments.Presentation.Controllers.Tournaments
             //TournamentDetails? tournamentEntity = await uoW.TournamentDetailsRepository.GetAsync(id, includeGames);
             TournamentDto? tournamentDto = await serviceManager
                 .TournamentService
-                .GetTournamentByIdAsync(id, includeGames);
+                .GetByIdAsync(id, includeGames);
 
             // Return 404 Not Found if the entity doesn't exist
             if(tournamentDto == null) {
