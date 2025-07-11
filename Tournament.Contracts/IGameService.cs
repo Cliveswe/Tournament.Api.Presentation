@@ -6,5 +6,7 @@ public interface IGameService
 {
     Task<IEnumerable<GameDto>> GetAllAsync(int tournamentId);
     Task<GameDto> GetAsync(int tournamentId, int id);
+
+    Task<GameDto> GetAsync(int tournamentId, string title);
     Task<bool> ExistsAsync(int id);
 }

@@ -181,23 +181,18 @@ namespace Tournaments.Presentation.Controllers.Games
             }
             #endregion
 
-            // Check if the tournamentEntity exists.
-            // This check ensures that the game being retrieved is associated with the correct tournamentEntity.
-            Game? gameEntity = await uoW.GameRepository.GetByTitleAndTournamentIdAsync(trimmedTitle, tournamentId);
+            // The GameService.GetAsync method internally verifies the tournament exists.
+            GameDto gameDto = await serviceManager.GameService.GetAsync(tournamentId, trimmedTitle);
 
-            // If no game with the specified title exists in the tournamentEntity, return 404 Not Found.
-            // This ensures that the API does not return a game from a different tournamentEntity with the same title.
-            if(gameEntity == null) {
-                return NotFound($"Game with title '{trimmedTitle}' was not found.");
+            // If the gameDto is null, it means no game with the specified title exists in the tournamentEntity.
+            if(gameDto == null) {
+                // Return 404 Not Found.
+                return NotFound($"Game with title '{trimmedTitle}' was not found in Tournament with ID {tournamentId}.");
             }
-
-            // Map the Game entity to a GameDto using AutoMapper.
-            GameDto gameDto = mapper.Map<GameDto>(gameEntity);
-
             // Return the GameDto with HTTP 200 OK.
             return Ok(gameDto);
-        }
 
+        }
 
         #endregion
 
