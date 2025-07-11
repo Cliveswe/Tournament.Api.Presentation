@@ -8,5 +8,6 @@ public interface IGameService
     Task<GameDto> GetAsync(int tournamentId, int id);
 
     Task<GameDto> GetAsync(int tournamentId, string title);
+    Task<bool> RemoveAsync(int tournamentId, int id);
     Task<bool> ExistsAsync(int id);
 }

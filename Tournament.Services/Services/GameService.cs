@@ -40,9 +40,21 @@ public class GameService(IMapper mapper, IUnitOfWork uoW) : IGameService
         return mapper.Map<GameDto>(game);
     }
 
+    public async Task<bool> RemoveAsync(int tournamentId, int id)
+    {
+        Game? game = await uoW.GameRepository.GetByIdAsync(id);
+
+        // Check if the game exists and is part of the specified tournament.
+        if(game!.TournamentDetailsId != tournamentId) {
+            return false;
+        }
+
+        uoW.GameRepository.Remove(game);
+        await uoW.CompleteAsync();
+        return true;
+    }
     public async Task<bool> ExistsAsync(int id)
     {
         return await uoW.GameRepository.AnyAsync(id);
     }
-
 }

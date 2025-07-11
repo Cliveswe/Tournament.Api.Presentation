@@ -166,7 +166,7 @@ namespace Tournaments.Presentation.Controllers.Games
         [HttpGet("byTitle/{title}")]
         public async Task<ActionResult<GameDto>> GetGameByTitle(int tournamentId, string title)
         {
-            #region VAlidation of input parameters
+            #region Validation of input parameters
             // Validate the title input.
             if(string.IsNullOrWhiteSpace(title)) {
                 return BadRequest("Title must be a non-empty string.");
@@ -432,52 +432,43 @@ namespace Tournaments.Presentation.Controllers.Games
 
         #region DELETE api/tournamentDetails/1/Games/5
 
-
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> DeleteGame(int id, int tournamentId)
         {
             #region Validation of Input Parameters
+
             // Validate the ID to ensure it is a positive integer.
             // If the ID is less than or equal to zero, return 400 Bad Request.
-            if(tournamentId <= 0) {
-                return BadRequest($"Invalid tournamentEntity Id.");
+            if(tournamentId <= 0 || id <= 0) {
+                return BadRequest("Invalid tournamentEntity id or game id.");
             }
 
-            if(id <= 0) {
-                return BadRequest($"Invalid game Id.");
-            }
             #endregion
 
             #region Validation of Tournament and Game existence.
-            // Attempt to retrieve the TournamentDetails entity by ID from the repository
-            TournamentDetails? tournamentEntity= await uoW.TournamentDetailsRepository.GetAsync(tournamentId);
 
-            if(tournamentEntity == null) {
+            // If the tournamentEntity does not exist.
+            if(!await serviceManager.TournamentService.ExistsAsync(tournamentId)) {
+                // Return 404 Not Found
                 return NotFound("Tournament with the specified ID was not found.");
             }
 
-            // Attempt to retrieve the Game entity by ID from the repository
-            Game? gameEntity = await uoW.GameRepository.GetByIdAsync(id);
-
-            // If the entity does not exist, return 404 Not Found
-            if(gameEntity == null) {
-                return NotFound($"Game with the specified Id {id} was not found.");
-            }
-
-            //Make sure that the game does belong to the specified tournamentEntity.
-            if(gameEntity.TournamentDetailsId != tournamentId) {
-                return NotFound("Game with the specified ID does not belong to the specified tournamentEntity.");
+            // If the game does not exist. 
+            if(!await serviceManager.GameService.ExistsAsync(id)) {
+                // Return 404 Not Found
+                return NotFound($"Game with ID {id} was not found.");
             }
 
             #endregion
 
-            // Remove the Game entity from the repository
-            uoW.GameRepository.Remove(gameEntity);
-            // Persist the change to the database
-            await uoW.CompleteAsync();
+            // If the game does not exist or does not belong to the specified tournamentEntity.
+            if(!await serviceManager.GameService.RemoveAsync(tournamentId, id)) {
+                // Return 404 Not Found
+                return NotFound($"Game with ID {id} in Tournament {tournamentId} was not found.");
+            }
 
             // Return 200 OK with a confirmation message
-            return Ok(new { message = $"Game with ID {id} has bee deleted successfully." });
+            return Ok($"Game with ID {id} has bee deleted successfully.");
         }
 
         #endregion
