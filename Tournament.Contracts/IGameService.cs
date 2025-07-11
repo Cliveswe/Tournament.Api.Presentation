@@ -5,9 +5,9 @@ namespace Service.Contracts;
 public interface IGameService
 {
     Task<IEnumerable<GameDto>> GetAllAsync(int tournamentId);
-    Task<GameDto> GetAsync(int tournamentId, int id);
-
+    Task<GameDto?> GetAsync(int tournamentId, int id);
     Task<GameDto> GetAsync(int tournamentId, string title);
+    Task<(bool isSuccess, bool isDuplicate, GameDto? gameDto)> AddAsync(GameCreateDto gameCreateDto, int tournamentId);
     Task<bool> RemoveAsync(int tournamentId, int id);
     Task<bool> ExistsAsync(int id);
 }
