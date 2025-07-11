@@ -476,25 +476,6 @@ namespace Tournaments.Presentation.Controllers.Games
         #region Private Methods
 
         /// <summary>
-        /// Checks whether a <see cref="Game"/> entity with the specified ID exists in the database.
-        /// </summary>
-        /// <param name="game">The <see cref="Game"/> entity whose ID is used to check for existence.</param>
-        /// <returns>
-        /// A <see cref="Task{Boolean}"/> representing the asynchronous operation, 
-        /// with a result of <c>true</c> if a game with the given ID exists; otherwise, <c>false</c>.
-        /// </returns>
-        /// <remarks>
-        /// This method is typically used before performing update or delete operations to avoid conflicts 
-        /// or exceptions when the entity no longer exists.
-        /// </remarks>
-        private async Task<bool> GameExists(Game game)
-        {
-            // Check for existence using the Game ID
-            // Returns true if a Game with the same ID exists, otherwise false
-            return await uoW.GameRepository.AnyAsync(game.Id);
-        }
-
-        /// <summary>
         /// Validates whether the specified game time falls within the start and end dates of the tournamentEntity.
         /// </summary>
         /// <param name="gameTime">The time of the game to validate.</param>
