@@ -170,8 +170,9 @@ namespace Tournaments.Presentation.Controllers.Tournaments
             patchDocument.ApplyTo(tournamentDto, ModelState);
 
             // Validate patched DTO
-            if(!ModelState.IsValid)
+            if(!ModelState.IsValid) {
                 return UnprocessableEntity(ModelState);
+            }
 
             #endregion
 

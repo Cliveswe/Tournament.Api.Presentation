@@ -4,11 +4,14 @@ using AutoMapper;
 using Domain.Contracts;
 using Domain.Models.Entities;
 using Service.Contracts;
+using Service.Contracts.Enums;
 using Tournaments.Shared.Dto;
 
 namespace Tournaments.Services.Services;
 public class GameService(IMapper mapper, IUnitOfWork uoW) : IGameService
 {
+
+
     public async Task<IEnumerable<GameDto>> GetAllAsync(int tournamentId)
     {
         // Retrieve all games associated with the specified tournament ID.
@@ -89,5 +92,57 @@ public class GameService(IMapper mapper, IUnitOfWork uoW) : IGameService
         }
 
         return (true, false, mapper.Map<GameDto>(gameEntity));
+    }
+
+    public async Task<UpdateGameResult> UpdateAsync(int tournamentId, string title, GameUpdateDto gameUpdateDto)
+    {
+        // Retrieve the game by title and tournament ID.
+        Game? gameEntity = await uoW.GameRepository.GetByTitleAndTournamentIdAsync(title, tournamentId);
+
+        // If the game does not exist, return null.
+        if(gameEntity == null) {
+            return UpdateGameResult.NotFound;
+        }
+        // Map the updated properties from the DTO to the existing game entity.
+        mapper.Map(gameUpdateDto, gameEntity);
+
+        // Update the game in the repository.
+        uoW.GameRepository.Update(gameEntity);
+        int success = await uoW.CompleteAsync();
+
+        if(success == 0) {
+            // If no changes were made, return NotModified.
+            return UpdateGameResult.NotModified;
+        }
+        // Return the updated game as a GameDto.
+        return UpdateGameResult.Success;
+    }
+
+    public async Task<ApplyPatchResult> ApplyToAsync(int tournamentId, int id, GameDto gameDto, TournamentDto tournamentDto)
+    {
+
+        if(gameDto.StartDate < tournamentDto.StartDate || gameDto.StartDate > tournamentDto.EndDate) {
+            return ApplyPatchResult.InvalidDateRange;
+        }
+
+        // Fetch the existing game by ID.
+        Game? gameEntity = await uoW.GameRepository.GetByIdAsync(id);
+        if(gameEntity is null) {
+            return ApplyPatchResult.GameNotFound;
+        }
+
+        // Map gameEntity to a GameDto.
+        mapper.Map(gameDto, gameEntity);
+
+        // Update the existing game details in the repository.
+        uoW.GameRepository.Update(gameEntity);
+
+        // Persist the changes to the database.
+        int result = await uoW.CompleteAsync();
+        if(result == 0) {
+            return ApplyPatchResult.NoChanges;
+        }
+
+        return ApplyPatchResult.Success;
     }
 }
