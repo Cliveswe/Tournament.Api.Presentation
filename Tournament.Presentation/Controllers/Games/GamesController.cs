@@ -18,6 +18,7 @@ using Domain.Models.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using Service.Contracts;
 using Tournaments.Shared.Dto;
 
 namespace Tournaments.Presentation.Controllers.Games
@@ -41,7 +42,7 @@ namespace Tournaments.Presentation.Controllers.Games
     /// </remarks>
     [ApiController]
     [Route("api/tournamentDetails/{tournamentId}/games")]
-    public class GamesController(IMapper mapper, IUnitOfWork uoW) : ControllerBase
+    public class GamesController(IServiceManager serviceManager, IMapper mapper, IUnitOfWork uoW) : ControllerBase
     {
         #region GET api/Games api/1/Games/
 
@@ -59,30 +60,35 @@ namespace Tournaments.Presentation.Controllers.Games
         /// not "api/..." there is a difference.
         // GET api/tournamentDetails/{tournamentId}/
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<GameDto>>> GetTournamentGame(int tournamentId)
+        public async Task<ActionResult<IEnumerable<GameDto>>> GetTournamentGames(int tournamentId)
         {
 
             #region Validation of input parameters
+
             // Validate the tournamentEntity ID from the route parameter
             if(tournamentId <= 0) {
                 // If the tournamentEntity ID is invalid (less than or equal to zero), return 400 Bad Request.
                 // This ensures that the client must provide a valid tournamentEntity ID to retrieve games.
                 return BadRequest($"Invalid tournamentEntity ID {tournamentId}.");
             }
-            #endregion
 
-            // Validate the tournamentEntity ID from the route parameter
-            bool exists = await uoW.TournamentDetailsRepository.AnyAsync(tournamentId);
+            // Check if the tournamentEntity with the specified ID exists
+            bool exists = await serviceManager.TournamentService.ExistsAsync(tournamentId);
+
             // If the tournamentEntity with the specified ID does not exist, return 404 Not Found
             if(!exists) {
                 return NotFound($"Tournament with ID {tournamentId} does not exist.");
             }
 
-            // Retrieve all games associated with the specified tournamentEntity ID.
-            IEnumerable<Game?> gamesResult = await uoW.GameRepository.GetByTournamentIdAsync(tournamentId);
+            #endregion
 
-            // Map the Game entities to GameDto using AutoMapper.
-            IEnumerable<GameDto> games = mapper.Map<IEnumerable<GameDto>>(gamesResult);
+            // Retrieve all games associated with the specified tournamentEntity ID.
+            IEnumerable<GameDto> games = await serviceManager.GameService.GetAllAsync(tournamentId);
+
+            if(!games.Any()) {
+                // If no games are found, return 404 Not Found with a message
+                return NotFound($"No games found for tournamentEntity with ID {tournamentId}.");
+            }
 
             // Return the result with HTTP 200 OK
             return Ok(games);
@@ -113,30 +119,30 @@ namespace Tournaments.Presentation.Controllers.Games
         public async Task<ActionResult<GameDto>> GetGameById(int tournamentId, int id)
         {
             #region Validation of Input parameters
+
             // Validate the tournamentEntity ID and game ID
             if(id <= 0 || tournamentId <= 0) {
                 return BadRequest("Invalid tournamentEntity id or game id.");
             }
+
             #endregion
 
-            #region Validation of Tournament existence
-            // Check if the tournamentEntity exists
-            var gameEntity = await uoW.GameRepository.GetByIdAsync(id);
+            #region Validation of Tournament existence, return 404 Not Found
 
-            // If the game does not exist, return 404 Not Found
-            if(gameEntity == null) {
-                return NotFound($"Game with ID {id} was not found.");
+            // Check if the tournamentEntity exists.
+            if(!await serviceManager.TournamentService.ExistsAsync(tournamentId)) {
+                return NotFound($"Tournament with ID {tournamentId} does not exist.");
             }
 
-            // Ensure the game belongs to the specified tournamentEntity.
-            // This check ensures that the game being retrieved is associated with the correct tournamentEntity.
-            if(gameEntity.TournamentDetailsId != tournamentId) {
-                return NotFound($"Game with ID {id} does not belong to the specified tournamentEntity.");
-            }
             #endregion 
 
             // Map the Game entity to a GameDto using AutoMapper
-            var gameDto = mapper.Map<GameDto>(gameEntity);
+            var gameDto = await serviceManager.GameService.GetAsync(tournamentId, id);
+
+            // If the gameDto is null, it means the game was not found in the specified tournamentEntity
+            if(gameDto == null) {
+                return NotFound($"Game with ID {id} was not found in Tournament with ID {tournamentId}.");
+            }
 
             // Return the GameDto with HTTP 200 OK
             return Ok(gameDto);

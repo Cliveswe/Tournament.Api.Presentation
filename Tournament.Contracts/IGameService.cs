@@ -1,5 +1,10 @@
-﻿namespace Service.Contracts;
+﻿using Tournaments.Shared.Dto;
+
+namespace Service.Contracts;
 
 public interface IGameService
 {
+    Task<IEnumerable<GameDto>> GetAllAsync(int tournamentId);
+    Task<GameDto> GetAsync(int tournamentId, int id);
+    Task<bool> ExistsAsync(int id);
 }
