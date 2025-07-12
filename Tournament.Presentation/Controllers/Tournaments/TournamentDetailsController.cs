@@ -12,10 +12,12 @@
 // -------------------------------------------------------------------------------------
 
 using Domain.Models.Entities;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Service.Contracts;
+using System.Text.Json;
 using Tournaments.Shared.Dto;
 using Tournaments.Shared.Request;
 
@@ -58,16 +60,19 @@ namespace Tournaments.Presentation.Controllers.Tournaments
         /// If no tournaments exist, it returns a 404 Not Found with an appropriate message.
         /// </remarks>>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<TournamentDto>>> GetTournamentDetails([FromQuery] TournamentRequestParameters requestParameters, [FromQuery] bool includeGames)
+        public async Task<ActionResult<IEnumerable<TournamentDto>>> GetTournamentDetails([FromQuery] TournamentRequestParameters requestParameters)
         {
             // Fetch all tournaments using the service manager
-            IEnumerable<TournamentDto> tournamentDetails = await serviceManager.TournamentService.GetAllAsync(requestParameters, includeGames);
+            (IEnumerable<TournamentDto> tournamentDetails, MetaData metaData) = await serviceManager
+                .TournamentService
+                .GetAllAsync(requestParameters);
 
             // If no tournaments are found, return 404 Not Found
             if(tournamentDetails == null || !tournamentDetails.Any()) {
                 return NotFound("No tournaments found.");
             }
-
+            // If includeGames is true, we can modify the DTOs to include game details if needed.
+            Response.Headers.Append("X-Pagination", JsonSerializer.Serialize(metaData));
             // Return the results with HTTP 200 OK
             return Ok(tournamentDetails);
         }

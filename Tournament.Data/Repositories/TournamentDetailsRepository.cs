@@ -96,66 +96,36 @@ public class TournamentDetailsRepository(TournamentApiContext context) : Reposit
     //public async Task<IEnumerable<TournamentDetails>> GetAllAsync(TournamentRequestParameters requestParameters, bool trackChanges = false)
     public async Task<PagedList<TournamentDetails>> GetAllAsync(TournamentRequestParameters requestParameters, bool trackChanges = false)
     {
-        //return includeGames
-        //     ? await context.TournamentDetails
-        //         .Include(t => t.Games)
-        //         .ToListAsync()
-        //     : await context.TournamentDetails
-        //         .ToListAsync();
-        // If includeGames is true, we will include the related games in the query.
-        var tournaments = new List<TournamentDetails>();
-        //if(includeGames) {
+        // Retrieve all tournaments without tracking changes
+        IQueryable<TournamentDetails> tournaments = FindAll(trackChanges);
+
         if(requestParameters.IncludeGames) {
-            // If includeGames is true, load tournaments with their games.
-            //tournaments = await context.TournamentDetails
-            //    .Include(t => t.Games)
-            //    .ToListAsync();
-            //// If we have tournaments, order their games by title.
-            //if(tournaments != null && tournaments.Any()) {
-            //    // If we have tournaments, order their games by title.
-            //    foreach(var tournament in tournaments) {
-            //        tournament.Games = tournament.Games
-            //            .OrderBy(g => g.Title)
-            //            .ToList();
-            //    }
-
-            //tournaments = await FindAll(trackChanges)
-            //    .Include(t => t.Games).ToListAsync();
-            tournaments = await FindAll(trackChanges)
-                .Include(t => t.Games).ToListAsync();
-
-            //if(tournaments != null && tournaments.Any()) {
-
-            OrderGamesByTitle(tournaments);
-            //}
-
-        } else {
-            // If includeGames is false, just load the tournaments without games.
-            //tournaments = await context.TournamentDetails
-            //    .ToListAsync();
-            tournaments = await FindAll(trackChanges).ToListAsync();
+            // If IncludeGames is true, include related games and order them by title.
+            tournaments = tournaments
+                .Include(t => t.Games);
         }
 
-        // Return the list of tournaments, ordered by their title.
-        //return [.. tournaments!.OrderBy(t => t.Title)];
-        return await PagedList<TournamentDetails>.CreateAsync(
-            tournaments.AsQueryable(),// Convert tournaments form a list<TournamentDetails> to an IQueryable for pagination 
+        PagedList<TournamentDetails> pagedList = await PagedList<TournamentDetails>.CreateAsync(
+            tournaments,
             requestParameters.PageNumber,
             requestParameters.PageSize);
 
-        /*
-         return await tornaments.skip((requestParameters.PageNumber - 1) * requestParameters.PageSize)
-            .Take(requestParameters.PageSize)
-            .ToListAsync();
-         */
+        OrderGames(requestParameters, tournaments);
+
+        return pagedList;
     }
 
-    private static void OrderGamesByTitle(List<TournamentDetails> tournaments)
+    private static void OrderGames(TournamentRequestParameters requestParameters, IQueryable<TournamentDetails> tournaments)
     {
-        foreach(var tournament in tournaments) {
-            tournament.Games = [.. tournament.Games.OrderBy(g => g.Title)];
+        if(requestParameters.IncludeGames) {
+            foreach(TournamentDetails tournament in tournaments) {
+                // If IncludeGames is true, order the games by title.
+                tournament.Games = tournament.Games.OrderBy(g => g.Title).ToList();
+            }
         }
     }
+
+
 
     /// <summary>
     /// Retrieves the details of a tournament by its unique identifier, optionally including related games.
