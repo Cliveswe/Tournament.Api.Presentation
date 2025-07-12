@@ -79,19 +79,7 @@ public class TournamentDetailsRepository(TournamentApiContext context) : Reposit
     #endregion
 
 
-    /// /// <summary>
-    /// Asynchronously retrieves all tournament details from the data store, with optional inclusion of related games.
-    /// </summary>
-    /// <param name="includeGames">
-    /// Optional parameter indicating whether to include the related games for each tournament.
-    /// If <c>true</c>, each tournament includes its associated games, which are ordered by title.
-    /// If <c>false</c>, games are excluded from the results.
-    /// </param>
-    /// <returns>
-    /// A task representing the asynchronous operation. The result contains an <see cref="IEnumerable{TournamentDetails}"/>
-    /// representing all tournaments, ordered by title. If <paramref name="includeGames"/> is <c>true</c>,
-    /// each tournament's games are also included and ordered by title.
-    /// </returns>
+
 
     //public async Task<IEnumerable<TournamentDetails>> GetAllAsync(TournamentRequestParameters requestParameters, bool trackChanges = false)
     public async Task<PagedList<TournamentDetails>> GetAllAsync(TournamentRequestParameters requestParameters, bool trackChanges = false)
