@@ -6,7 +6,7 @@ namespace Service.Contracts;
 public interface ITournamentService
 {
 
-    Task<IEnumerable<TournamentDto>> GetAllAsync(TournamentRequestParameters requestParameters, bool trackChanges = false);
+    Task<(IEnumerable<TournamentDto> tournamentDto, MetaData metaData)> GetAllAsync(TournamentRequestParameters requestParameters, bool trackChanges = false);
     Task<TournamentDto> GetByIdAsync(int id, bool trackChanges = false);
     Task<(int id, TournamentDto tournamentDto)> CreateAsync(TournamentDetailsCreateDto tournamentDetailsCreateDto);
 

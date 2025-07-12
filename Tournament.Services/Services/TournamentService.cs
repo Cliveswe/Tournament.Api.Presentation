@@ -12,11 +12,20 @@ public class TournamentService(IMapper mapper, IUnitOfWork uoW) : ITournamentSer
 {
     #region Get Tournament details
 
-    public async Task<IEnumerable<TournamentDto>> GetAllAsync(TournamentRequestParameters requestParameters, bool trackChanges = false)
+    //public async Task<IEnumerable<TournamentDto>> GetAllAsync(TournamentRequestParameters requestParameters, bool trackChanges = false)
+    public async Task<(IEnumerable<TournamentDto> tournamentDto, MetaData metaData)> GetAllAsync(TournamentRequestParameters requestParameters, bool trackChanges = false)
     {
-        return mapper.Map<IEnumerable<TournamentDto>>(await uoW
+        var pagedList = await uoW
             .TournamentDetailsRepository
-            .GetAllAsync(requestParameters, trackChanges));
+            .GetAllAsync(requestParameters, trackChanges);
+
+        var tournamentDtos = mapper.Map<IEnumerable<TournamentDto>>(pagedList.Items);
+
+        //return mapper.Map<IEnumerable<TournamentDto>>(await uoW
+        //    .TournamentDetailsRepository
+        //    .GetAllAsync(requestParameters, trackChanges));
+
+        return (tournamentDtos, pagedList.MetaData);
     }
 
     public async Task<TournamentDto> GetByIdAsync(int id, bool trackChanges = false)
