@@ -133,6 +133,12 @@ public class TournamentDetailsRepository(TournamentApiContext context) : Reposit
 
         // Return the list of tournaments, ordered by their title.
         return [.. tournaments!.OrderBy(t => t.Title)];
+
+        /*
+         return await tornaments.skip((requestParameters.PageNumber - 1) * requestParameters.PageSize)
+            .Take(requestParameters.PageSize)
+            .ToListAsync();
+         */
     }
 
     private static void OrderGamesByTitle(List<TournamentDetails> tournaments)

@@ -1,11 +1,12 @@
 ﻿using Tournaments.Shared.Dto;
+using Tournaments.Shared.Request;
 
 namespace Service.Contracts;
 
 public interface ITournamentService
 {
 
-    Task<IEnumerable<TournamentDto>> GetAllAsync(bool includeGames, bool trackChanges = false);
+    Task<IEnumerable<TournamentDto>> GetAllAsync(TournamentRequestParameters requestParameters, bool trackChanges = false);
     Task<TournamentDto> GetByIdAsync(int id, bool trackChanges = false);
     Task<(int id, TournamentDto tournamentDto)> CreateAsync(TournamentDetailsCreateDto tournamentDetailsCreateDto);
 

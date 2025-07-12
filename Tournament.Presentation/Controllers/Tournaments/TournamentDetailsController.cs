@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Service.Contracts;
 using Tournaments.Shared.Dto;
+using Tournaments.Shared.Request;
 
 namespace Tournaments.Presentation.Controllers.Tournaments
 {
@@ -57,10 +58,10 @@ namespace Tournaments.Presentation.Controllers.Tournaments
         /// If no tournaments exist, it returns a 404 Not Found with an appropriate message.
         /// </remarks>>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<TournamentDto>>> GetTournamentDetails([FromQuery] bool includeGames)
+        public async Task<ActionResult<IEnumerable<TournamentDto>>> GetTournamentDetails([FromQuery] TournamentRequestParameters requestParameters, [FromQuery] bool includeGames)
         {
             // Fetch all tournaments using the service manager
-            IEnumerable<TournamentDto> tournamentDetails = await serviceManager.TournamentService.GetAllAsync(includeGames);
+            IEnumerable<TournamentDto> tournamentDetails = await serviceManager.TournamentService.GetAllAsync(requestParameters, includeGames);
 
             // If no tournaments are found, return 404 Not Found
             if(tournamentDetails == null || !tournamentDetails.Any()) {

@@ -5,17 +5,18 @@ using Domain.Contracts;
 using Domain.Models.Entities;
 using Service.Contracts;
 using Tournaments.Shared.Dto;
+using Tournaments.Shared.Request;
 
 namespace Tournaments.Services.Services;
 public class TournamentService(IMapper mapper, IUnitOfWork uoW) : ITournamentService
 {
     #region Get Tournament details
 
-    public async Task<IEnumerable<TournamentDto>> GetAllAsync(bool includeGames, bool trackChanges = false)
+    public async Task<IEnumerable<TournamentDto>> GetAllAsync(TournamentRequestParameters requestParameters, bool trackChanges = false)
     {
         return mapper.Map<IEnumerable<TournamentDto>>(await uoW
             .TournamentDetailsRepository
-            .GetAllAsync(includeGames, trackChanges));
+            .GetAllAsync(requestParameters, trackChanges));
     }
 
     public async Task<TournamentDto> GetByIdAsync(int id, bool trackChanges = false)
