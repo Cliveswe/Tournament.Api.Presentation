@@ -13,6 +13,7 @@ using Domain.Contracts;
 using Domain.Models.Entities;
 using Microsoft.EntityFrameworkCore;
 using Tournaments.Infrastructure.Data;
+using Tournaments.Shared.Request;
 
 namespace Tournaments.Infrastructure.Repositories;
 /// <summary>
@@ -92,7 +93,8 @@ public class TournamentDetailsRepository(TournamentApiContext context) : Reposit
     /// each tournament's games are also included and ordered by title.
     /// </returns>
 
-    public async Task<IEnumerable<TournamentDetails>> GetAllAsync(bool includeGames = false, bool trackChanges = false)
+    //public async Task<IEnumerable<TournamentDetails>> GetAllAsync(TournamentRequestParameters requestParameters, bool trackChanges = false)
+    public async Task<PagedList<TournamentDetails>> GetAllAsync(TournamentRequestParameters requestParameters, bool trackChanges = false)
     {
         //return includeGames
         //     ? await context.TournamentDetails
@@ -101,8 +103,9 @@ public class TournamentDetailsRepository(TournamentApiContext context) : Reposit
         //     : await context.TournamentDetails
         //         .ToListAsync();
         // If includeGames is true, we will include the related games in the query.
-        List<TournamentDetails> tournaments;
-        if(includeGames) {
+        var tournaments = new List<TournamentDetails>();
+        //if(includeGames) {
+        if(requestParameters.IncludeGames) {
             // If includeGames is true, load tournaments with their games.
             //tournaments = await context.TournamentDetails
             //    .Include(t => t.Games)
@@ -116,6 +119,8 @@ public class TournamentDetailsRepository(TournamentApiContext context) : Reposit
             //            .ToList();
             //    }
 
+            //tournaments = await FindAll(trackChanges)
+            //    .Include(t => t.Games).ToListAsync();
             tournaments = await FindAll(trackChanges)
                 .Include(t => t.Games).ToListAsync();
 
@@ -132,7 +137,11 @@ public class TournamentDetailsRepository(TournamentApiContext context) : Reposit
         }
 
         // Return the list of tournaments, ordered by their title.
-        return [.. tournaments!.OrderBy(t => t.Title)];
+        //return [.. tournaments!.OrderBy(t => t.Title)];
+        return await PagedList<TournamentDetails>.CreateAsync(
+            tournaments.AsQueryable(),// Convert tournaments form a list<TournamentDetails> to an IQueryable for pagination 
+            requestParameters.PageNumber,
+            requestParameters.PageSize);
 
         /*
          return await tornaments.skip((requestParameters.PageNumber - 1) * requestParameters.PageSize)
@@ -248,6 +257,4 @@ public class TournamentDetailsRepository(TournamentApiContext context) : Reposit
         //return context.TournamentDetails
         // .AnyAsync(t => t.Title.ToLower() == title.ToLower() && t.StartDate.Date == startDate.Date);
     }
-
-
 }
