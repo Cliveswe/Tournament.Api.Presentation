@@ -26,6 +26,7 @@
 // -----------------------------------------------------------------------------
 
 using Domain.Models.Entities;
+using Tournaments.Shared.Request;
 
 namespace Domain.Contracts;
 
@@ -86,15 +87,10 @@ public interface IGameRepository
     /// <param name="tournamentId">The unique identifier of the tournament.</param>
     /// <param name="trackChanges">Indicates whether entity changes should be tracked.</param>
     /// <returns>A task containing the <see cref="Game"/> entity if found; otherwise, <c>null</c>.</returns>
-   //Task<Game?> GetByNameAndTournamentAsync(string name, int tournamentId, bool trackChanges = false);
+    //Task<Game?> GetByNameAndTournamentAsync(string name, int tournamentId, bool trackChanges = false);
 
-    /// <summary>
-    /// Asynchronously retrieves all <see cref="Game"/> entities associated with a specific tournament.
-    /// </summary>
-    /// <param name="tournamentId">The unique identifier of the tournament.</param>
-    /// <param name="trackChanges">Indicates whether entity changes should be tracked.</param>
-    /// <returns>A task containing an enumerable of <see cref="Game"/> entities ordered by title.</returns>
-    Task<IEnumerable<Game?>> GetByTournamentIdAsync(int tournamentId, bool trackChanges = false);
+
+    Task<PagedList<Game>> GetByTournamentIdAsync(TournamentRequestParameters requestParameters, int tournamentId, bool trackChanges = false);
 
     /// <summary>
     /// Asynchronously retrieves a <see cref="Game"/> entity by its title and associated tournament ID.

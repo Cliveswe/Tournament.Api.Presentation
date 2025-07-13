@@ -19,6 +19,7 @@ using Microsoft.AspNetCore.Mvc;
 using Service.Contracts;
 using Service.Contracts.Enums;
 using Tournaments.Shared.Dto;
+using Tournaments.Shared.Request;
 
 namespace Tournaments.Presentation.Controllers.Games
 {
@@ -59,7 +60,8 @@ namespace Tournaments.Presentation.Controllers.Games
         /// not "api/..." there is a difference.
         // GET api/tournamentDetails/{tournamentId}/
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<GameDto>>> GetTournamentGames(int tournamentId)
+        //public async Task<ActionResult<IEnumerable<GameDto>>> GetTournamentGames(int tournamentId)
+        public async Task<ActionResult<IEnumerable<GameDto>>> GetTournamentGames([FromQuery] TournamentRequestParameters requestParameters, int tournamentId)
         {
 
             #region Validation of input parameters
@@ -82,15 +84,21 @@ namespace Tournaments.Presentation.Controllers.Games
             #endregion
 
             // Retrieve all games associated with the specified tournamentEntity ID.
-            IEnumerable<GameDto> games = await serviceManager.GameService.GetAllAsync(tournamentId);
+            (IEnumerable<GameDto> gameDetails, MetaData metaData) = await serviceManager
+                .GameService
+                .GetAllAsync(requestParameters, tournamentId);
 
-            if(!games.Any()) {
+            if(gameDetails is null || !gameDetails.Any()) {
                 // If no games are found, return 404 Not Found with a message
                 return NotFound($"No games found for tournamentEntity with ID {tournamentId}.");
             }
 
             // Return the result with HTTP 200 OK
-            return Ok(games);
+            //return Ok(games);
+
+            Response.Headers.Append("X-Pagination", System.Text.Json.JsonSerializer.Serialize(metaData));
+
+            return Ok(gameDetails);
         }
 
 

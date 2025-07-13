@@ -6,19 +6,27 @@ using Domain.Models.Entities;
 using Service.Contracts;
 using Service.Contracts.Enums;
 using Tournaments.Shared.Dto;
+using Tournaments.Shared.Request;
 
 namespace Tournaments.Services.Services;
 public class GameService(IMapper mapper, IUnitOfWork uoW) : IGameService
 {
 
 
-    public async Task<IEnumerable<GameDto>> GetAllAsync(int tournamentId)
+    //public async Task<IEnumerable<GameDto>> GetAllAsync(int tournamentId)
+    public async Task<(IEnumerable<GameDto> gameDtos, MetaData metaData)> GetAllAsync(TournamentRequestParameters requestParameters, int tournamentId)
     {
         // Retrieve all games associated with the specified tournament ID.
-        var gamesResult = await uoW.GameRepository.GetByTournamentIdAsync(tournamentId);
+        // var gamesResult = await uoW.GameRepository.GetByTournamentIdAsync(tournamentId);
         // Map the retrieved game entities to GameDto objects using AutoMapper.
-        IEnumerable<GameDto> games = mapper.Map<IEnumerable<GameDto>>(gamesResult);
-        return games;
+        //IEnumerable<GameDto> games = mapper.Map<IEnumerable<GameDto>>(gamesResult);
+
+        var pagedList = await uoW
+            .GameRepository
+            .GetByTournamentIdAsync(requestParameters, tournamentId);
+        var gameDtos = mapper.Map<IEnumerable<GameDto>>(pagedList.Items);
+
+        return (gameDtos, pagedList.MetaData);
     }
     public async Task<GameDto?> GetAsync(int tournamentId, int id)
     {

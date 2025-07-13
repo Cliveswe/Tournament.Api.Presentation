@@ -16,6 +16,7 @@ using Domain.Contracts;
 using Domain.Models.Entities;
 using Microsoft.EntityFrameworkCore;
 using Tournaments.Infrastructure.Data;
+using Tournaments.Shared.Request;
 
 namespace Tournaments.Infrastructure.Repositories;
 
@@ -205,11 +206,22 @@ public class GameRepository(TournamentApiContext context) : RepositoryBase<Game>
     /// A task representing the asynchronous operation. The result contains an <see cref="IEnumerable{Game}"/> 
     /// of games related to the specified tournament, ordered by their title.
     /// </returns>
-    public async Task<IEnumerable<Game?>> GetByTournamentIdAsync(int tournamentId, bool trackChanges = false)
+    //public async Task<IEnumerable<Game?>> GetByTournamentIdAsync(int tournamentId, bool trackChanges = false)
+    public async Task<PagedList<Game>> GetByTournamentIdAsync(TournamentRequestParameters requestParameters, int tournamentId, bool trackChanges = false)
     {
-        return await FindByCondition(g => g.TournamentDetailsId == tournamentId, trackChanges)
-            .OrderBy(g => g.Title)
-            .ToListAsync();
+        //return await FindByCondition(g => g.TournamentDetailsId == tournamentId, trackChanges)
+        //    .OrderBy(g => g.Title)
+        //    .ToListAsync();
+
+        IQueryable<Game> query = FindByCondition(g => g.TournamentDetailsId == tournamentId, trackChanges)
+            .OrderBy(g => g.Title);
+
+        PagedList<Game> pagedList = await PagedList<Game>.CreateAsync(
+            query,
+            requestParameters.PageNumber,
+            requestParameters.PageSize
+        );
+        return pagedList;
     }
 
     /// <summary>
