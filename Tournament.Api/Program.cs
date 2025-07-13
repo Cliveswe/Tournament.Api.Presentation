@@ -35,6 +35,8 @@ namespace Tournaments.Api
             builder.Services.AddAutoMapper(typeof(TournamentMappings));
             var app = builder.Build();
 
+            app.ConfigureExceptionHandler();
+
             await app.SeedDataAsync();
 
             // Configure the HTTP request pipeline.
