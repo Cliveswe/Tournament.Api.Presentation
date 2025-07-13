@@ -3,6 +3,7 @@
 using AutoMapper;
 using Domain.Contracts;
 using Domain.Models.Entities;
+using Domain.Models.Exceptions;
 using Service.Contracts;
 using Tournaments.Shared.Dto;
 using Tournaments.Shared.Request;
@@ -30,9 +31,15 @@ public class TournamentService(IMapper mapper, IUnitOfWork uoW) : ITournamentSer
 
     public async Task<TournamentDto> GetByIdAsync(int id, bool trackChanges = false)
     {
-        return mapper.Map<TournamentDto>(await uoW
+        var tournamentDetails = await uoW
             .TournamentDetailsRepository
-            .GetAsync(id, trackChanges));
+            .GetAsync(id, trackChanges);
+
+        if(tournamentDetails is null) {
+            throw new TournamentNotFoundException(id);
+        }
+
+        return mapper.Map<TournamentDto>(tournamentDetails);
     }
 
     #endregion
