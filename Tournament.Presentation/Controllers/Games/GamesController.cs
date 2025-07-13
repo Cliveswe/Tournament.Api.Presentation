@@ -83,7 +83,7 @@ namespace Tournaments.Presentation.Controllers.Games
 
             #endregion
 
-            // Retrieve all games associated with the specified tournamentEntity ID.
+            // The GetAllAsync method returns a tuple containing the game details and metadata for pagination.
             (IEnumerable<GameDto> gameDetails, MetaData metaData) = await serviceManager
                 .GameService
                 .GetAllAsync(requestParameters, tournamentId);
