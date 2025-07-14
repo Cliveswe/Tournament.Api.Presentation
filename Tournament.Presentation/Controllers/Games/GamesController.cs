@@ -229,20 +229,73 @@ namespace Tournaments.Presentation.Controllers.Games
 
         #region PATCH api/tournamentDetails/1/Games/5
 
+        [Consumes("application/json-patch+json")]//Make sure your controller/method allows only application/json-patch+json to improve client request correctness.
         [HttpPatch("{id:int}")]
         public async Task<IActionResult> PatchGame(int tournamentId, int id, [FromBody] JsonPatchDocument<GameDto> patchDocument)
         {
-            #region Validation of Input Parameters
+            //Early validation.
+            var errorResult = ValidatePatchRequest(tournamentId, id, patchDocument);
+            if(errorResult is not null) {
+                return errorResult;
+            }
 
+            //Get target Game.
+            ApiBaseResponse gameResponse = await serviceManager.GameService.GetGameAsync(tournamentId, id);
+
+            // If the game with the specified ID does not exist, return 404 Not Found.
+            if(!gameResponse.Success) {
+                return ProcessError(gameResponse);
+            }
+
+            // Apply the patch to the DTO
+            GameDto patchedDto = gameResponse.GetOkResult<GameDto>();
+            patchDocument.ApplyTo(patchedDto, ModelState);
+
+            // Check for error while applying the patch
+            TryValidatePatchedGame(patchedDto);
+            if(!ModelState.IsValid) {
+                return UnprocessableEntity(ModelState);
+            }
+
+            TournamentDto? tournamentDto = await serviceManager.TournamentService.GetByIdAsync(tournamentId);
+
+            if(tournamentDto is null) {
+                return NotFound($"Tournament with ID {tournamentId} not found.");
+            }
+
+            ApplyPatchResult result = await serviceManager.GameService.ApplyToAsync(tournamentId, id, patchedDto, tournamentDto);
+
+
+            return result switch
+            {
+                ApplyPatchResult.InvalidDateRange => BadRequest("Game start date must be within the tournament period."),
+                ApplyPatchResult.NoChanges => StatusCode(500, "Update failed. No changes were saved."),
+                ApplyPatchResult.Success => NoContent(),
+                _ => StatusCode(500, "Unexpected error occurred.")
+            };
+        }
+
+        private bool TryValidatePatchedGame(GameDto dto)
+        {
+            //if(string.IsNullOrWhiteSpace(dto.Title))
+            //    ModelState.AddModelError(nameof(dto.Title), "Game title is required.");
+
+            //if(dto.StartDate == default)
+            //    ModelState.AddModelError(nameof(dto.StartDate), "Start date is required.");
+            ModelState.Clear();
+
+            return TryValidateModel(dto, prefix: string.Empty);
+        }
+        private IActionResult? ValidatePatchRequest(int tournamentId, int id, JsonPatchDocument<GameDto>? patchDocument)
+        {
             if(patchDocument is null) {
                 return BadRequest("Patch document cannot be null.");
             }
 
-            // Validate the input parameters.
-            if(!ModelState.IsValid) {
-                // Return 400 Bad Request if the model state is invalid
-                return BadRequest(ModelState);
+            if(patchDocument.Operations is null || !patchDocument.Operations.Any()) {
+                return BadRequest("Patch document must contain at least one operation.");
             }
+
 
             if(tournamentId <= 0) {
                 // If the tournament ID is invalid (less than or equal to zero), return 400 Bad Request.
@@ -255,46 +308,7 @@ namespace Tournaments.Presentation.Controllers.Games
                 return BadRequest("Invalid game id.");
             }
 
-            #endregion
-
-            //TODO: replace GetAsync with the new GetGameAsync
-            GameDto? gameDto = await serviceManager.GameService.GetAsync(tournamentId, id);
-
-            if(gameDto is null) {
-                // If the game with the specified ID does not exist, return 404 Not Found.
-                return NotFound($"Game with ID {id} in Tournament {tournamentId} was not found.");
-            }
-
-            #region PATCH Document Validation
-
-            // Apply the patch to the DTO
-            patchDocument.ApplyTo(gameDto, ModelState);
-
-            // Validate patched DTO
-            if(!ModelState.IsValid) {
-                return UnprocessableEntity(ModelState);
-            }
-
-            #endregion
-
-            #region Validate Game date is within the Tournament period
-            TournamentDto? tournamentDto = await serviceManager.TournamentService.GetByIdAsync(tournamentId);
-
-            if(tournamentDto is null) {
-                return NotFound($"Tournament with ID {tournamentId} not found.");
-            }
-
-            ApplyPatchResult result = await serviceManager.GameService.ApplyToAsync(tournamentId, id, gameDto, tournamentDto);
-
-            #endregion
-
-            return result switch
-            {
-                ApplyPatchResult.InvalidDateRange => BadRequest("Game start date must be within the tournament period."),
-                ApplyPatchResult.NoChanges => StatusCode(500, "Update failed. No changes were saved."),
-                ApplyPatchResult.Success => NoContent(),
-                _ => StatusCode(500, "Unexpected error occurred.")
-            };
+            return null;
         }
 
         #endregion

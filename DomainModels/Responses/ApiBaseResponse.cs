@@ -1,31 +1,47 @@
 ﻿// Ignore Spelling: Api
 
 namespace Domain.Models.Responses;
-public abstract class ApiBaseResponse(bool success)
+public abstract class ApiBaseResponse(bool success, string? message = null)
 {
-    public bool Success { get; set; } = success;
+    public bool Success { get; init; } = success;
+    //Support general feedback across all responses (not just NotFound).
+    public string? Message { get; init; } = message;
+
+    //Helper method 
+    public bool IsNotFound() => this is ApiNotFoundResponse;
+
 
     public TResultType GetOkResult<TResultType>()
     {
         if(this is ApiOkResponse<TResultType> apiOkResponse) {
             return apiOkResponse.Result;
         }
-        throw new InvalidOperationException($"Response type {this.GetType().Name} is not an ApiOkResponse.");
+        throw new InvalidOperationException($"Expected ApiOkResponse<{typeof(TResultType).Name}>, but received {this.GetType().Name}.");
     }
 
 }
 
-public sealed class ApiOkResponse<TResult>(TResult result) : ApiBaseResponse(true)
+public sealed class ApiOkResponse<TResult>(TResult result, string? message = null) : ApiBaseResponse(true, message)
 {
     public TResult Result { get; } = result;
 }
 
-public abstract class ApiNotFoundResponse(string message) : ApiBaseResponse(false)
+public abstract class ApiNotFoundResponse(string message) : ApiBaseResponse(false, message)
 {
-    public string? Message { get; } = message;
 }
 
 public class TournamentNotFoundResponse(int id)
     : ApiNotFoundResponse($"Tournament with id {id} not found.")
+{
+}
+
+public class GameNotFoundResponse(int gameId) :
+    ApiNotFoundResponse($"Game with ID {gameId} was not found.")
+{
+
+}
+
+public class GameDoesNotBelongToTournamentResponse(int gameId, int tournamentId) :
+    ApiNotFoundResponse($"Game with ID {gameId} does not belong to Tournament ID {tournamentId}.")
 {
 }
