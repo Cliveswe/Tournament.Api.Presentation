@@ -36,7 +36,7 @@ public interface IGameService
     /// <param name="tournamentId">The unique identifier of the tournament.</param>
     /// <param name="title">The title of the game.</param>
     /// <returns>The <see cref="GameDto"/> if found; otherwise, <c>null</c>.</returns>
-    Task<GameDto> GetAsync(int tournamentId, string title);
+    //Task<GameDto> GetAsync(int tournamentId, string title);
 
     /// <summary>
     /// Adds a new game to a tournament.

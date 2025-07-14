@@ -84,7 +84,7 @@ namespace Tournaments.Presentation.Controllers.Games
 
             #endregion
 
-            // The GetAllAsync method returns a tuple containing the game details and metadata for pagination.
+            // The GetAllAsync method returns a tuple containing the game details and meta-data for pagination.
             //(IEnumerable<GameDto> gameDetails, MetaData metaData) = await serviceManager
             //    .GameService
             //    .GetAllAsync(requestParameters, tournamentId);
@@ -257,6 +257,7 @@ namespace Tournaments.Presentation.Controllers.Games
 
             #endregion
 
+            //TODO: replace GetAsync with the new GetGameAsync
             GameDto? gameDto = await serviceManager.GameService.GetAsync(tournamentId, id);
 
             if(gameDto is null) {
