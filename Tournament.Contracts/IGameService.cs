@@ -1,4 +1,5 @@
-﻿using Service.Contracts.Enums;
+﻿using Domain.Models.Responses;
+using Service.Contracts.Enums;
 using Tournaments.Shared.Dto;
 using Tournaments.Shared.Request;
 
@@ -16,6 +17,8 @@ public interface IGameService
     /// <returns>A collection of <see cref="GameDto"/> objects belonging to the tournament.</returns>
     //Task<IEnumerable<GameDto>> GetAllAsync(int tournamentId);
     Task<(IEnumerable<GameDto> gameDtos, MetaData metaData)> GetAllAsync(TournamentRequestParameters requestParameters, int tournamentId);
+
+    Task<ApiBaseResponse> GetGameAsync(int tournamentId, int id);
 
     /// <summary>
     /// Retrieves a game by its identifier within a specific tournament.

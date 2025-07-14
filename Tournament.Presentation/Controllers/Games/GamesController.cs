@@ -13,6 +13,7 @@
 //        comprehensive error handling to ensure API robustness and data integrity.
 // --------------------------------------------------------------------------------
 using Domain.Models.Entities;
+using Domain.Models.Responses;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
@@ -42,7 +43,7 @@ namespace Tournaments.Presentation.Controllers.Games
     /// </remarks>
     [ApiController]
     [Route("api/tournamentDetails/{tournamentId}/games")]
-    public class GamesController(IServiceManager serviceManager) : ControllerBase
+    public class GamesController(IServiceManager serviceManager) : ApiControllerBase
     {
         #region GET api/Games api/1/Games/
 
@@ -144,15 +145,17 @@ namespace Tournaments.Presentation.Controllers.Games
             #endregion 
 
             // Map the Game entity to a GameDto using AutoMapper
-            var gameDto = await serviceManager.GameService.GetAsync(tournamentId, id);
+            //var gameDto = await serviceManager.GameService.GetAsync(tournamentId, id);
+            ApiBaseResponse response = await serviceManager.GameService.GetGameAsync(tournamentId, id);
 
             // If the gameDto is null, it means the game was not found in the specified tournamentEntity
-            if(gameDto == null) {
-                return NotFound($"Game with ID {id} was not found in Tournament with ID {tournamentId}.");
-            }
+            //if(gameDto == null) {
+            //    return NotFound($"Game with ID {id} was not found in Tournament with ID {tournamentId}.");
+            //}
+            return response.Success ? Ok(response.GetOkResult<GameDto>()) : ProcessError(response);
 
             // Return the GameDto with HTTP 200 OK
-            return Ok(gameDto);
+            //return Ok(gameDto);
         }
 
         /// <summary>

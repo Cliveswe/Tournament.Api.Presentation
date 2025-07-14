@@ -3,6 +3,7 @@
 using AutoMapper;
 using Domain.Contracts;
 using Domain.Models.Entities;
+using Domain.Models.Responses;
 using Service.Contracts;
 using Service.Contracts.Enums;
 using Tournaments.Shared.Dto;
@@ -28,6 +29,20 @@ public class GameService(IMapper mapper, IUnitOfWork uoW) : IGameService
 
         return (gameDtos, pagedList.MetaData);
     }
+
+    public async Task<ApiBaseResponse> GetGameAsync(int tournamentId, int id)
+    {
+        Game? game = await uoW.GameRepository.GetByIdAsync(id);
+
+        if(game is null || game.TournamentDetailsId != tournamentId) {
+            return new TournamentNotFoundResponse(tournamentId);
+        }
+        // Map the retrieved game entity to a GameDto object using AutoMapper.
+        GameDto gameDto = mapper.Map<GameDto>(game);
+
+        return new ApiOkResponse<GameDto>(gameDto);
+    }
+
     public async Task<GameDto?> GetAsync(int tournamentId, int id)
     {
         Game? game = await uoW.GameRepository.GetByIdAsync(id);
