@@ -85,21 +85,28 @@ namespace Tournaments.Presentation.Controllers.Games
             #endregion
 
             // The GetAllAsync method returns a tuple containing the game details and metadata for pagination.
-            (IEnumerable<GameDto> gameDetails, MetaData metaData) = await serviceManager
-                .GameService
-                .GetAllAsync(requestParameters, tournamentId);
+            //(IEnumerable<GameDto> gameDetails, MetaData metaData) = await serviceManager
+            //    .GameService
+            //    .GetAllAsync(requestParameters, tournamentId);
 
-            if(gameDetails is null || !gameDetails.Any()) {
-                // If no games are found, return 404 Not Found with a message
-                return NotFound($"No games found for tournamentEntity with ID {tournamentId}.");
-            }
+            (ApiBaseResponse gameResponse, MetaData metaData) = await serviceManager.GameService.GetGamesAsync(requestParameters, tournamentId);
+
+            //if(gameDetails is null || !gameDetails.Any()) {
+            //    // If no games are found, return 404 Not Found with a message
+            //    return NotFound($"No games found for tournamentEntity with ID {tournamentId}.");
+            //}
 
             // Return the result with HTTP 200 OK
             //return Ok(games);
 
+            if(gameResponse.Success is false) {
+                return ProcessError(gameResponse);
+            }
+
             Response.Headers.Append("X-Pagination", System.Text.Json.JsonSerializer.Serialize(metaData));
 
-            return Ok(gameDetails);
+            return Ok(gameResponse.GetOkResult<IEnumerable<GameDto>>());
+            //return Ok(gameDetails);
         }
 
 

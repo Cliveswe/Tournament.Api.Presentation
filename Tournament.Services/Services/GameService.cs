@@ -42,6 +42,10 @@ public class GameService(IMapper mapper, IUnitOfWork uoW) : IGameService
             .GetByTournamentIdAsync(requestParameters, tournamentId);
         IEnumerable<GameDto> gameDtos = mapper.Map<IEnumerable<GameDto>>(pagedList.Items);
 
+        if(!gameDtos.Any()) {
+            return (new TournamentNotFoundResponse(tournamentId), pagedList.MetaData);
+        }
+
         return (new ApiOkResponse<IEnumerable<GameDto>>(gameDtos), pagedList.MetaData);
     }
 
