@@ -16,7 +16,7 @@ public interface IGameService
     /// <param name="tournamentId">The unique identifier of the tournament.</param>
     /// <returns>A collection of <see cref="GameDto"/> objects belonging to the tournament.</returns>
     //Task<IEnumerable<GameDto>> GetAllAsync(int tournamentId);
-    Task<(IEnumerable<GameDto> gameDtos, MetaData metaData)> GetAllAsync(TournamentRequestParameters requestParameters, int tournamentId);
+    //Task<(IEnumerable<GameDto> gameDtos, MetaData metaData)> GetAllAsync(TournamentRequestParameters requestParameters, int tournamentId);
 
     Task<(ApiBaseResponse gameResponse, MetaData metaData)> GetGamesAsync(TournamentRequestParameters requestParameters, int tournamentId);
     Task<ApiBaseResponse> GetGameAsync(int tournamentId, int id);
