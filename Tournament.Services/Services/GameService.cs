@@ -30,15 +30,30 @@ public class GameService(IMapper mapper, IUnitOfWork uoW) : IGameService
         return (gameDtos, pagedList.MetaData);
     }
 
+    public async Task<(ApiBaseResponse gameResponse, MetaData metaData)> GetGamesAsync(TournamentRequestParameters requestParameters, int tournamentId)
+    {
+        // Retrieve all games associated with the specified tournament ID.
+        // var gamesResult = await uoW.GameRepository.GetByTournamentIdAsync(tournamentId);
+        // Map the retrieved game entities to GameDto objects using AutoMapper.
+        //IEnumerable<GameDto> games = mapper.Map<IEnumerable<GameDto>>(gamesResult);
+
+        var pagedList = await uoW
+            .GameRepository
+            .GetByTournamentIdAsync(requestParameters, tournamentId);
+        IEnumerable<GameDto> gameDtos = mapper.Map<IEnumerable<GameDto>>(pagedList.Items);
+
+        return (new ApiOkResponse<IEnumerable<GameDto>>(gameDtos), pagedList.MetaData);
+    }
+
     public async Task<ApiBaseResponse> GetGameAsync(int tournamentId, int id)
     {
-        Game? game = await uoW.GameRepository.GetByIdAsync(id);
+        Game? gameExists = await uoW.GameRepository.GetByIdAsync(id);
 
-        if(game is null || game.TournamentDetailsId != tournamentId) {
+        if(gameExists is null || gameExists.TournamentDetailsId != tournamentId) {
             return new TournamentNotFoundResponse(tournamentId);
         }
         // Map the retrieved game entity to a GameDto object using AutoMapper.
-        GameDto gameDto = mapper.Map<GameDto>(game);
+        GameDto gameDto = mapper.Map<GameDto>(gameExists);
 
         return new ApiOkResponse<GameDto>(gameDto);
     }
@@ -56,6 +71,18 @@ public class GameService(IMapper mapper, IUnitOfWork uoW) : IGameService
 
         return gameDto;
     }
+
+    public async Task<ApiBaseResponse> GetGameAsync(int tournamentId, string title)
+    {
+        Game? gameExists = await uoW.GameRepository.GetByTitleAndTournamentIdAsync(title, tournamentId);
+        // Check if a game with the same title already exists for the specified tournament.
+        if(gameExists is null) {
+            return new TournamentNotFoundResponse(tournamentId);
+        }
+
+        return new ApiOkResponse<GameDto>(mapper.Map<GameDto>(gameExists));
+    }
+
     public async Task<GameDto> GetAsync(int tournamentId, string title)
     {
 

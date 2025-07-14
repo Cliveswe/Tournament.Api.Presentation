@@ -18,7 +18,9 @@ public interface IGameService
     //Task<IEnumerable<GameDto>> GetAllAsync(int tournamentId);
     Task<(IEnumerable<GameDto> gameDtos, MetaData metaData)> GetAllAsync(TournamentRequestParameters requestParameters, int tournamentId);
 
+    Task<(ApiBaseResponse gameResponse, MetaData metaData)> GetGamesAsync(TournamentRequestParameters requestParameters, int tournamentId);
     Task<ApiBaseResponse> GetGameAsync(int tournamentId, int id);
+    Task<ApiBaseResponse> GetGameAsync(int tournamentId, string title);
 
     /// <summary>
     /// Retrieves a game by its identifier within a specific tournament.

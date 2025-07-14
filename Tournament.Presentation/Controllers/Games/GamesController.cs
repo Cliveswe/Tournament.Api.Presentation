@@ -103,25 +103,7 @@ namespace Tournaments.Presentation.Controllers.Games
         }
 
 
-        /// <summary>
-        /// Retrieves a specific game by its unique identifier, ensuring it belongs to the specified tournamentEntity.
-        /// </summary>
-        /// <param name="tournamentId">The ID of the tournamentEntity the game is associated with.</param>
-        /// <param name="id">The unique ID of the game to retrieve.</param>
-        /// <returns>
-        /// Returns a 200 OK response with the corresponding <see cref="GameDto"/> if found and associated with the tournamentEntity.
-        /// Returns 400 Bad Request if either the game ID or tournamentEntity ID is invalid.
-        /// Returns 404 Not Found if the game does not exist or does not belong to the specified tournamentEntity.
-        /// </returns>
-        /// <remarks>
-        /// This method performs the following validations:
-        /// <list type="number">
-        /// <item>Ensures both <paramref name="tournamentId"/> and <paramref name="id"/> are positive integers.</item>
-        /// <item>Fetches the game from the repository by ID.</item>
-        /// <item>Verifies that the game's tournamentEntity ID matches the provided tournamentEntity ID.</item>
-        /// <item>Uses AutoMapper to convert the entity to a DTO and returns the result.</item>
-        /// </list>
-        /// </remarks>
+
         // GET api/tournamentDetails/{tournamentId}/games/{id}
         [HttpGet("{id:int}")]
         public async Task<ActionResult<GameDto>> GetGameById(int tournamentId, int id)
@@ -158,20 +140,7 @@ namespace Tournaments.Presentation.Controllers.Games
             //return Ok(gameDto);
         }
 
-        /// <summary>
-        /// Retrieves a game by its title within a specific tournamentEntity.
-        /// </summary>
-        /// <param name="tournamentId">The ID of the tournamentEntity to search within.</param>
-        /// <param name="title">The title of the game to retrieve. Cannot be null or empty.</param>
-        /// <returns>
-        /// An <see cref="ActionResult{GameDto}"/> containing the game data if found, or an appropriate HTTP error response:
-        /// - 400 Bad Request if inputs are invalid
-        /// - 404 Not Found if no matching game is found
-        /// </returns>
-        /// <remarks>
-        /// This method trims the input title and filters by both game title and tournamentEntity ID.
-        /// It ensures games from other tournaments with the same title are excluded.
-        /// </remarks>
+
         // GET api/tournamentDetails/{tournamentId}/games/byTitle/{title}
         [HttpGet("byTitle/{title}")]
         public async Task<ActionResult<GameDto>> GetGameByTitle(int tournamentId, string title)
@@ -192,15 +161,19 @@ namespace Tournaments.Presentation.Controllers.Games
             #endregion
 
             // The GameService.GetAsync method internally verifies the tournament exists.
-            GameDto gameDto = await serviceManager.GameService.GetAsync(tournamentId, trimmedTitle);
+            //GameDto gameDto = await serviceManager.GameService.GetAsync(tournamentId, trimmedTitle);
+            ApiBaseResponse response = await serviceManager.GameService.GetGameAsync(tournamentId, trimmedTitle);
 
-            // If the gameDto is null, it means no game with the specified title exists in the tournamentEntity.
-            if(gameDto == null) {
-                // Return 404 Not Found.
-                return NotFound($"Game with title '{trimmedTitle}' was not found in Tournament with ID {tournamentId}.");
-            }
-            // Return the GameDto with HTTP 200 OK.
-            return Ok(gameDto);
+            //// If the gameDto is null, it means no game with the specified title exists in the tournamentEntity.
+            //if(gameDto == null) {
+            //    // Return 404 Not Found.
+            //    return NotFound($"Game with title '{trimmedTitle}' was not found in Tournament with ID {tournamentId}.");
+            //}
+
+            return response.Success ? Ok(response.GetOkResult<GameDto>()) : ProcessError(response);
+
+            //// Return the GameDto with HTTP 200 OK.
+            //return Ok(gameDto);
 
         }
 
