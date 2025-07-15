@@ -35,8 +35,14 @@ public class TournamentNotFoundResponse(int id)
 {
 }
 
-public class GameNotFoundResponse(int gameId) :
-    ApiNotFoundResponse($"Game with ID {gameId} was not found.")
+public class GameNotFoundByTitleResponse(string title) :
+    ApiNotFoundResponse($"Game with title {title} was not found.")
+{
+
+}
+
+public class GameNotFoundByIdResponse(int id) :
+    ApiNotFoundResponse($"Game with id {id} was not found.")
 {
 
 }

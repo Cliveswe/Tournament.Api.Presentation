@@ -57,7 +57,7 @@ public class GameService(IMapper mapper, IUnitOfWork uoW) : IGameService
 
         //
         if(gameExists is null || gameExists.TournamentDetailsId != tournamentId) {
-            return new TournamentNotFoundResponse(tournamentId);
+            return new GameNotFoundByIdResponse(id);
         }
         // Map the retrieved game entity to a GameDto object using AutoMapper.
         GameDto gameDto = mapper.Map<GameDto>(gameExists);
@@ -84,7 +84,7 @@ public class GameService(IMapper mapper, IUnitOfWork uoW) : IGameService
         Game? gameExists = await uoW.GameRepository.GetByTitleAndTournamentIdAsync(title, tournamentId);
         // Check if a game with the same title already exists for the specified tournament.
         if(gameExists is null) {
-            return new TournamentNotFoundResponse(tournamentId);
+            return new GameNotFoundByTitleResponse(title);
         }
 
         return new ApiOkResponse<GameDto>(mapper.Map<GameDto>(gameExists));

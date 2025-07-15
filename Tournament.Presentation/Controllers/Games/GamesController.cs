@@ -61,7 +61,6 @@ namespace Tournaments.Presentation.Controllers.Games
         /// not "api/..." there is a difference.
         // GET api/tournamentDetails/{tournamentId}/
         [HttpGet]
-        //public async Task<ActionResult<IEnumerable<GameDto>>> GetTournamentGames(int tournamentId)
         public async Task<ActionResult<IEnumerable<GameDto>>> GetTournamentGames([FromQuery] TournamentRequestParameters requestParameters, int tournamentId)
         {
 
@@ -84,35 +83,18 @@ namespace Tournaments.Presentation.Controllers.Games
 
             #endregion
 
-            // The GetAllAsync method returns a tuple containing the game details and meta-data for pagination.
-            //(IEnumerable<GameDto> gameDetails, MetaData metaData) = await serviceManager
-            //    .GameService
-            //    .GetAllAsync(requestParameters, tournamentId);
-
             (ApiBaseResponse gameResponse, MetaData metaData) = await serviceManager.GameService.GetGamesAsync(requestParameters, tournamentId);
 
-            //if(gameDetails is null || !gameDetails.Any()) {
-            //    // If no games are found, return 404 Not Found with a message
-            //    return NotFound($"No games found for tournamentEntity with ID {tournamentId}.");
-            //}
-
-            // Return the result with HTTP 200 OK
-            //return Ok(games);
-
-            if(gameResponse.Success is false) {
+            if(!gameResponse.Success) {
                 return ProcessError(gameResponse);
             }
 
             Response.Headers.Append("X-Pagination", System.Text.Json.JsonSerializer.Serialize(metaData));
 
             return Ok(gameResponse.GetOkResult<IEnumerable<GameDto>>());
-            //return Ok(gameDetails);
         }
 
-
-
         // GET api/tournamentDetails/{tournamentId}/games/{id}
-
         [HttpGet("{id:int}")]
         public async Task<ActionResult<GameDto>> GetGameById(int tournamentId, int id)
         {
@@ -139,7 +121,7 @@ namespace Tournaments.Presentation.Controllers.Games
         [HttpGet("byTitle/{title}")]
         public async Task<ActionResult<GameDto>> GetGameByTitle(int tournamentId, string title)
         {
-            #region Validation of input parameters
+            // Validation of input parameters
             // Validate the title input.
             if(string.IsNullOrWhiteSpace(title)) {
                 return BadRequest("Title must be a non-empty string.");
@@ -152,22 +134,11 @@ namespace Tournaments.Presentation.Controllers.Games
             if(tournamentId <= 0) {
                 return BadRequest("Invalid tournamentEntity id.");
             }
-            #endregion
 
             // The GameService.GetAsync method internally verifies the tournament exists.
-            //GameDto gameDto = await serviceManager.GameService.GetAsync(tournamentId, trimmedTitle);
             ApiBaseResponse response = await serviceManager.GameService.GetGameAsync(tournamentId, trimmedTitle);
 
-            //// If the gameDto is null, it means no game with the specified title exists in the tournamentEntity.
-            //if(gameDto == null) {
-            //    // Return 404 Not Found.
-            //    return NotFound($"Game with title '{trimmedTitle}' was not found in Tournament with ID {tournamentId}.");
-            //}
-
             return response.Success ? Ok(response.GetOkResult<GameDto>()) : ProcessError(response);
-
-            //// Return the GameDto with HTTP 200 OK.
-            //return Ok(gameDto);
 
         }
 
@@ -226,7 +197,7 @@ namespace Tournaments.Presentation.Controllers.Games
                 return errorResult;
             }
 
-            //Get target Game.
+            //Get the Game.
             ApiBaseResponse gameResponse = await serviceManager.GameService.GetGameAsync(tournamentId, id);
 
             // If the game with the specified ID does not exist, return 404 Not Found.
@@ -239,8 +210,9 @@ namespace Tournaments.Presentation.Controllers.Games
             patchDocument.ApplyTo(patchedDto, ModelState);
 
             // Check for error while applying the patch
-            TryValidatePatchedGame(patchedDto);
-            if(!ModelState.IsValid) {
+
+            if(!TryValidatePatchedGame(patchedDto)
+             || !ModelState.IsValid) {
                 return UnprocessableEntity(ModelState);
             }
 
@@ -256,23 +228,20 @@ namespace Tournaments.Presentation.Controllers.Games
             return result switch
             {
                 ApplyPatchResult.InvalidDateRange => BadRequest("Game start date must be within the tournament period."),
-                ApplyPatchResult.NoChanges => StatusCode(500, "Update failed. No changes were saved."),
+                ApplyPatchResult.NoChanges => StatusCode(409, "Update failed. No changes were saved."),
                 ApplyPatchResult.Success => NoContent(),
+                ApplyPatchResult.GameNotFound => StatusCode(404, "Game not found."),
                 _ => StatusCode(500, "Unexpected error occurred.")
             };
         }
 
         private bool TryValidatePatchedGame(GameDto dto)
         {
-            //if(string.IsNullOrWhiteSpace(dto.Title))
-            //    ModelState.AddModelError(nameof(dto.Title), "Game title is required.");
-
-            //if(dto.StartDate == default)
-            //    ModelState.AddModelError(nameof(dto.StartDate), "Start date is required.");
             ModelState.Clear();
 
             return TryValidateModel(dto, prefix: string.Empty);
         }
+
         private IActionResult? ValidatePatchRequest(int tournamentId, int id, JsonPatchDocument<GameDto>? patchDocument)
         {
             if(patchDocument is null) {
@@ -286,7 +255,7 @@ namespace Tournaments.Presentation.Controllers.Games
 
             if(tournamentId <= 0) {
                 // If the tournament ID is invalid (less than or equal to zero), return 400 Bad Request.
-                return BadRequest("Invalid tournamentEntity id.");
+                return BadRequest("Invalid tournament id.");
             }
             // Validate the game ID from the route parameter
 
