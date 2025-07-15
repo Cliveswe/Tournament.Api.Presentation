@@ -120,35 +120,34 @@ public class GameService(IMapper mapper, IUnitOfWork uoW) : IGameService
         return await uoW.GameRepository.AnyAsync(id);
     }
 
-    public async Task<(bool isSuccess, bool isDuplicate, GameDto? gameDto)> AddAsync(GameCreateDto gameCreateDto, int tournamentId)
+    //TODO: change AddAsync return tuple to include ApiOkResponse
+    //public async Task<(bool isSuccess, bool isDuplicate, GameDto? gameDto)> AddAsync(GameCreateDto gameCreateDto, int tournamentId)
+    public async Task<ApiBaseResponse> AddAsync(GameCreateDto gameCreateDto, int tournamentId)
     {
-        #region Validation of GameCreateDto with tournamentId
+        //Validation of GameCreateDto with tournamentId
+        // Check if there is a duplicate game in the tournament.
+        Game? existingGameEntity = await uoW.GameRepository.GetByTitleAndTournamentIdAsync(gameCreateDto.Name, tournamentId);
 
-        // Check if a game with the same title already exists for the specified tournament.
-        Game? gameEntity = await uoW.GameRepository.GetByTitleAndTournamentIdAsync(gameCreateDto.Name, tournamentId);
-
-        if(gameEntity is not null) {
+        if(existingGameEntity is not null) {
             // Duplicate game found, return a failure result with the existing game.
-            return (false, true, mapper.Map<GameDto>(gameEntity));
+            return new GameAlreadyExistsResponse(gameCreateDto.Name, tournamentId);
         }
 
-        #endregion
-
         // Map the GameCreateDto to a Game entity.
-        gameEntity = mapper.Map<Game>(gameCreateDto);
+        Game gameEntity = mapper.Map<Game>(gameCreateDto);
         // Associate the game with the specified tournament.
         gameEntity.TournamentDetailsId = tournamentId;
 
         // Persist the changes to the database.
         uoW.GameRepository.Add(gameEntity);
         int changes = await uoW.CompleteAsync();
+
         // Check if any changes were made to the database.
         if(changes == 0) {
             // If no changes were made, return a failure result.
-            return (false, false, null);
+            return new GameSaveFailedResponse();
         }
-
-        return (true, false, mapper.Map<GameDto>(gameEntity));
+        return new ApiOkResponse<GameDto>(mapper.Map<GameDto>(gameEntity));
     }
 
     public async Task<UpdateGameResult> UpdateAsync(int tournamentId, string title, GameUpdateDto gameUpdateDto)

@@ -26,9 +26,11 @@ public sealed class ApiOkResponse<TResult>(TResult result, string? message = nul
     public TResult Result { get; } = result;
 }
 
-public abstract class ApiNotFoundResponse(string message) : ApiBaseResponse(false, message)
+
+public class ApiNotFoundResponse(string message) : ApiBaseResponse(false, message)
 {
 }
+
 
 public class TournamentNotFoundResponse(int id)
     : ApiNotFoundResponse($"Tournament with id {id} not found.")
@@ -47,7 +49,11 @@ public class GameNotFoundByIdResponse(int id) :
 
 }
 
-public class GameDoesNotBelongToTournamentResponse(int gameId, int tournamentId) :
-    ApiNotFoundResponse($"Game with ID {gameId} does not belong to Tournament ID {tournamentId}.")
+public class GameAlreadyExistsResponse(string name, int tournamentId)
+    : ApiNotFoundResponse($"A game with the name '{name}' already exists in tournament ID {tournamentId}.")
+{
+}
+
+public class GameSaveFailedResponse() : ApiNotFoundResponse("Failed to save the new game.")
 {
 }

@@ -44,7 +44,8 @@ public interface IGameService
     /// <param name="gameCreateDto">The data transfer object containing the details of the game to add.</param>
     /// <param name="tournamentId">The unique identifier of the tournament to which the game belongs.</param>
     /// <returns>A tuple indicating success status, duplication status, and the added <see cref="GameDto"/> if successful.</returns>
-    Task<(bool isSuccess, bool isDuplicate, GameDto? gameDto)> AddAsync(GameCreateDto gameCreateDto, int tournamentId);
+    //Task<(bool isSuccess, bool isDuplicate, GameDto? gameDto)> AddAsync(GameCreateDto gameCreateDto, int tournamentId);
+    Task<ApiBaseResponse> AddAsync(GameCreateDto gameCreateDto, int tournamentId);
 
     /// <summary>
     /// Updates an existing game identified by its title within a tournament.

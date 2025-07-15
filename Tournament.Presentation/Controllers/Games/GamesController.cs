@@ -275,8 +275,7 @@ namespace Tournaments.Presentation.Controllers.Games
         [HttpPost]
         public async Task<ActionResult<GameDto>> PostGame([FromBody] GameCreateDto gameCreateDto, int tournamentId)
         {
-            #region Validation of Input Parameters
-
+            //Validate input Parameters
             if(!ModelState.IsValid) {
                 return BadRequest(ModelState);
             }
@@ -284,32 +283,20 @@ namespace Tournaments.Presentation.Controllers.Games
             // Trim whitespace from the gameEntity name
             gameCreateDto.Name = gameCreateDto.Name.Trim();
 
-            #endregion
-
-            #region Validation of Tournament existence and Game time.
-
             // Validate tournamentEntity existence
             if(!await serviceManager.TournamentService.ExistsAsync(tournamentId)) {
                 // Return 404 Not Found if the tournamentEntity does not exist
                 return NotFound($"Tournament with ID {tournamentId} does not exist.");
             }
 
-            #endregion
+            //(bool isSuccess, bool isDuplicate, GameDto? gameDto) = await serviceManager.GameService.AddAsync(gameCreateDto, tournamentId);
+            ApiBaseResponse response = await serviceManager.GameService.AddAsync(gameCreateDto, tournamentId);
+            return response.Success ?
+                CreatedAtAction(nameof(GetGameByTitle),
+                new { tournamentId, title = response.GetOkResult<GameDto>().Title },
+                response.GetOkResult<GameDto>()) :
+                ProcessError(response);
 
-            (bool isSuccess, bool isDuplicate, GameDto? gameDto) = await serviceManager.GameService.AddAsync(gameCreateDto, tournamentId);
-
-            if(isDuplicate) {
-                // If the game already exists, return 409 Conflict
-                return Conflict($"Game with title '{gameCreateDto.Name}' already exists in Tournament {tournamentId}.");
-            }
-
-            if(!isSuccess) {
-                // No changes saved - something went wrong
-                return StatusCode(StatusCodes.Status500InternalServerError, "Failed to save the new game.");
-            }
-
-            // Return 201 Created with the location header pointing to access the new resource.
-            return CreatedAtAction(nameof(GetGameByTitle), new { tournamentId, title = gameDto?.Title }, gameDto);
         }
 
         #endregion
@@ -357,24 +344,6 @@ namespace Tournaments.Presentation.Controllers.Games
 
         #endregion
 
-        #region Private Methods
 
-        /// <summary>
-        /// Validates whether the specified game time falls within the start and end dates of the tournamentEntity.
-        /// </summary>
-        /// <param name="gameTime">The time of the game to validate.</param>
-        /// <param name="tournament">The tournamentEntity against which the game time is validated.</param>
-        /// <returns>
-        /// <c>true</c> if the game time is strictly between the tournamentEntity's start and end dates; otherwise, <c>false</c>.
-        /// </returns>
-        /// <remarks>
-        /// This method ensures that the game is scheduled within the tournamentEntity's valid timeframe.
-        /// </remarks>
-        private bool IsGameTimeValid(DateTime gameTime, TournamentDto tournament)
-        {
-            return gameTime >= tournament.StartDate && gameTime <= tournament.EndDate;
-        }
-
-        #endregion
     }
 }
