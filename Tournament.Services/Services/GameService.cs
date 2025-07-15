@@ -120,8 +120,6 @@ public class GameService(IMapper mapper, IUnitOfWork uoW) : IGameService
         return await uoW.GameRepository.AnyAsync(id);
     }
 
-    //TODO: change AddAsync return tuple to include ApiOkResponse
-    //public async Task<(bool isSuccess, bool isDuplicate, GameDto? gameDto)> AddAsync(GameCreateDto gameCreateDto, int tournamentId)
     public async Task<ApiBaseResponse> AddAsync(GameCreateDto gameCreateDto, int tournamentId)
     {
         //Validation of GameCreateDto with tournamentId
