@@ -112,39 +112,26 @@ namespace Tournaments.Presentation.Controllers.Games
 
 
         // GET api/tournamentDetails/{tournamentId}/games/{id}
+
         [HttpGet("{id:int}")]
         public async Task<ActionResult<GameDto>> GetGameById(int tournamentId, int id)
         {
-            #region Validation of Input parameters
 
             // Validate the tournamentEntity ID and game ID
             if(id <= 0 || tournamentId <= 0) {
-                return BadRequest("Invalid tournamentEntity id or game id.");
+                return BadRequest("Invalid tournamentEntity id or game id.");//
             }
-
-            #endregion
-
-            #region Validation of Tournament existence, return 404 Not Found
 
             // Check if the tournamentEntity exists.
             if(!await serviceManager.TournamentService.ExistsAsync(tournamentId)) {
                 return NotFound($"Tournament with ID {tournamentId} does not exist.");
             }
 
-            #endregion 
-
             // Map the Game entity to a GameDto using AutoMapper
-            //var gameDto = await serviceManager.GameService.GetAsync(tournamentId, id);
             ApiBaseResponse response = await serviceManager.GameService.GetGameAsync(tournamentId, id);
 
             // If the gameDto is null, it means the game was not found in the specified tournamentEntity
-            //if(gameDto == null) {
-            //    return NotFound($"Game with ID {id} was not found in Tournament with ID {tournamentId}.");
-            //}
-            return response.Success ? Ok(response.GetOkResult<GameDto>()) : ProcessError(response);
-
-            // Return the GameDto with HTTP 200 OK
-            //return Ok(gameDto);
+            return response.Success ? Ok(response.GetOkResult<GameDto>()) : ProcessError(response);//
         }
 
 

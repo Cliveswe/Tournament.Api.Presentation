@@ -49,10 +49,13 @@ public class GameService(IMapper mapper, IUnitOfWork uoW) : IGameService
         return (new ApiOkResponse<IEnumerable<GameDto>>(gameDtos), pagedList.MetaData);
     }
 
+
     public async Task<ApiBaseResponse> GetGameAsync(int tournamentId, int id)
     {
+        //
         Game? gameExists = await uoW.GameRepository.GetByIdAsync(id);
 
+        //
         if(gameExists is null || gameExists.TournamentDetailsId != tournamentId) {
             return new TournamentNotFoundResponse(tournamentId);
         }
