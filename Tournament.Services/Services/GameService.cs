@@ -32,14 +32,22 @@ public class GameService(IMapper mapper, IUnitOfWork uoW) : IGameService
 
     public async Task<(ApiBaseResponse gameResponse, MetaData metaData)> GetGamesAsync(TournamentRequestParameters requestParameters, int tournamentId)
     {
-        // Retrieve all games associated with the specified tournament ID.
-        // var gamesResult = await uoW.GameRepository.GetByTournamentIdAsync(tournamentId);
-        // Map the retrieved game entities to GameDto objects using AutoMapper.
-        //IEnumerable<GameDto> games = mapper.Map<IEnumerable<GameDto>>(gamesResult);
+        TournamentRequestParameters clampedParameters = ClampRequestParameters(requestParameters);
 
-        var pagedList = await uoW
+        PagedList<Game> pagedList = await uoW
             .GameRepository
-            .GetByTournamentIdAsync(requestParameters, tournamentId);
+            .GetByTournamentIdAsync(clampedParameters, tournamentId);
+
+        // Clamp PageNumber if it exceeds total pages
+        if(pagedList.MetaData.TotalPages > 0 && clampedParameters.PageNumber > pagedList.MetaData.TotalPages) {
+            clampedParameters.PageNumber = pagedList.MetaData.TotalPages;
+
+            // Fetch again with corrected PageNumber
+            pagedList = await uoW
+                .GameRepository
+                .GetByTournamentIdAsync(clampedParameters, tournamentId);
+        }
+
         IEnumerable<GameDto> gameDtos = mapper.Map<IEnumerable<GameDto>>(pagedList.Items);
 
         if(!gameDtos.Any()) {
@@ -49,6 +57,16 @@ public class GameService(IMapper mapper, IUnitOfWork uoW) : IGameService
         return (new ApiOkResponse<IEnumerable<GameDto>>(gameDtos), pagedList.MetaData);
     }
 
+    private static TournamentRequestParameters ClampRequestParameters(TournamentRequestParameters requestParameters)
+    {
+        // Clamp page size using the setter logic in RequestParameters
+        return new TournamentRequestParameters
+        {
+            PageSize = requestParameters.PageSize,
+            PageNumber = requestParameters.PageNumber,
+            IncludeGames = requestParameters.IncludeGames
+        };
+    }
 
     public async Task<ApiBaseResponse> GetGameAsync(int tournamentId, int id)
     {
