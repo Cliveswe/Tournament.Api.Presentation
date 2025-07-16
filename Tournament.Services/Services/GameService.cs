@@ -120,7 +120,7 @@ public class GameService(IMapper mapper, IUnitOfWork uoW) : IGameService
         return await uoW.GameRepository.AnyAsync(id);
     }
 
-    public async Task<ApiBaseResponse> AddAsync(GameCreateDto gameCreateDto, int tournamentId)
+    public async Task<ApiBaseResponse> AddGameAsync(GameCreateDto gameCreateDto, int tournamentId)
     {
         //Validation of GameCreateDto with tournamentId
         // Check if there is a duplicate game in the tournament.
@@ -129,6 +129,21 @@ public class GameService(IMapper mapper, IUnitOfWork uoW) : IGameService
         if(existingGameEntity is not null) {
             // Duplicate game found, return a failure result with the existing game.
             return new GameAlreadyExistsResponse(gameCreateDto.Name, tournamentId);
+        }
+
+        int MaxGamesPerTournament = 10;
+
+        // Use your existing paginated method with a high page size to fetch count
+        var requestParams = new TournamentRequestParameters
+        {
+            PageNumber = 1,
+            PageSize = MaxGamesPerTournament + 1 // To check if limit is already exceeded
+        };
+
+        PagedList<Game> games = await uoW.GameRepository.GetByTournamentIdAsync(requestParams,tournamentId);
+
+        if(games.Items.Count >= MaxGamesPerTournament) {
+            return new MaxGameLimitReachedResponse(MaxGamesPerTournament, tournamentId);
         }
 
         // Map the GameCreateDto to a Game entity.

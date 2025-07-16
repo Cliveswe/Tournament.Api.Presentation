@@ -290,7 +290,8 @@ namespace Tournaments.Presentation.Controllers.Games
             }
 
             //(bool isSuccess, bool isDuplicate, GameDto? gameDto) = await serviceManager.GameService.AddAsync(gameCreateDto, tournamentId);
-            ApiBaseResponse response = await serviceManager.GameService.AddAsync(gameCreateDto, tournamentId);
+            ApiBaseResponse response = await serviceManager.GameService.AddGameAsync(gameCreateDto, tournamentId);
+
             return response.Success ?
                 CreatedAtAction(nameof(GetGameByTitle),
                 new { tournamentId, title = response.GetOkResult<GameDto>().Title },
