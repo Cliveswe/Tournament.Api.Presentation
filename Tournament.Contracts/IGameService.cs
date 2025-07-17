@@ -23,14 +23,6 @@ public interface IGameService
     Task<ApiBaseResponse> GetGameAsync(int tournamentId, string title);
 
     /// <summary>
-    /// Retrieves a game by its identifier within a specific tournament.
-    /// </summary>
-    /// <param name="tournamentId">The unique identifier of the tournament.</param>
-    /// <param name="id">The unique identifier of the game.</param>
-    /// <returns>The <see cref="GameDto"/> if found; otherwise, <c>null</c>.</returns>
-    Task<GameDto?> GetAsync(int tournamentId, int id);
-
-    /// <summary>
     /// Retrieves a game by its title within a specific tournament.
     /// </summary>
     /// <param name="tournamentId">The unique identifier of the tournament.</param>
