@@ -8,6 +8,7 @@
 //        contracts through a unified interface.
 // -----------------------------------------------------------------------------
 
+
 namespace Service.Contracts;
 
 /// <summary>
@@ -35,4 +36,7 @@ public interface IServiceManager
     /// Gets the service responsible for user authentication and authorization.
     /// </summary>
     IAuthService AuthService { get; }
+
+    Task<bool> DoesGameExist(int id);
+    Task<bool> DoesTournamentExist(int id);
 }

@@ -76,18 +76,6 @@ public class GameService(IMapper mapper, IUnitOfWork uoW) : IGameService
         return new ApiOkResponse<GameDto>(mapper.Map<GameDto>(gameExists));
     }
 
-    //public async Task<GameDto> GetAsync(int tournamentId, string title)
-    //{
-
-    //    Game? game = await uoW.GameRepository.GetByTitleAndTournamentIdAsync(title, tournamentId);
-    //    // Check if a game with the same title already exists for the specified tournament.
-    //    if(game == null) {
-    //        return mapper.Map<GameDto>(game);
-    //    }
-
-    //    return mapper.Map<GameDto>(game);
-    //}
-
     public async Task<bool> RemoveAsync(int tournamentId, int id)
     {
         Game? game = await uoW.GameRepository.GetByIdAsync(id);

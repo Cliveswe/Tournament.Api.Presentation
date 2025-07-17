@@ -34,6 +34,10 @@ public class ServiceManager(
     /// </summary>
     public ITournamentService TournamentService => tournamentService.Value;
 
+    public async Task<bool> DoesGameExist(int id) => await gameService.Value.ExistsAsync(id);
+
+    public async Task<bool> DoesTournamentExist(int id) => await tournamentService.Value.ExistsAsync(id);
+
     /// <summary>
     /// Gets the game service instance for managing game-specific logic and operations.
     /// </summary>
