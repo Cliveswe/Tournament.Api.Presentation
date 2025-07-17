@@ -74,7 +74,8 @@ namespace Tournaments.Presentation.Controllers.Games
             }
 
             // Check if the tournamentEntity with the specified ID exists
-            bool exists = await serviceManager.TournamentService.ExistsAsync(tournamentId);
+            //bool exists = await serviceManager.TournamentService.ExistsAsync(tournamentId);
+            bool exists = await serviceManager.DoesTournamentExist(tournamentId);
 
             // If the tournamentEntity with the specified ID does not exist, return 404 Not Found
             if(!exists) {
@@ -105,7 +106,7 @@ namespace Tournaments.Presentation.Controllers.Games
             }
 
             // Check if the tournamentEntity exists.
-            if(!await serviceManager.TournamentService.ExistsAsync(tournamentId)) {
+            if(!await serviceManager.DoesTournamentExist(tournamentId)) {
                 return NotFound($"Tournament with ID {tournamentId} does not exist.");
             }
 
@@ -284,7 +285,8 @@ namespace Tournaments.Presentation.Controllers.Games
             gameCreateDto.Name = gameCreateDto.Name.Trim();
 
             // Validate tournamentEntity existence
-            if(!await serviceManager.TournamentService.ExistsAsync(tournamentId)) {
+            //if(!await serviceManager.TournamentService.ExistsAsync(tournamentId)) {
+            if(!await serviceManager.DoesTournamentExist(tournamentId)) {
                 // Return 404 Not Found if the tournamentEntity does not exist
                 return NotFound($"Tournament with ID {tournamentId} does not exist.");
             }
@@ -320,7 +322,8 @@ namespace Tournaments.Presentation.Controllers.Games
             #region Validation of Tournament and Game existence.
 
             // If the tournamentEntity does not exist.
-            if(!await serviceManager.TournamentService.ExistsAsync(tournamentId)) {
+            //if(!await serviceManager.TournamentService.ExistsAsync(tournamentId)) {
+            if(!await serviceManager.DoesTournamentExist(tournamentId)) {
                 // Return 404 Not Found
                 return NotFound("Tournament with the specified ID was not found.");
             }
