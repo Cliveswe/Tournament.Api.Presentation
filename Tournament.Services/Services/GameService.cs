@@ -12,6 +12,7 @@ using Tournaments.Shared.Request;
 namespace Tournaments.Services.Services;
 public class GameService(IMapper mapper, IUnitOfWork uoW) : IGameService
 {
+    public int MaxGamesPerTournament { get; init; } = 10;
 
     public async Task<(ApiBaseResponse gameResponse, MetaData metaData)> GetGamesAsync(TournamentRequestParameters requestParameters, int tournamentId)
     {
@@ -104,8 +105,6 @@ public class GameService(IMapper mapper, IUnitOfWork uoW) : IGameService
             // Duplicate game found, return a failure result with the existing game.
             return new GameAlreadyExistsResponse(gameCreateDto.Name, tournamentId);
         }
-
-        int MaxGamesPerTournament = 10;
 
         // Use your existing paginated method with a high page size to fetch count
         var requestParams = new TournamentRequestParameters

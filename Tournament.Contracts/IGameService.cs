@@ -10,6 +10,9 @@ namespace Service.Contracts;
 /// </summary>
 public interface IGameService
 {
+    int MaxGamesPerTournament { get; }
+
+
     /// <summary>
     /// Retrieves all games for a specified tournament.
     /// </summary>
