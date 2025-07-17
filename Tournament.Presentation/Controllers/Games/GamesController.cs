@@ -307,9 +307,8 @@ namespace Tournaments.Presentation.Controllers.Games
         #region DELETE api/tournamentDetails/1/Games/5
 
         [HttpDelete("{id:int}")]
-        public async Task<IActionResult> DeleteGame(int id, int tournamentId)
+        public async Task<ActionResult<GameDto>> DeleteGame(int id, int tournamentId)
         {
-            #region Validation of Input Parameters
 
             // Validate the ID to ensure it is a positive integer.
             // If the ID is less than or equal to zero, return 400 Bad Request.
@@ -317,33 +316,16 @@ namespace Tournaments.Presentation.Controllers.Games
                 return BadRequest("Invalid tournamentEntity id or game id.");
             }
 
-            #endregion
-
-            #region Validation of Tournament and Game existence.
-
             // If the tournamentEntity does not exist.
-            //if(!await serviceManager.TournamentService.ExistsAsync(tournamentId)) {
             if(!await serviceManager.DoesTournamentExist(tournamentId)) {
                 // Return 404 Not Found
                 return NotFound("Tournament with the specified ID was not found.");
             }
 
-            // If the game does not exist. 
-            if(!await serviceManager.GameService.ExistsAsync(id)) {
-                // Return 404 Not Found
-                return NotFound($"Game with ID {id} was not found.");
-            }
+            ApiBaseResponse response = await serviceManager.GameService.RemoveAsync(tournamentId, id);
 
-            #endregion
-
-            // If the game does not exist or does not belong to the specified tournamentEntity.
-            if(!await serviceManager.GameService.RemoveAsync(tournamentId, id)) {
-                // Return 404 Not Found
-                return NotFound($"Game with ID {id} in Tournament {tournamentId} was not found.");
-            }
-
-            // Return 200 OK with a confirmation message
-            return Ok($"Game with ID {id} has bee deleted successfully.");
+            // Return OK with a confirmation error message.
+            return response.Success ? Ok(response.Message) : ProcessError(response);
         }
 
         #endregion

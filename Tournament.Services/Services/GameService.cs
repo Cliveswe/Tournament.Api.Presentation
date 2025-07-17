@@ -77,18 +77,25 @@ public class GameService(IMapper mapper, IUnitOfWork uoW) : IGameService
         return new ApiOkResponse<GameDto>(mapper.Map<GameDto>(gameExists));
     }
 
-    public async Task<bool> RemoveAsync(int tournamentId, int id)
+    //public async Task<bool> RemoveAsync(int tournamentId, int id)
+    public async Task<ApiBaseResponse> RemoveAsync(int tournamentId, int id)
     {
         Game? game = await uoW.GameRepository.GetByIdAsync(id);
 
+        if(game == null) {
+
+            return new ApiNotFoundResponse($"Could not remove game from tournament.");
+        }
         // Check if the game exists and is part of the specified tournament.
-        if(game!.TournamentDetailsId != tournamentId) {
-            return false;
+        if(game.TournamentDetailsId != tournamentId) {
+
+            return new ApiNotFoundResponse($"Could not remove game {game.Title} from tournament.");
         }
 
         uoW.GameRepository.Remove(game);
         await uoW.CompleteAsync();
-        return true;
+
+        return new ApiOkResponse<GameDto>(mapper.Map<GameDto>(game));
     }
     public async Task<bool> ExistsAsync(int id)
     {

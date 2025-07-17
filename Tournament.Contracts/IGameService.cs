@@ -61,13 +61,8 @@ public interface IGameService
     /// <returns>An <see cref="ApplyPatchResult"/> indicating the outcome of the patch operation.</returns>
     Task<ApplyPatchResult> ApplyToAsync(int tournamentId, int id, GameDto gameDto, TournamentDto tournamentDto);
 
-    /// <summary>
-    /// Removes a game from a tournament by its identifier.
-    /// </summary>
-    /// <param name="tournamentId">The unique identifier of the tournament.</param>
-    /// <param name="id">The unique identifier of the game to remove.</param>
-    /// <returns><c>true</c> if the game was successfully removed; otherwise, <c>false</c>.</returns>
-    Task<bool> RemoveAsync(int tournamentId, int id);
+
+    Task<ApiBaseResponse> RemoveAsync(int tournamentId, int id);
 
     /// <summary>
     /// Checks if a game exists by its unique identifier.
