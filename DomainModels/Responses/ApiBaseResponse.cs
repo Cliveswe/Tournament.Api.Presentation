@@ -14,7 +14,7 @@ public abstract class ApiBaseResponse(bool success, string? message = null, int 
     //Helper methods
     public bool IsNotFound() => this is ApiNotFoundResponse;
     public bool IsMaxGameLimitReached() => this is MaxGameLimitReachedResponse;
-
+    public bool IsBadGamePatchDocumentResponse() => this is BadGamePatchDocumentResponse;
 
     public TResultType GetOkResult<TResultType>()
     {
@@ -69,34 +69,9 @@ public class MaxGameLimitReachedResponse(int maxGamesPerTournament, int tourname
 {
 }
 
+public class BadGamePatchDocumentResponse(string message)
+    : ApiBaseResponse(false, message, StatusCodes.Status400BadRequest)
+{ }
 
-//public class TournamentNotFoundResponse(int id)
-//    : ApiBaseResponse(false, $"Tournament with id {id} not found.")
-//{
-//}
 
-//public class GameNotFoundByTitleResponse(string title) :
-//    ApiBaseResponse(false, $"Game with title {title} was not found.")
-//{
-
-//}
-
-//public class GameNotFoundByIdResponse(int id) :
-//    ApiBaseResponse(false, $"Game with id {id} was not found.")
-//{
-
-//}
-
-//public class GameAlreadyExistsResponse(string name, int tournamentId)
-//    : ApiBaseResponse(false, $"A game with the name '{name}' already exists in tournament ID {tournamentId}.")
-//{
-//}
-
-//public class GameSaveFailedResponse() : ApiBaseResponse(false, "Failed to save the new game.")
-//{
-//}
-
-//public class MaxGameLimitReachedResponse(int maxGamesPerTournament, int tournamentId)
-//    : ApiBaseResponse(false, $"Tournament {tournamentId} has reached its maximum number of {maxGamesPerTournament} games per tournament.")
-//{ }
 #endregion
