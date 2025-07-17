@@ -243,26 +243,30 @@ namespace Tournaments.Presentation.Controllers.Games
             return TryValidateModel(dto, prefix: string.Empty);
         }
 
-        private IActionResult? ValidatePatchRequest(int tournamentId, int id, JsonPatchDocument<GameDto>? patchDocument)
+        private ApiBaseResponse? ValidatePatchRequest(int tournamentId, int id, JsonPatchDocument<GameDto>? patchDocument)
         {
             if(patchDocument is null) {
-                return BadRequest("Patch document cannot be null.");
+                //return BadRequest("Patch document cannot be null.");
+                return new BadGamePatchDocumentResponse("Patch document cannot be null.");
             }
 
             if(patchDocument.Operations is null || !patchDocument.Operations.Any()) {
-                return BadRequest("Patch document must contain at least one operation.");
+                //return BadRequest("Patch document must contain at least one operation.");
+                return new BadGamePatchDocumentResponse("Patch document must contain at least one operation.");
             }
 
 
             if(tournamentId <= 0) {
                 // If the tournament ID is invalid (less than or equal to zero), return 400 Bad Request.
-                return BadRequest("Invalid tournament id.");
+                //return BadRequest("Invalid tournament id.");
+                return new BadGamePatchDocumentResponse("Invalid tournament id.");
             }
             // Validate the game ID from the route parameter
 
             if(id <= 0) {
                 // If the game ID is invalid (less than or equal to zero), return 400 Bad Request.
-                return BadRequest("Invalid game id.");
+                //return BadRequest("Invalid game id.");
+                return new BadGamePatchDocumentResponse("Invalid game id.");
             }
 
             return null;
