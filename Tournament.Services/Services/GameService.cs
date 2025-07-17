@@ -12,7 +12,7 @@ using Tournaments.Shared.Request;
 namespace Tournaments.Services.Services;
 public class GameService(IMapper mapper, IUnitOfWork uoW) : IGameService
 {
-    public int MaxGamesPerTournament { get; init; } = 10;
+    public int MaxNumberOfGames { get; init; } = 10;
 
     public async Task<(ApiBaseResponse gameResponse, MetaData metaData)> GetGamesAsync(TournamentRequestParameters requestParameters, int tournamentId)
     {
@@ -110,13 +110,13 @@ public class GameService(IMapper mapper, IUnitOfWork uoW) : IGameService
         var requestParams = new TournamentRequestParameters
         {
             PageNumber = 1,
-            PageSize = MaxGamesPerTournament + 1 // To check if limit is already exceeded
+            PageSize = MaxNumberOfGames + 1 // To check if limit is already exceeded
         };
 
         PagedList<Game> games = await uoW.GameRepository.GetByTournamentIdAsync(requestParams,tournamentId);
 
-        if(games.Items.Count >= MaxGamesPerTournament) {
-            return new MaxGameLimitReachedResponse(MaxGamesPerTournament, tournamentId);
+        if(games.Items.Count >= MaxNumberOfGames) {
+            return new MaxGameLimitReachedResponse(MaxNumberOfGames, tournamentId);
         }
 
         // Map the GameCreateDto to a Game entity.

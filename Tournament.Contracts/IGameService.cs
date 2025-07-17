@@ -10,7 +10,7 @@ namespace Service.Contracts;
 /// </summary>
 public interface IGameService
 {
-    int MaxGamesPerTournament { get; }
+    int MaxNumberOfGames { get; }
 
 
     /// <summary>
