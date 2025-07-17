@@ -190,12 +190,12 @@ namespace Tournaments.Presentation.Controllers.Games
 
         [Consumes("application/json-patch+json")]//Make sure your controller/method allows only application/json-patch+json to improve client request correctness.
         [HttpPatch("{id:int}")]
-        public async Task<IActionResult> PatchGame(int tournamentId, int id, [FromBody] JsonPatchDocument<GameDto> patchDocument)
+        public async Task<ActionResult> PatchGame(int tournamentId, int id, [FromBody] JsonPatchDocument<GameDto> patchDocument)
         {
             //Early validation.
-            var errorResult = ValidatePatchRequest(tournamentId, id, patchDocument);
+            ApiBaseResponse? errorResult = ValidatePatchRequest(tournamentId, id, patchDocument);
             if(errorResult is not null) {
-                return errorResult;
+                return ProcessError(errorResult);
             }
 
             //Get the Game.
@@ -211,29 +211,23 @@ namespace Tournaments.Presentation.Controllers.Games
             patchDocument.ApplyTo(patchedDto, ModelState);
 
             // Check for error while applying the patch
-
-            if(!TryValidatePatchedGame(patchedDto)
-             || !ModelState.IsValid) {
+            if(!TryValidatePatchedGame(patchedDto) || !ModelState.IsValid) {
                 return UnprocessableEntity(ModelState);
             }
 
             TournamentDto? tournamentDto = await serviceManager.TournamentService.GetByIdAsync(tournamentId);
 
             if(tournamentDto is null) {
-                return NotFound($"Tournament with ID {tournamentId} not found.");
+                //return NotFound($"Tournament with ID {tournamentId} not found.");
+                return ProcessError(
+                    new BadGamePatchDocumentResponse($"Tournament with ID {tournamentId} not found.")
+                    );
             }
 
-            ApplyPatchResult result = await serviceManager.GameService.ApplyToAsync(tournamentId, id, patchedDto, tournamentDto);
+            //Apply the patched dto to the db.
+            ApiBaseResponse response = await serviceManager.GameService.ApplyToAsync(tournamentId, id, patchedDto, tournamentDto);
 
-
-            return result switch
-            {
-                ApplyPatchResult.InvalidDateRange => BadRequest("Game start date must be within the tournament period."),
-                ApplyPatchResult.NoChanges => StatusCode(409, "Update failed. No changes were saved."),
-                ApplyPatchResult.Success => NoContent(),
-                ApplyPatchResult.GameNotFound => StatusCode(404, "Game not found."),
-                _ => StatusCode(500, "Unexpected error occurred.")
-            };
+            return response.Success ? Ok(response.GetOkResult<GameDto>()) : ProcessError(response);
         }
 
         private bool TryValidatePatchedGame(GameDto dto)
@@ -246,26 +240,22 @@ namespace Tournaments.Presentation.Controllers.Games
         private ApiBaseResponse? ValidatePatchRequest(int tournamentId, int id, JsonPatchDocument<GameDto>? patchDocument)
         {
             if(patchDocument is null) {
-                //return BadRequest("Patch document cannot be null.");
                 return new BadGamePatchDocumentResponse("Patch document cannot be null.");
             }
 
             if(patchDocument.Operations is null || !patchDocument.Operations.Any()) {
-                //return BadRequest("Patch document must contain at least one operation.");
                 return new BadGamePatchDocumentResponse("Patch document must contain at least one operation.");
             }
 
 
             if(tournamentId <= 0) {
                 // If the tournament ID is invalid (less than or equal to zero), return 400 Bad Request.
-                //return BadRequest("Invalid tournament id.");
                 return new BadGamePatchDocumentResponse("Invalid tournament id.");
             }
             // Validate the game ID from the route parameter
 
             if(id <= 0) {
                 // If the game ID is invalid (less than or equal to zero), return 400 Bad Request.
-                //return BadRequest("Invalid game id.");
                 return new BadGamePatchDocumentResponse("Invalid game id.");
             }
 

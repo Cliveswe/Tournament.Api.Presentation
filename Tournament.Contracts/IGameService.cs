@@ -51,15 +51,8 @@ public interface IGameService
     /// <returns>An <see cref="UpdateGameResult"/> indicating the result of the update operation.</returns>
     Task<UpdateGameResult> UpdateAsync(int tournamentId, string title, GameUpdateDto gameUpdateDto);
 
-    /// <summary>
-    /// Applies a JSON Patch document to a game within a tournament and validates the update.
-    /// </summary>
-    /// <param name="tournamentId">The unique identifier of the tournament.</param>
-    /// <param name="id">The unique identifier of the game to patch.</param>
-    /// <param name="gameDto">The current <see cref="GameDto"/> representing the game.</param>
-    /// <param name="tournamentDto">The <see cref="TournamentDto"/> representing the tournament details.</param>
-    /// <returns>An <see cref="ApplyPatchResult"/> indicating the outcome of the patch operation.</returns>
-    Task<ApplyPatchResult> ApplyToAsync(int tournamentId, int id, GameDto gameDto, TournamentDto tournamentDto);
+
+    Task<ApiBaseResponse> ApplyToAsync(int tournamentId, int id, GameDto gameDto, TournamentDto tournamentDto);
 
 
     Task<ApiBaseResponse> RemoveAsync(int tournamentId, int id);

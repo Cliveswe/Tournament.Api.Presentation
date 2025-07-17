@@ -15,6 +15,10 @@ public abstract class ApiBaseResponse(bool success, string? message = null, int 
     public bool IsNotFound() => this is ApiNotFoundResponse;
     public bool IsMaxGameLimitReached() => this is MaxGameLimitReachedResponse;
     public bool IsBadGamePatchDocumentResponse() => this is BadGamePatchDocumentResponse;
+    public bool IsGameNotFoundByIdResponse() => this is GameNotFoundByIdResponse;
+    public bool NotModifiedResponse() => this is NotModifiedResponse;
+    public bool UnProcessableContentResponse() => this is UnProcessableContentResponse;
+
 
     public TResultType GetOkResult<TResultType>()
     {
@@ -73,5 +77,11 @@ public class BadGamePatchDocumentResponse(string message)
     : ApiBaseResponse(false, message, StatusCodes.Status400BadRequest)
 { }
 
+public class NotModifiedResponse(string message)
+    : ApiBaseResponse(false, message, StatusCodes.Status304NotModified)
+{ }
 
+public class UnProcessableContentResponse(string message)
+    : ApiBaseResponse(false, message, StatusCodes.Status422UnprocessableEntity)
+{ }
 #endregion

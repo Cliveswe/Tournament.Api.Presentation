@@ -167,17 +167,19 @@ public class GameService(IMapper mapper, IUnitOfWork uoW) : IGameService
         return UpdateGameResult.Success;
     }
 
-    public async Task<ApplyPatchResult> ApplyToAsync(int tournamentId, int id, GameDto gameDto, TournamentDto tournamentDto)
+    public async Task<ApiBaseResponse> ApplyToAsync(int tournamentId, int id, GameDto gameDto, TournamentDto tournamentDto)
     {
 
         if(gameDto.StartDate < tournamentDto.StartDate || gameDto.StartDate > tournamentDto.EndDate) {
-            return ApplyPatchResult.InvalidDateRange;
+            //return ApplyPatchResult.InvalidDateRange;
+            return new UnProcessableContentResponse("Date is out of range for the tournament.");
         }
 
         // Fetch the existing game by ID.
         Game? gameEntity = await uoW.GameRepository.GetByIdAsync(id);
         if(gameEntity is null) {
-            return ApplyPatchResult.GameNotFound;
+            //return ApplyPatchResult.GameNotFound;
+            return new GameNotFoundByIdResponse(id);
         }
 
         // Map gameEntity to a GameDto.
@@ -189,9 +191,11 @@ public class GameService(IMapper mapper, IUnitOfWork uoW) : IGameService
         // Persist the changes to the database.
         int result = await uoW.CompleteAsync();
         if(result == 0) {
-            return ApplyPatchResult.NoChanges;
+            //return ApplyPatchResult.NoChanges;
+            return new NotModifiedResponse("The game entity was not updated.");
         }
 
-        return ApplyPatchResult.Success;
+        //return ApplyPatchResult.Success;
+        return new ApiOkResponse<GameDto>(gameDto);
     }
 }
