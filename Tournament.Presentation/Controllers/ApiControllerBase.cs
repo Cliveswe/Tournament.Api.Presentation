@@ -9,37 +9,54 @@ namespace Tournaments.Presentation.Controllers;
 [ApiController]
 public class ApiControllerBase : ControllerBase
 {
-    private IResult CreateProblemResult(string title, string detail, int statusCode)
+    private ProblemDetails CreateProblemResult(string title, string detail, int statusCode, DateTime timestamp)
     {
-        return Results.Problem(
-            title: title,
-            detail: detail,
-            statusCode: statusCode,
-            instance: HttpContext.Request.Path
-        );
+        var problemDetails = new ProblemDetails
+        {
+            Title = title,
+            Detail = detail,
+            Status = statusCode,
+            Instance = HttpContext.Request.Path
+        };
+
+        problemDetails.Extensions["Time Stamp"] = timestamp;
+
+        return problemDetails;
     }
+
 
 
     [NonAction]
     public ActionResult ProcessError(ApiBaseResponse baseResponse)
     {
-
-        return baseResponse switch
+        ProblemDetails problem = baseResponse switch
         {
-            //Checks type and assigns instance to notFound
-            ApiNotFoundResponse notFound => NotFound(CreateProblemResult(
-                "Not found", notFound.Message!, notFound.StatusCode)),
+            ApiNotFoundResponse notFound => CreateProblemResult(
+            "Not found", notFound.Message!, notFound.StatusCode, notFound.TimeStamp),
 
-            //Checks type and assigns instance to limitReached
-            MaxGameLimitReachedResponse limitReached => Conflict(CreateProblemResult(
-                "Maximum game limit reached", limitReached.Message!, limitReached.StatusCode)),
-            GameAlreadyExistsResponse alreadyExists => Conflict(CreateProblemResult(
-                "Conflict", alreadyExists.Message!, alreadyExists.StatusCode)),
+            MaxGameLimitReachedResponse limitReached => CreateProblemResult(
+            "Maximum game limit reached", limitReached.Message!, limitReached.StatusCode, limitReached.TimeStamp),
 
-            GameSaveFailedResponse saveFailed => StatusCode(saveFailed.StatusCode, CreateProblemResult(
-                "Save Failed", saveFailed.Message!, saveFailed.StatusCode)),
+            GameAlreadyExistsResponse alreadyExists => CreateProblemResult(
+            "Conflict", alreadyExists.Message!, alreadyExists.StatusCode, alreadyExists.TimeStamp),
 
-            _ => throw new NotImplementedException()
+            GameSaveFailedResponse saveFailed => CreateProblemResult(
+            "Save Failed", saveFailed.Message!, saveFailed.StatusCode, saveFailed.TimeStamp),
+
+            NoChangesMadeResponse noChangesMade => CreateProblemResult(
+            "No Changes Made", noChangesMade.Message!, noChangesMade.StatusCode, noChangesMade.TimeStamp),
+
+            UnProcessableContentResponse unprocessable => CreateProblemResult(
+            "Non-processable Content", unprocessable.Message!, unprocessable.StatusCode, unprocessable.TimeStamp),
+
+            _ => CreateProblemResult(
+            "Error", baseResponse.Message ?? "An error occurred.", baseResponse.StatusCode, baseResponse.TimeStamp)
+        };
+
+        return new ObjectResult(problem)
+        {
+            StatusCode = problem.Status
         };
     }
+
 }

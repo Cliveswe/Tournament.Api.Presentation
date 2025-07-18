@@ -18,7 +18,7 @@ public abstract class ApiBaseResponse(bool success, string? message = null, int 
     public bool IsGameNotFoundByIdResponse() => this is GameNotFoundByIdResponse;
     public bool NotModifiedResponse() => this is NotModifiedResponse;
     public bool UnProcessableContentResponse() => this is UnProcessableContentResponse;
-
+    public bool NoChangesMadeResponse() => this is NoChangesMadeResponse;
 
     public TResultType GetOkResult<TResultType>()
     {
@@ -84,5 +84,6 @@ public class UnProcessableContentResponse(string message)
 { }
 
 public class NoChangesMadeResponse(string message)
-    : ApiBaseResponse(false, message, StatusCodes.Status204NoContent);
+    : ApiBaseResponse(false, message, StatusCodes.Status422UnprocessableEntity)
+{ }
 #endregion
