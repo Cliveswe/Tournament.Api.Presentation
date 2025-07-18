@@ -123,7 +123,7 @@ public class GameService(IMapper mapper, IUnitOfWork uoW) : IGameService
         PagedList<Game> games = await uoW.GameRepository.GetByTournamentIdAsync(requestParams,tournamentId);
 
         if(games.Items.Count >= MaxNumberOfGames) {
-            return new MaxGameLimitReachedResponse(MaxNumberOfGames, tournamentId);
+            return new MaxGameLimitReachedResponse($"Tournament {tournamentId} has reached its maximum number of {MaxNumberOfGames} games per tournament.");
         }
 
         // Map the GameCreateDto to a Game entity.
@@ -145,6 +145,8 @@ public class GameService(IMapper mapper, IUnitOfWork uoW) : IGameService
 
     public async Task<UpdateGameResult> UpdateAsync(int tournamentId, string title, GameUpdateDto gameUpdateDto)
     {
+        //TODO: re-factor the return type of this method.
+
         // Retrieve the game by title and tournament ID.
         Game? gameEntity = await uoW.GameRepository.GetByTitleAndTournamentIdAsync(title, tournamentId);
 

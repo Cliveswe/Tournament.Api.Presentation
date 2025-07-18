@@ -226,7 +226,6 @@ namespace Tournaments.Presentation.Controllers.Games
 
             //Apply the patched dto to the db.
             ApiBaseResponse response = await serviceManager.GameService.ApplyToAsync(tournamentId, id, patchedDto, tournamentDto);
-
             return response.Success ? Ok(response.GetOkResult<GameDto>()) : ProcessError(response);
         }
 

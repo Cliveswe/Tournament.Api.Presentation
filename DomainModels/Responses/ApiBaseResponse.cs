@@ -8,7 +8,7 @@ public abstract class ApiBaseResponse(bool success, string? message = null, int 
     //Support general feedback across all responses (not just NotFound).
     public string? Message { get; init; } = message;
     public int StatusCode { get; init; } = statusCode;
-    public DateTime Timestamp { get; init; } = DateTime.UtcNow;
+    public DateTime TimeStamp { get; init; } = DateTime.UtcNow;
 
 
     //Helper methods
@@ -68,10 +68,13 @@ public class GameSaveFailedResponse()
 {
 }
 
-public class MaxGameLimitReachedResponse(int maxGamesPerTournament, int tournamentId)
-    : ApiBaseResponse(false, $"Tournament {tournamentId} has reached its maximum number of {maxGamesPerTournament} games per tournament.", StatusCodes.Status409Conflict)
-{
-}
+public class MaxGameLimitReachedResponse(string message)
+    : ApiBaseResponse(false, message, StatusCodes.Status409Conflict)
+{ }
+//public class MaxGameLimitReachedResponse(int maxGamesPerTournament, int tournamentId)
+//    : ApiBaseResponse(false, $"Tournament {tournamentId} has reached its maximum number of {maxGamesPerTournament} games per tournament.", StatusCodes.Status409Conflict)
+//{
+//}
 
 public class BadGamePatchDocumentResponse(string message)
     : ApiBaseResponse(false, message, StatusCodes.Status400BadRequest)
