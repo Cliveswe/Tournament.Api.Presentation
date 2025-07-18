@@ -1,4 +1,5 @@
-﻿using Tournaments.Shared.Dto;
+﻿using Domain.Models.Responses;
+using Tournaments.Shared.Dto;
 using Tournaments.Shared.Request;
 
 namespace Service.Contracts;
@@ -13,7 +14,7 @@ public interface ITournamentService
     Task<bool> ApplyToAsync(int id, TournamentDto tournamentUpdateDto);
 
     Task<bool> Update(int id, TournamentUpdateDto tournamentUpdateDto);
-    Task<bool> ExistsAsync(string title, DateTime startDate);
+    Task<ApiBaseResponse> ExistsAsync(string title, DateTime startDate);
     Task<bool> ExistsAsync(int id);
     Task<bool> RemoveAsync(int id);
 }

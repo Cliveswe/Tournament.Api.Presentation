@@ -4,6 +4,7 @@ using AutoMapper;
 using Domain.Contracts;
 using Domain.Models.Entities;
 using Domain.Models.Exceptions;
+using Domain.Models.Responses;
 using Service.Contracts;
 using Tournaments.Shared.Dto;
 using Tournaments.Shared.Request;
@@ -140,9 +141,10 @@ public class TournamentService(IMapper mapper, IUnitOfWork uoW) : ITournamentSer
             .ExistsByTitleAndStartDateAsync(title, startDate);
     }
 
-    public async Task<bool> ExistsAsync(int id)
+    public async Task<ApiBaseResponse> ExistsAsync(int id)
     {
-        return await uoW.TournamentDetailsRepository.AnyAsync(id);
+        bool entityExists = await uoW.TournamentDetailsRepository.AnyAsync(id);
+        return entityExists ? new ApiOkResponse<bool>(entityExists) : new ApiNotFoundResponse("Tournament does not exists.");
     }
 
     #endregion
