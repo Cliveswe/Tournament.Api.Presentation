@@ -44,25 +44,11 @@ namespace Tournaments.Presentation.Controllers.Tournaments
     {
         #region GET api/TournamentDetails/5
 
-        /// <summary>
-        /// Retrieves a list of all tournaments.
-        /// </summary>
-        /// <param name="includeGames">
-        /// A query parameter indicating whether to include the related games for each tournament.
-        /// If <c>true</c>, the response will include game details; otherwise, games are excluded.
-        /// </param>
-        /// <returns>
-        /// Returns an <see cref="ActionResult{IEnumerable{TournamentDto}}"/> containing a list of tournament data transfer objects (DTOs).
-        /// </returns>
-        /// <response code="200">Returns the list of tournaments (with or without games depending on <paramref name="includeGames"/>).</response>
-        /// <response code="404">If no tournaments are found in the data store.</response>
-        /// <remarks>
-        /// This endpoint fetches tournaments asynchronously using the unit of work pattern and maps entities to DTOs using AutoMapper.
-        /// If no tournaments exist, it returns a 404 Not Found with an appropriate message.
-        /// </remarks>>
+
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TournamentDto>>> GetTournamentDetails([FromQuery] TournamentRequestParameters requestParameters)
         {
+            //TODO: add pagination and ProcessError
             // Fetch all tournaments using the service manager
             (IEnumerable<TournamentDto> tournamentDetails, MetaData metaData) = await serviceManager
                 .TournamentService

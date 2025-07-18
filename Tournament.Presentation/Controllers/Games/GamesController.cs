@@ -183,7 +183,13 @@ namespace Tournaments.Presentation.Controllers.Games
 
             // Check for error while applying the patch
             if(!TryValidatePatchedGame(patchedDto) || !ModelState.IsValid) {
-                return UnprocessableEntity(ModelState);
+                //return UnprocessableEntity(ModelState);
+                string errorMessage = string.Join("; ",
+                    ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage));
+                UnProcessableContentResponse errorResponse = new UnProcessableContentResponse(errorMessage);
+                return ProcessError(errorResponse);
             }
 
             TournamentDto? tournamentDto = await serviceManager.TournamentService.GetByIdAsync(tournamentId);
@@ -241,8 +247,8 @@ namespace Tournaments.Presentation.Controllers.Games
         public async Task<ActionResult<GameDto>> PostGame([FromBody] GameCreateDto gameCreateDto, int tournamentId)
         {
             //Validate input Parameters
-            if(!ModelState.IsValid) {
-                return BadRequest(ModelState);
+            if(tournamentId < 0) {
+                return ProcessError(new BadRequestResponse($"Invalid tournamentEntity ID {tournamentId}."));
             }
 
             // Trim whitespace from the gameEntity name
@@ -253,7 +259,8 @@ namespace Tournaments.Presentation.Controllers.Games
             ApiBaseResponse entityExists = await serviceManager.DoesTournamentExist(tournamentId);
             if(!entityExists.Success) {
                 // Return 404 Not Found if the tournamentEntity does not exist
-                return NotFound($"Tournament with ID {tournamentId} does not exist.");
+                // return NotFound($"Tournament with ID {tournamentId} does not exist.");
+                return ProcessError(new ApiNotFoundResponse($"Tournament with ID {tournamentId} does not exist."));
             }
 
             //(bool isSuccess, bool isDuplicate, GameDto? gameDto) = await serviceManager.GameService.AddAsync(gameCreateDto, tournamentId);
