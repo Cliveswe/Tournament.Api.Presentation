@@ -145,15 +145,13 @@ public class GameService(IMapper mapper, IUnitOfWork uoW) : IGameService
 
     public async Task<ApiBaseResponse> UpdateAsync(int tournamentId, string title, GameUpdateDto gameUpdateDto)
     {
-        //TODO: re-factor the return type of this method.
-
         // Retrieve the game by title and tournament ID.
         Game? gameEntity = await uoW.GameRepository.GetByTitleAndTournamentIdAsync(title, tournamentId);
 
         // If the game does not exist, return null.
         if(gameEntity == null) {
             //return UpdateGameResult.NotFound;
-            return new GameNotFoundByTitleResponse($"Game in tournament {tournamentId} not found.");
+            return new GameNotFoundByTitleResponse($"Could not find game {title} in tournament {tournamentId}.");
         }
         // Map the updated properties from the DTO to the existing game entity.
         mapper.Map(gameUpdateDto, gameEntity);
@@ -163,12 +161,7 @@ public class GameService(IMapper mapper, IUnitOfWork uoW) : IGameService
         int success = await uoW.CompleteAsync();
 
         return success != 0 ? new ApiOkResponse<GameDto>(mapper.Map<GameDto>(gameEntity)) : new NoChangesMadeResponse($"The game {title} was not updated.");
-        //if(success == 0) {
-        //    // If no changes were made, return NotModified.
-        //    return UpdateGameResult.NotModified;
-        //}
-        //// Return the updated game as a GameDto.
-        //return UpdateGameResult.Success;
+
     }
 
     public async Task<ApiBaseResponse> ApplyToAsync(int tournamentId, int id, GameDto gameDto, TournamentDto tournamentDto)

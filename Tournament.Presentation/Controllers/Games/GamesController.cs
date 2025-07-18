@@ -164,17 +164,9 @@ namespace Tournaments.Presentation.Controllers.Games
             }
 
             // The GameService.UpdateAsync method internally verifies the tournament exists and the game title matches.
-            //UpdateGameResult result = await serviceManager.GameService.UpdateAsync(tournamentId, title, gameUpdateDto);
-            var result = await serviceManager.GameService.UpdateAsync(tournamentId, title, gameUpdateDto);
+            ApiBaseResponse result = await serviceManager.GameService.UpdateAsync(tournamentId, title, gameUpdateDto);
 
-            // Check the result of the update operation
-            //return result switch
-            //{
-            //    UpdateGameResult.NotFound => NotFound($"Game with title '{title}' was not found."),
-            //    UpdateGameResult.NotModified => StatusCode(500, "Update failed. No changes were saved."),
-            //    UpdateGameResult.Success => NoContent(),
-            //    _ => StatusCode(500, "Unexpected update result.")
-            //};
+            return result.Success ? Ok(result.GetOkResult<GameDto>()) : ProcessError(result);
         }
 
         #endregion
