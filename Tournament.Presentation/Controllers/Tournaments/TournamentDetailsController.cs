@@ -12,6 +12,7 @@
 // -------------------------------------------------------------------------------------
 
 using Domain.Models.Entities;
+using Domain.Models.Responses;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
@@ -228,7 +229,8 @@ namespace Tournaments.Presentation.Controllers.Tournaments
             #endregion
 
             // If the tournament does not exist.
-            if(!await serviceManager.TournamentService.ExistsAsync(id)) {
+            ApiBaseResponse entityExists = await serviceManager.TournamentService.ExistsAsync(id);
+            if(!entityExists.Success) {
                 // Return 404 Not Found with an error message.
                 return NotFound($"Tournament with ID {id} was not found.");
             }
@@ -284,11 +286,12 @@ namespace Tournaments.Presentation.Controllers.Tournaments
             #region Validate that the tournament does not already exist
 
             // Check if a tournament with the same title and start date already exists.
-            bool exists = await serviceManager
+            ApiBaseResponse exists = await serviceManager
                 .TournamentService
                 .ExistsAsync(tournamentDetailsCreateDto.Title, tournamentDetailsCreateDto.StartDate);
 
-            if(exists) {
+
+            if(exists.Success) {
                 return Conflict($"A tournament with the same name \"{tournamentDetailsCreateDto.Title}\" and start date already exists.");
             }
 

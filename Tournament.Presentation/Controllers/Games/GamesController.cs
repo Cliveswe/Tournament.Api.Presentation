@@ -75,10 +75,11 @@ namespace Tournaments.Presentation.Controllers.Games
 
             // Check if the tournamentEntity with the specified ID exists
             //bool exists = await serviceManager.TournamentService.ExistsAsync(tournamentId);
-            bool exists = await serviceManager.DoesTournamentExist(tournamentId);
+            //bool exists = await serviceManager.DoesTournamentExist(tournamentId);
+            ApiBaseResponse exists = await serviceManager.DoesTournamentExist(tournamentId);
 
             // If the tournamentEntity with the specified ID does not exist, return 404 Not Found
-            if(!exists) {
+            if(!exists.Success) {
                 return NotFound($"Tournament with ID {tournamentId} does not exist.");
             }
 
@@ -106,7 +107,8 @@ namespace Tournaments.Presentation.Controllers.Games
             }
 
             // Check if the tournamentEntity exists.
-            if(!await serviceManager.DoesTournamentExist(tournamentId)) {
+            ApiBaseResponse entityExists =await serviceManager.DoesTournamentExist(tournamentId);
+            if(!entityExists.Success) {
                 return NotFound($"Tournament with ID {tournamentId} does not exist.");
             }
 
@@ -279,7 +281,8 @@ namespace Tournaments.Presentation.Controllers.Games
 
             // Validate tournamentEntity existence
             //if(!await serviceManager.TournamentService.ExistsAsync(tournamentId)) {
-            if(!await serviceManager.DoesTournamentExist(tournamentId)) {
+            ApiBaseResponse entityExists = await serviceManager.DoesTournamentExist(tournamentId);
+            if(!entityExists.Success) {
                 // Return 404 Not Found if the tournamentEntity does not exist
                 return NotFound($"Tournament with ID {tournamentId} does not exist.");
             }
@@ -310,7 +313,8 @@ namespace Tournaments.Presentation.Controllers.Games
             }
 
             // If the tournamentEntity does not exist.
-            if(!await serviceManager.DoesTournamentExist(tournamentId)) {
+            ApiBaseResponse entityExists = await serviceManager.DoesTournamentExist(tournamentId);
+            if(!entityExists.Success) {
                 // Return 404 Not Found
                 return NotFound("Tournament with the specified ID was not found.");
             }
