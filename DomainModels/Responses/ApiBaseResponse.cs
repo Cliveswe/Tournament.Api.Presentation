@@ -72,9 +72,38 @@ public class MaxGameLimitReachedResponse(string message)
     : ApiBaseResponse(false, message, StatusCodes.Status409Conflict)
 { }
 
-public class BadGamePatchDocumentResponse(string message)
-    : ApiBaseResponse(false, message, StatusCodes.Status400BadRequest)
-{ }
+
+public class BadGamePatchDocumentResponse : ApiBaseResponse
+{
+    public IEnumerable<string> Errors { get; }
+
+    public BadGamePatchDocumentResponse(
+        string? message = "Patch document validation failed.",
+        IEnumerable<string>? errors = null)
+        : base(false, message, StatusCodes.Status400BadRequest)
+    {
+        Errors = errors ?? Array.Empty<string>();
+    }
+}
+
+
+//public class BadGamePatchDocumentResponse : ApiBaseResponse
+//{
+//    public IEnumerable<string> Errors { get; }
+
+//    public BadGamePatchDocumentResponse(IEnumerable<string> errors)
+//        : base(false, "Patch document validation failed.", StatusCodes.Status400BadRequest)
+//    {
+//        Errors = errors;
+//    }
+
+//    public BadGamePatchDocumentResponse(string message)
+//        : base(false, message, StatusCodes.Status400BadRequest)
+//    {
+//        Errors = Array.Empty<string>();
+//    }
+//}
+
 
 public class NotModifiedResponse(string message)
     : ApiBaseResponse(false, message, StatusCodes.Status304NotModified)

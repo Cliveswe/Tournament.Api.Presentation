@@ -152,23 +152,21 @@ namespace Tournaments.Presentation.Controllers.Games
         public async Task<IActionResult> PutGame(int tournamentId, [FromQuery] string title, [FromBody] GameUpdateDto gameUpdateDto)
         {
             #region Validation of Input parameters
-
             // Validate the input parameters.
-            if(!ModelState.IsValid) {
-                // Return 400 Bad Request if the model state is invalid
-                return BadRequest(ModelState);
-            }
+
 
             // Validate the tournamentEntity ID from the route parameter.
             if(tournamentId <= 0) {
                 // Return 400 Bad Request if the tournamentEntity ID is invalid
-                return BadRequest($"Invalid tournamentEntity ID {tournamentId}.");
+                //return BadRequest($"Invalid tournamentEntity ID {tournamentId}.");
+                return ProcessError(new BadGamePatchDocumentResponse($"Invalid tournament {tournamentId}."));
             }
 
             // Validate the game title input
             title = title.Trim();
             if(string.IsNullOrWhiteSpace(title)) {
-                return BadRequest("Game title must be a non-empty string.");
+                //return BadRequest("Game title must be a non-empty string.");
+                return ProcessError(new BadGamePatchDocumentResponse("Game title must be a non-empty string."));
             }
 
             #endregion
