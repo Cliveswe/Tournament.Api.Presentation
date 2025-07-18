@@ -40,5 +40,5 @@ public interface IServiceManager
     IAuthService AuthService { get; }
 
     Task<ApiBaseResponse> DoesGameExist(int id);
-    Task<bool> DoesTournamentExist(int id);
+    Task<ApiBaseResponse> DoesTournamentExist(int id);
 }

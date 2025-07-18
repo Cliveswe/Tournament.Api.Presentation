@@ -37,7 +37,7 @@ public class ServiceManager(
 
     public async Task<ApiBaseResponse> DoesGameExist(int id) => await gameService.Value.ExistsAsync(id);
 
-    public async Task<bool> DoesTournamentExist(int id) => await tournamentService.Value.ExistsAsync(id);
+    public async Task<ApiBaseResponse> DoesTournamentExist(int id) => await tournamentService.Value.ExistsAsync(id);
 
     /// <summary>
     /// Gets the game service instance for managing game-specific logic and operations.
