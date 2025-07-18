@@ -49,7 +49,7 @@ public interface IGameService
     /// <param name="title">The title of the game to update.</param>
     /// <param name="gameUpdateDto">The data transfer object containing updated game information.</param>
     /// <returns>An <see cref="UpdateGameResult"/> indicating the result of the update operation.</returns>
-    Task<UpdateGameResult> UpdateAsync(int tournamentId, string title, GameUpdateDto gameUpdateDto);
+    Task<ApiBaseResponse> UpdateAsync(int tournamentId, string title, GameUpdateDto gameUpdateDto);
 
 
     Task<ApiBaseResponse> ApplyToAsync(int tournamentId, int id, GameDto gameDto, TournamentDto tournamentDto);

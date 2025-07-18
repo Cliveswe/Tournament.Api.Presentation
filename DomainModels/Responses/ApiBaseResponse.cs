@@ -57,7 +57,6 @@ public class GameNotFoundByIdResponse(string message)
 {
 }
 
-
 public class GameAlreadyExistsResponse(string message)
     : ApiBaseResponse(false, message, StatusCodes.Status409Conflict)
 {
@@ -72,38 +71,9 @@ public class MaxGameLimitReachedResponse(string message)
     : ApiBaseResponse(false, message, StatusCodes.Status409Conflict)
 { }
 
-
-public class BadGamePatchDocumentResponse : ApiBaseResponse
-{
-    public IEnumerable<string> Errors { get; }
-
-    public BadGamePatchDocumentResponse(
-        string? message = "Patch document validation failed.",
-        IEnumerable<string>? errors = null)
-        : base(false, message, StatusCodes.Status400BadRequest)
-    {
-        Errors = errors ?? Array.Empty<string>();
-    }
-}
-
-
-//public class BadGamePatchDocumentResponse : ApiBaseResponse
-//{
-//    public IEnumerable<string> Errors { get; }
-
-//    public BadGamePatchDocumentResponse(IEnumerable<string> errors)
-//        : base(false, "Patch document validation failed.", StatusCodes.Status400BadRequest)
-//    {
-//        Errors = errors;
-//    }
-
-//    public BadGamePatchDocumentResponse(string message)
-//        : base(false, message, StatusCodes.Status400BadRequest)
-//    {
-//        Errors = Array.Empty<string>();
-//    }
-//}
-
+public class BadGamePatchDocumentResponse(string message)
+    : ApiBaseResponse(false, message, StatusCodes.Status400BadRequest)
+{ }
 
 public class NotModifiedResponse(string message)
     : ApiBaseResponse(false, message, StatusCodes.Status304NotModified)
@@ -112,4 +82,7 @@ public class NotModifiedResponse(string message)
 public class UnProcessableContentResponse(string message)
     : ApiBaseResponse(false, message, StatusCodes.Status422UnprocessableEntity)
 { }
+
+public class NoChangesMadeResponse(string message)
+    : ApiBaseResponse(false, message, StatusCodes.Status204NoContent);
 #endregion

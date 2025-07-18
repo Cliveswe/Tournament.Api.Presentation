@@ -18,7 +18,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Service.Contracts;
-using Service.Contracts.Enums;
 using Tournaments.Shared.Dto;
 using Tournaments.Shared.Request;
 
@@ -149,39 +148,33 @@ namespace Tournaments.Presentation.Controllers.Games
 
         #region PUT api/tournamentDetails/1/Games/5
         [HttpPut]
-        public async Task<IActionResult> PutGame(int tournamentId, [FromQuery] string title, [FromBody] GameUpdateDto gameUpdateDto)
+        public async Task<ActionResult> PutGame(int tournamentId, [FromQuery] string title, [FromBody] GameUpdateDto gameUpdateDto)
         {
-            #region Validation of Input parameters
-            // Validate the input parameters.
-
-
             // Validate the tournamentEntity ID from the route parameter.
             if(tournamentId <= 0) {
                 // Return 400 Bad Request if the tournamentEntity ID is invalid
-                //return BadRequest($"Invalid tournamentEntity ID {tournamentId}.");
                 return ProcessError(new BadGamePatchDocumentResponse($"Invalid tournament {tournamentId}."));
             }
 
             // Validate the game title input
             title = title.Trim();
             if(string.IsNullOrWhiteSpace(title)) {
-                //return BadRequest("Game title must be a non-empty string.");
+                // Return 400 Bad Request if the title ID is invalid
                 return ProcessError(new BadGamePatchDocumentResponse("Game title must be a non-empty string."));
             }
 
-            #endregion
-
             // The GameService.UpdateAsync method internally verifies the tournament exists and the game title matches.
-            UpdateGameResult result = await serviceManager.GameService.UpdateAsync(tournamentId, title, gameUpdateDto);
+            //UpdateGameResult result = await serviceManager.GameService.UpdateAsync(tournamentId, title, gameUpdateDto);
+            var result = await serviceManager.GameService.UpdateAsync(tournamentId, title, gameUpdateDto);
 
             // Check the result of the update operation
-            return result switch
-            {
-                UpdateGameResult.NotFound => NotFound($"Game with title '{title}' was not found."),
-                UpdateGameResult.NotModified => StatusCode(500, "Update failed. No changes were saved."),
-                UpdateGameResult.Success => NoContent(),
-                _ => StatusCode(500, "Unexpected update result.")
-            };
+            //return result switch
+            //{
+            //    UpdateGameResult.NotFound => NotFound($"Game with title '{title}' was not found."),
+            //    UpdateGameResult.NotModified => StatusCode(500, "Update failed. No changes were saved."),
+            //    UpdateGameResult.Success => NoContent(),
+            //    _ => StatusCode(500, "Unexpected update result.")
+            //};
         }
 
         #endregion

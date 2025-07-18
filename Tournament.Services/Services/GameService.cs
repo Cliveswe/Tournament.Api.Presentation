@@ -5,7 +5,6 @@ using Domain.Contracts;
 using Domain.Models.Entities;
 using Domain.Models.Responses;
 using Service.Contracts;
-using Service.Contracts.Enums;
 using Tournaments.Shared.Dto;
 using Tournaments.Shared.Request;
 
@@ -144,7 +143,7 @@ public class GameService(IMapper mapper, IUnitOfWork uoW) : IGameService
         return new ApiOkResponse<GameDto>(mapper.Map<GameDto>(gameEntity));
     }
 
-    public async Task<UpdateGameResult> UpdateAsync(int tournamentId, string title, GameUpdateDto gameUpdateDto)
+    public async Task<ApiBaseResponse> UpdateAsync(int tournamentId, string title, GameUpdateDto gameUpdateDto)
     {
         //TODO: re-factor the return type of this method.
 
@@ -153,7 +152,8 @@ public class GameService(IMapper mapper, IUnitOfWork uoW) : IGameService
 
         // If the game does not exist, return null.
         if(gameEntity == null) {
-            return UpdateGameResult.NotFound;
+            //return UpdateGameResult.NotFound;
+            return new GameNotFoundByTitleResponse($"Game in tournament {tournamentId} not found.");
         }
         // Map the updated properties from the DTO to the existing game entity.
         mapper.Map(gameUpdateDto, gameEntity);
@@ -162,12 +162,13 @@ public class GameService(IMapper mapper, IUnitOfWork uoW) : IGameService
         uoW.GameRepository.Update(gameEntity);
         int success = await uoW.CompleteAsync();
 
-        if(success == 0) {
-            // If no changes were made, return NotModified.
-            return UpdateGameResult.NotModified;
-        }
-        // Return the updated game as a GameDto.
-        return UpdateGameResult.Success;
+        return success != 0 ? new ApiOkResponse<GameDto>(mapper.Map<GameDto>(gameEntity)) : new NoChangesMadeResponse($"The game {title} was not updated.");
+        //if(success == 0) {
+        //    // If no changes were made, return NotModified.
+        //    return UpdateGameResult.NotModified;
+        //}
+        //// Return the updated game as a GameDto.
+        //return UpdateGameResult.Success;
     }
 
     public async Task<ApiBaseResponse> ApplyToAsync(int tournamentId, int id, GameDto gameDto, TournamentDto tournamentDto)
