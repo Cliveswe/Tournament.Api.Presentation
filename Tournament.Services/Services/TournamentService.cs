@@ -135,10 +135,11 @@ public class TournamentService(IMapper mapper, IUnitOfWork uoW) : ITournamentSer
 
     #region Exists Tournament details
 
-    public async Task<bool> ExistsAsync(string title, DateTime startDate)
+    public async Task<ApiBaseResponse> ExistsAsync(string title, DateTime startDate)
     {
-        return await uoW.TournamentDetailsRepository
+        bool entityExists = await uoW.TournamentDetailsRepository
             .ExistsByTitleAndStartDateAsync(title, startDate);
+        return entityExists ? new ApiOkResponse<bool>(entityExists) : new ApiNotFoundResponse($"Tournament {title} with start date {startDate} does not exists.");
     }
 
     public async Task<ApiBaseResponse> ExistsAsync(int id)
