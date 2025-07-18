@@ -312,13 +312,6 @@ namespace Tournaments.Presentation.Controllers.Games
                 return BadRequest("Invalid tournamentEntity id or game id.");
             }
 
-            // If the tournamentEntity does not exist.
-            ApiBaseResponse entityExists = await serviceManager.DoesTournamentExist(tournamentId);
-            if(!entityExists.Success) {
-                // Return 404 Not Found
-                return NotFound("Tournament with the specified ID was not found.");
-            }
-
             ApiBaseResponse response = await serviceManager.GameService.RemoveAsync(tournamentId, id);
 
             // Return OK with a confirmation error message.

@@ -84,7 +84,7 @@ public class GameService(IMapper mapper, IUnitOfWork uoW) : IGameService
 
         if(game == null) {
 
-            return new ApiNotFoundResponse($"Could not remove game from tournament.");
+            return new ApiNotFoundResponse($"Could not remove the game from tournament {tournamentId}.");
         }
         // Check if the game exists and is part of the specified tournament.
         if(game.TournamentDetailsId != tournamentId) {
