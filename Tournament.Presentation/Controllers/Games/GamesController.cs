@@ -95,7 +95,7 @@ namespace Tournaments.Presentation.Controllers.Games
             // Check if the tournamentEntity exists.
             ApiBaseResponse entityExists =await serviceManager.DoesTournamentExist(tournamentId);
             if(!entityExists.Success) {
-                ProcessError(new ApiNotFoundResponse($"Tournament with ID {tournamentId} does not exist."));
+                return ProcessError(new ApiNotFoundResponse($"Tournament with ID {tournamentId} does not exist."));
             }
 
             // Map the Game entity to a GameDto using AutoMapper
