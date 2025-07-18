@@ -46,18 +46,7 @@ namespace Tournaments.Presentation.Controllers.Games
     {
         #region GET api/Games api/1/Games/
 
-        /// <summary>
-        /// Retrieves all Game entities associated with a specific TournamentDetails ID.
-        /// [HttpGet("/api/tournamentDetails/{tournametId}/games")]
-        /// </summary>
-        /// <param name="tournamentId">The ID of the tournamentEntity for which to fetch games.</param>
-        /// <returns>
-        /// Returns a 200 OK response containing a collection of GameDto objects if the tournamentEntity exists.
-        /// Returns 400 Bad Request, if the tournamentEntity ID is invalid. 
-        /// Returns 404 Not Found if the tournamentEntity with the specified ID does not exist.
-        /// </returns>
-        /// Note that the route is overridden and it is important to add a root "/api/..." and 
-        /// not "api/..." there is a difference.
+
         // GET api/tournamentDetails/{tournamentId}/
         [HttpGet]
         public async Task<ActionResult<IEnumerable<GameDto>>> GetTournamentGames([FromQuery] TournamentRequestParameters requestParameters, int tournamentId)
@@ -69,7 +58,7 @@ namespace Tournaments.Presentation.Controllers.Games
             if(tournamentId <= 0) {
                 // If the tournamentEntity ID is invalid (less than or equal to zero), return 400 Bad Request.
                 // This ensures that the client must provide a valid tournamentEntity ID to retrieve games.
-                return BadRequest($"Invalid tournamentEntity ID {tournamentId}.");
+                return ProcessError(new BadRequestResponse($"Invalid tournamentEntity ID {tournamentId}."));
             }
 
             // Check if the tournamentEntity with the specified ID exists
@@ -77,7 +66,7 @@ namespace Tournaments.Presentation.Controllers.Games
 
             // If the tournamentEntity with the specified ID does not exist, return 404 Not Found
             if(!exists.Success) {
-                return NotFound($"Tournament with ID {tournamentId} does not exist.");
+                return ProcessError(new ApiNotFoundResponse($"Tournament with ID {tournamentId} does not exist."));
             }
 
             #endregion
@@ -100,7 +89,7 @@ namespace Tournaments.Presentation.Controllers.Games
 
             // Validate the tournamentEntity ID and game ID
             if(id <= 0 || tournamentId <= 0) {
-                return BadRequest("Invalid tournamentEntity id or game id.");//
+                return ProcessError(new BadRequestResponse("Invalid tournamentEntity id or game id."));
             }
 
             // Check if the tournamentEntity exists.
@@ -123,7 +112,7 @@ namespace Tournaments.Presentation.Controllers.Games
         {
             // Validation of input parameters
             if(string.IsNullOrWhiteSpace(title)) {
-                return BadRequest("Title must be a non-empty string.");
+                return ProcessError(new BadRequestResponse("Title must be a non-empty string."));
             }
 
             // Trim whitespace from the title to ensure accurate matching.
@@ -131,7 +120,7 @@ namespace Tournaments.Presentation.Controllers.Games
 
             // Validate the tournamentEntity ID.
             if(tournamentId <= 0) {
-                return BadRequest("Invalid tournamentEntity id.");
+                return ProcessError(new BadRequestResponse("Invalid tournamentEntity id."));
             }
 
             // The GameService.GetAsync method internally verifies the tournament exists.
@@ -289,7 +278,7 @@ namespace Tournaments.Presentation.Controllers.Games
             // Validate the ID to ensure it is a positive integer.
             // If the ID is less than or equal to zero, return 400 Bad Request.
             if(tournamentId <= 0 || id <= 0) {
-                return BadRequest("Invalid tournamentEntity id or game id.");
+                return ProcessError(new BadRequestResponse("Invalid tournamentEntity id or game id."));
             }
 
             ApiBaseResponse response = await serviceManager.GameService.RemoveAsync(tournamentId, id);

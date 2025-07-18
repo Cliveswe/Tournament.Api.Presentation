@@ -49,6 +49,7 @@ public class ApiControllerBase : ControllerBase
             UnProcessableContentResponse unprocessable => CreateProblemResult(
             "Non-processable Content", unprocessable.Message!, unprocessable.StatusCode, unprocessable.TimeStamp),
 
+            // A generic response as an alternative of a "Throw"
             _ => CreateProblemResult(
             "Error", baseResponse.Message ?? "An error occurred.", baseResponse.StatusCode, baseResponse.TimeStamp)
         };

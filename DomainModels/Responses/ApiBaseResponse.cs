@@ -57,6 +57,11 @@ public class GameNotFoundByIdResponse(string message)
 {
 }
 
+public class BadRequestResponse(string message)
+    : ApiBaseResponse(false, message, StatusCodes.Status400BadRequest)
+{ }
+
+
 public class GameAlreadyExistsResponse(string message)
     : ApiBaseResponse(false, message, StatusCodes.Status409Conflict)
 {
