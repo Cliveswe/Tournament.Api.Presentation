@@ -73,8 +73,6 @@ namespace Tournaments.Presentation.Controllers.Games
             }
 
             // Check if the tournamentEntity with the specified ID exists
-            //bool exists = await serviceManager.TournamentService.ExistsAsync(tournamentId);
-            //bool exists = await serviceManager.DoesTournamentExist(tournamentId);
             ApiBaseResponse exists = await serviceManager.DoesTournamentExist(tournamentId);
 
             // If the tournamentEntity with the specified ID does not exist, return 404 Not Found
@@ -124,7 +122,6 @@ namespace Tournaments.Presentation.Controllers.Games
         public async Task<ActionResult<GameDto>> GetGameByTitle(int tournamentId, string title)
         {
             // Validation of input parameters
-            // Validate the title input.
             if(string.IsNullOrWhiteSpace(title)) {
                 return BadRequest("Title must be a non-empty string.");
             }
