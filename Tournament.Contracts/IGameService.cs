@@ -62,6 +62,6 @@ public interface IGameService
     /// </summary>
     /// <param name="id">The unique identifier of the game.</param>
     /// <returns><c>true</c> if the game exists; otherwise, <c>false</c>.</returns>
-    Task<bool> ExistsAsync(int id);
+    Task<ApiBaseResponse> ExistsAsync(int id);
 }
 

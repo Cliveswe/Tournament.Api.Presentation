@@ -9,6 +9,8 @@
 // -----------------------------------------------------------------------------
 
 
+using Domain.Models.Responses;
+
 namespace Service.Contracts;
 
 /// <summary>
@@ -37,6 +39,6 @@ public interface IServiceManager
     /// </summary>
     IAuthService AuthService { get; }
 
-    Task<bool> DoesGameExist(int id);
+    Task<ApiBaseResponse> DoesGameExist(int id);
     Task<bool> DoesTournamentExist(int id);
 }

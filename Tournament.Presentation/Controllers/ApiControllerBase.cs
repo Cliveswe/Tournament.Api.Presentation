@@ -28,16 +28,16 @@ public class ApiControllerBase : ControllerBase
         {
             //Checks type and assigns instance to notFound
             ApiNotFoundResponse notFound => NotFound(CreateProblemResult(
-                "Not found", notFound.Message, notFound.StatusCode)),
+                "Not found", notFound.Message!, notFound.StatusCode)),
 
             //Checks type and assigns instance to limitReached
             MaxGameLimitReachedResponse limitReached => Conflict(CreateProblemResult(
-                "Maximum game limit reached", limitReached.Message, limitReached.StatusCode)),
+                "Maximum game limit reached", limitReached.Message!, limitReached.StatusCode)),
             GameAlreadyExistsResponse alreadyExists => Conflict(CreateProblemResult(
-                "Conflict", alreadyExists.Message, alreadyExists.StatusCode)),
+                "Conflict", alreadyExists.Message!, alreadyExists.StatusCode)),
 
             GameSaveFailedResponse saveFailed => StatusCode(saveFailed.StatusCode, CreateProblemResult(
-                "Save Failed", saveFailed.Message, saveFailed.StatusCode)),
+                "Save Failed", saveFailed.Message!, saveFailed.StatusCode)),
 
             _ => throw new NotImplementedException()
         };

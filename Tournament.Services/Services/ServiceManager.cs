@@ -10,6 +10,7 @@
 //        improving modularity, testability, and life-cycle management.
 // -----------------------------------------------------------------------------
 
+using Domain.Models.Responses;
 using Service.Contracts;
 
 namespace Tournaments.Services.Services;
@@ -34,7 +35,7 @@ public class ServiceManager(
     /// </summary>
     public ITournamentService TournamentService => tournamentService.Value;
 
-    public async Task<bool> DoesGameExist(int id) => await gameService.Value.ExistsAsync(id);
+    public async Task<ApiBaseResponse> DoesGameExist(int id) => await gameService.Value.ExistsAsync(id);
 
     public async Task<bool> DoesTournamentExist(int id) => await tournamentService.Value.ExistsAsync(id);
 
