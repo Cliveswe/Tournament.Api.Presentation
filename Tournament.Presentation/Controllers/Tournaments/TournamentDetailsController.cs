@@ -40,7 +40,7 @@ namespace Tournaments.Presentation.Controllers.Tournaments
     /// The <see cref="PatchTournament(int, JsonPatchDocument{TournamentDto})"/> method
     /// supports partial updates on tournament entities using JSON Patch.
     /// </remarks>
-    public class TournamentDetailsController(IServiceManager serviceManager) : ControllerBase
+    public class TournamentDetailsController(IServiceManager serviceManager) : ApiControllerBase
     {
         #region GET api/TournamentDetails/5
 
@@ -63,7 +63,6 @@ namespace Tournaments.Presentation.Controllers.Tournaments
             // Return the results with HTTP 200 OK
             return Ok(tournamentDetails);
         }
-
 
         [HttpGet("{id}")]
         public async Task<ActionResult<TournamentDto>> GetTournamentDetails(int id, [FromQuery] bool includeGames = false)

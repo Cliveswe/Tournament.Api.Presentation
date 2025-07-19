@@ -11,15 +11,16 @@ public class ApiControllerBase : ControllerBase
 {
     private ProblemDetails CreateProblemResult(string title, string detail, int statusCode, DateTime timestamp)
     {
+        // Built-in properties of the Microsoft.AspNetCore.Mvc.ProblemDetails class.
         var problemDetails = new ProblemDetails
         {
             Title = title,
             Detail = detail,
             Status = statusCode,
-            Instance = HttpContext.Request.Path
+            Instance = HttpContext.Request.Path,
         };
 
-        problemDetails.Extensions["Time Stamp"] = timestamp;
+        problemDetails.Extensions["Timestamp"] = timestamp;
 
         return problemDetails;
     }
@@ -32,26 +33,26 @@ public class ApiControllerBase : ControllerBase
         ProblemDetails problem = baseResponse switch
         {
             ApiNotFoundResponse notFound => CreateProblemResult(
-            "Not found", notFound.Message!, notFound.StatusCode, notFound.TimeStamp),
+                "Not found", notFound.Message!, notFound.StatusCode, notFound.Timestamp),
 
             MaxGameLimitReachedResponse limitReached => CreateProblemResult(
-            "Maximum game limit reached", limitReached.Message!, limitReached.StatusCode, limitReached.TimeStamp),
+                "Maximum game limit reached", limitReached.Message!, limitReached.StatusCode, limitReached.Timestamp),
 
             GameAlreadyExistsResponse alreadyExists => CreateProblemResult(
-            "Conflict", alreadyExists.Message!, alreadyExists.StatusCode, alreadyExists.TimeStamp),
+                "Conflict", alreadyExists.Message!, alreadyExists.StatusCode, alreadyExists.Timestamp),
 
             GameSaveFailedResponse saveFailed => CreateProblemResult(
-            "Save Failed", saveFailed.Message!, saveFailed.StatusCode, saveFailed.TimeStamp),
+                "Save Failed", saveFailed.Message!, saveFailed.StatusCode, saveFailed.Timestamp),
 
             NoChangesMadeResponse noChangesMade => CreateProblemResult(
-            "No Changes Made", noChangesMade.Message!, noChangesMade.StatusCode, noChangesMade.TimeStamp),
+                "No Changes Made", noChangesMade.Message!, noChangesMade.StatusCode, noChangesMade.Timestamp),
 
             UnProcessableContentResponse unprocessable => CreateProblemResult(
-            "Non-processable Content", unprocessable.Message!, unprocessable.StatusCode, unprocessable.TimeStamp),
+                "Non-processable Content", unprocessable.Message!, unprocessable.StatusCode, unprocessable.Timestamp),
 
             // A generic response as an alternative of a "Throw"
             _ => CreateProblemResult(
-            "Error", baseResponse.Message ?? "An error occurred.", baseResponse.StatusCode, baseResponse.TimeStamp)
+                "Error", baseResponse.Message ?? "An error occurred.", baseResponse.StatusCode, baseResponse.Timestamp)
         };
 
         return new ObjectResult(problem)

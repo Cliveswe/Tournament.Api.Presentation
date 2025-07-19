@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿// Ignore Spelling: Api
 
 namespace Domain.Models.Responses;
 public class ApiErrorDetails
@@ -11,6 +7,5 @@ public class ApiErrorDetails
     public string? Detail { get; init; }
     public string Instance { get; init; } = "/";
     public int Status { get; init; }
-    public DateTime Timestamp { get; init; } = DateTime.UtcNow;
 }
 

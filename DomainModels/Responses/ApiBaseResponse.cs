@@ -1,4 +1,4 @@
-﻿// Ignore Spelling: Api
+﻿// Ignore Spelling: Api Timestamp
 using Microsoft.AspNetCore.Http;  // for StatusCodes
 
 namespace Domain.Models.Responses;
@@ -8,7 +8,7 @@ public abstract class ApiBaseResponse(bool success, string? message = null, int 
     //Support general feedback across all responses (not just NotFound).
     public string? Message { get; init; } = message;
     public int StatusCode { get; init; } = statusCode;
-    public DateTime TimeStamp { get; init; } = DateTime.UtcNow;
+    public DateTime Timestamp { get; init; } = DateTime.UtcNow;
 
 
     //Helper methods
