@@ -19,6 +19,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Service.Contracts;
 using System.Text.Json;
+using Tournaments.Services.Services;
 using Tournaments.Shared.Dto;
 using Tournaments.Shared.Request;
 
@@ -48,6 +49,7 @@ namespace Tournaments.Presentation.Controllers.Tournaments
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TournamentDto>>> GetTournamentDetails([FromQuery] TournamentRequestParameters requestParameters)
         {
+            var clampedParameters =  ServiceManager.ClampRequestParameters(requestParameters);
             //TODO: add pagination and ProcessError
             // Fetch all tournaments using the service manager
             (IEnumerable<TournamentDto> tournamentDetails, MetaData metaData) = await serviceManager

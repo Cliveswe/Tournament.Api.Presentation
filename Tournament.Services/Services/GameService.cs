@@ -15,7 +15,7 @@ public class GameService(IMapper mapper, IUnitOfWork uoW) : IGameService
 
     public async Task<(ApiBaseResponse gameResponse, MetaData metaData)> GetGamesAsync(TournamentRequestParameters requestParameters, int tournamentId)
     {
-        TournamentRequestParameters clampedParameters = ClampRequestParameters(requestParameters);
+        TournamentRequestParameters clampedParameters =  ClampRequestParameters(requestParameters);
 
         PagedList<Game> pagedList = await uoW
             .GameRepository
@@ -38,17 +38,6 @@ public class GameService(IMapper mapper, IUnitOfWork uoW) : IGameService
         }
 
         return (new ApiOkResponse<IEnumerable<GameDto>>(gameDtos), pagedList.MetaData);
-    }
-
-    private static TournamentRequestParameters ClampRequestParameters(TournamentRequestParameters requestParameters)
-    {
-        // Clamp page size using the setter logic in RequestParameters
-        return new TournamentRequestParameters
-        {
-            PageSize = requestParameters.PageSize,
-            PageNumber = requestParameters.PageNumber,
-            IncludeGames = requestParameters.IncludeGames
-        };
     }
 
     public async Task<ApiBaseResponse> GetGameAsync(int tournamentId, int id)

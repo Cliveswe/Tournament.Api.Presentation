@@ -12,6 +12,7 @@
 
 using Domain.Models.Responses;
 using Service.Contracts;
+using Tournaments.Shared.Request;
 
 namespace Tournaments.Services.Services;
 
@@ -38,6 +39,17 @@ public class ServiceManager(
     public async Task<ApiBaseResponse> DoesGameExist(int id) => await gameService.Value.ExistsAsync(id);
 
     public async Task<ApiBaseResponse> DoesTournamentExist(int id) => await tournamentService.Value.ExistsAsync(id);
+
+    public static TournamentRequestParameters ClampRequestParameters(TournamentRequestParameters requestParameters)
+    {
+        // Clamp page size using the setter logic in RequestParameters
+        return new TournamentRequestParameters
+        {
+            PageSize = requestParameters.PageSize,
+            PageNumber = requestParameters.PageNumber,
+            IncludeGames = requestParameters.IncludeGames
+        };
+    }
 
     /// <summary>
     /// Gets the game service instance for managing game-specific logic and operations.
