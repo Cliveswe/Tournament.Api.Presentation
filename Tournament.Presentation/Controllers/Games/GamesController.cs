@@ -1,4 +1,4 @@
-﻿// Ignore Spelling: Api Dto Ok
+﻿// Ignore Spelling: Api Dto json
 
 // --------------------------------------------------------------------------------
 // File: GamesController.cs
