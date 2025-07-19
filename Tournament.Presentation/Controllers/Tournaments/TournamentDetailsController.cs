@@ -19,7 +19,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Service.Contracts;
 using System.Text.Json;
-using Tournaments.Services.Services;
 using Tournaments.Shared.Dto;
 using Tournaments.Shared.Request;
 
@@ -49,21 +48,20 @@ namespace Tournaments.Presentation.Controllers.Tournaments
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TournamentDto>>> GetTournamentDetails([FromQuery] TournamentRequestParameters requestParameters)
         {
-            var clampedParameters =  ServiceManager.ClampRequestParameters(requestParameters);
-            //TODO: add pagination and ProcessError
             // Fetch all tournaments using the service manager
-            (IEnumerable<TournamentDto> tournamentDetails, MetaData metaData) = await serviceManager
+            (ApiBaseResponse tournamentResponse, MetaData metaData) = await serviceManager
                 .TournamentService
                 .GetAllAsync(requestParameters);
 
             // If no tournaments are found, return 404 Not Found
-            if(tournamentDetails == null || !tournamentDetails.Any()) {
-                return ProcessError(new BadRequestResponse("No tournaments found."));
+            if(!tournamentResponse.Success) {
+                return ProcessError(tournamentResponse);
             }
             // If includeGames is true, we can modify the DTOs to include game details if needed.
             Response.Headers.Append("X-Pagination", JsonSerializer.Serialize(metaData));
+
             // Return the results with HTTP 200 OK
-            return Ok(tournamentDetails);
+            return Ok(tournamentResponse.GetOkResult<IEnumerable<TournamentDto>>());
         }
 
         [HttpGet("{id}")]

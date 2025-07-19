@@ -15,7 +15,7 @@ public class GameService(IMapper mapper, IUnitOfWork uoW) : IGameService
 
     public async Task<(ApiBaseResponse gameResponse, MetaData metaData)> GetGamesAsync(TournamentRequestParameters requestParameters, int tournamentId)
     {
-        TournamentRequestParameters clampedParameters =  ClampRequestParameters(requestParameters);
+        TournamentRequestParameters clampedParameters =  ServiceManager.ClampRequestParameters(requestParameters);
 
         PagedList<Game> pagedList = await uoW
             .GameRepository

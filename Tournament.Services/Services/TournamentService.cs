@@ -15,19 +15,29 @@ public class TournamentService(IMapper mapper, IUnitOfWork uoW) : ITournamentSer
     #region Get Tournament details
 
     //public async Task<IEnumerable<TournamentDto>> GetAllAsync(TournamentRequestParameters requestParameters, bool trackChanges = false)
-    public async Task<(IEnumerable<TournamentDto> tournamentDto, MetaData metaData)> GetAllAsync(TournamentRequestParameters requestParameters, bool trackChanges = false)
+    public async Task<(ApiBaseResponse tournamentDto, MetaData metaData)> GetAllAsync(TournamentRequestParameters requestParameters, bool trackChanges = false)
     {
+        TournamentRequestParameters clampedParameters =  ServiceManager.ClampRequestParameters(requestParameters);
+
         var pagedList = await uoW
             .TournamentDetailsRepository
             .GetAllAsync(requestParameters, trackChanges);
 
+        // Clamp PageNumber if it exceeds total pages
+        if(pagedList.MetaData.TotalPages > 0 && clampedParameters.PageNumber > pagedList.MetaData.TotalPages) {
+
+            clampedParameters.PageNumber = pagedList.MetaData.TotalPages;
+
+            // Fetch again with corrected PageNumber
+            pagedList = await uoW
+           .TournamentDetailsRepository
+           .GetAllAsync(requestParameters, trackChanges);
+        }
+
         var tournamentDtos = mapper.Map<IEnumerable<TournamentDto>>(pagedList.Items);
 
-        //return mapper.Map<IEnumerable<TournamentDto>>(await uoW
-        //    .TournamentDetailsRepository
-        //    .GetAllAsync(requestParameters, trackChanges));
-
-        return (tournamentDtos, pagedList.MetaData);
+        //return (tournamentDtos, pagedList.MetaData);
+        return tournamentDtos.Any() ? (new ApiOkResponse<IEnumerable<TournamentDto>>(tournamentDtos), pagedList.MetaData) : (new TournamentNotFoundResponse("No tournaments found."), pagedList.MetaData);
     }
 
     public async Task<TournamentDto> GetByIdAsync(int id, bool trackChanges = false)
