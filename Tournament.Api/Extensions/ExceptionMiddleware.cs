@@ -42,7 +42,7 @@ public static class ExceptionMiddleware
                 title: tournamentNotFoundException.Title,
                 detail: tournamentNotFoundException.Message,
                 instance: context.Request.Path),
-            _ => problemDetailsFactory.CreateProblemDetails(
+            _ => problemDetailsFactory!.CreateProblemDetails(
                 context,
                 StatusCodes.Status500InternalServerError,
                 title: "Internal server error occurred.",

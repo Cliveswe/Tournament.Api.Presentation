@@ -38,7 +38,7 @@ namespace Domain.Models.Entities
         /// <summary>
         /// Gets or sets the title or name of the game.
         /// </summary>
-        public string Title { get; set; }
+        public required string Title { get; set; }
 
         /// <summary>
         /// Gets or sets the scheduled time for the game.

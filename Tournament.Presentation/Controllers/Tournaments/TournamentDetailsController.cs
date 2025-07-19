@@ -56,7 +56,7 @@ namespace Tournaments.Presentation.Controllers.Tournaments
 
             // If no tournaments are found, return 404 Not Found
             if(tournamentDetails == null || !tournamentDetails.Any()) {
-                return NotFound("No tournaments found.");
+                return ProcessError(new BadRequestResponse("No tournaments found."));
             }
             // If includeGames is true, we can modify the DTOs to include game details if needed.
             Response.Headers.Append("X-Pagination", JsonSerializer.Serialize(metaData));
@@ -64,23 +64,7 @@ namespace Tournaments.Presentation.Controllers.Tournaments
             return Ok(tournamentDetails);
         }
 
-        /// <summary>
-        /// Retrieves the details of a specific tournament by its unique identifier.
-        /// </summary>
-        /// <param name="id">The unique identifier of the tournament to retrieve.</param>
-        /// <param name="includeGames">
-        /// A query parameter indicating whether to include the related games for the tournament.
-        /// Defaults to <c>false</c>. If <c>true</c>, the response includes game details.
-        /// </param>
-        /// <returns>
-        /// Returns an <see cref="ActionResult{TournamentDto}"/> containing the tournament details if found.
-        /// </returns>
-        /// <response code="200">Returns the tournament details (with or without games depending on <paramref name="includeGames"/>).</response>
-        /// <response code="404">If no tournament with the specified <paramref name="id"/> is found.</response>
-        /// <remarks>
-        /// This endpoint fetches a tournament asynchronously using the unit of work pattern and maps the entity to a DTO using AutoMapper.
-        /// If the tournament does not exist, it returns a 404 Not Found with an appropriate message.
-        /// </remarks>
+
         [HttpGet("{id}")]
         public async Task<ActionResult<TournamentDto>> GetTournamentDetails(int id, [FromQuery] bool includeGames = false)
         {
