@@ -1,12 +1,12 @@
 ﻿// -----------------------------------------------------------------------------
-// File: ServiceExtensions.cs
-// Summary: Provides extension methods to configure repository services and support
-//          lazy loading for dependency injection within the Tournament API.
+// File: DependencyInjectionExtensions.cs
+// Summary: Provides extension methods to configure repositories, service layers,
+//          lazy-loading, and Swagger XML comment integration for the Tournament API.
 // Author: [Clive Leddy]
-// Created: [2025-07-04]
-// Notes: Simplifies the registration of repositories and Unit of Work pattern
-//        implementations by encapsulating service registrations and enabling
-//        lazy-loaded repositories for improved performance and resource management.
+// Created: [2025-07-21]
+// Notes: Consolidates dependency injection configuration across repositories,
+//        services, and Swagger for improved modularity, maintainability, and 
+//        documentation support.
 // -----------------------------------------------------------------------------
 
 
@@ -96,14 +96,27 @@ public static class ServiceCollectionExtensions
 
 #region SwaggerServiceExtension
 
+/// <summary>
+/// Provides extension methods for configuring Swagger services, including automatic
+/// inclusion of XML documentation files from known projects into the Swagger UI.
+/// </summary>
+/// <remarks>
+/// This class centralizes Swagger configuration by including XML comments for multiple 
+/// assemblies, such as the API, shared DTOs, and presentation layer. It ensures that XML 
+/// documentation is only included if the corresponding files exist, avoiding runtime exceptions.
+/// </remarks>
 public static class SwaggerServiceExtensions
 {
     /// <summary>
-    /// Adds Swagger generation and automatically includes XML documentation files 
-    /// from known projects if the files exist in the build output directory.
+    /// Registers and configures Swagger services, including automatic inclusion of XML documentation 
+    /// files from a predefined list of project assemblies.
     /// </summary>
-    /// <param name="services">The service collection to configure.</param>
-    /// <returns>The updated service collection.</returns>
+    /// <param name="services">The <see cref="IServiceCollection"/> to which Swagger services will be added.</param>
+    /// <returns>The updated <see cref="IServiceCollection"/> with Swagger services configured.</returns>
+    /// <remarks>
+    /// This method checks for the existence of XML files in the output directory before including them.
+    /// This prevents runtime failures in environments where certain projects or XML files may not be present.
+    /// </remarks>
     public static IServiceCollection AddSwaggerXmlComments(this IServiceCollection services)
     {
         services.AddSwaggerGen(options =>
