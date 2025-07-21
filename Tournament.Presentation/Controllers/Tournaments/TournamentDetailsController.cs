@@ -69,7 +69,8 @@ namespace Tournaments.Presentation.Controllers.Tournaments
         {
             if(id <= 0) {
                 // If the ID is invalid, return 400 Bad Request with an error message.
-                return BadRequest($"Invalid tournament ID {id} specified.");
+                //return BadRequest($"Invalid tournament ID {id} specified.");
+                return ProcessError(new BadRequestResponse($"Invalid tournament ID {id} specified."));
             }
 
             // Retrieve the tournament details by ID using the service manager

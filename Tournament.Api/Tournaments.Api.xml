@@ -44,13 +44,28 @@
             <param name="services">The service collection to add the lazy registration to.</param>
             <returns>The updated <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection"/> with the lazy service registration.</returns>
         </member>
+        <member name="T:Tournaments.Api.Extensions.SwaggerServiceExtensions">
+            <summary>
+            Provides extension methods for configuring Swagger services, including automatic
+            inclusion of XML documentation files from known projects into the Swagger UI.
+            </summary>
+            <remarks>
+            This class centralizes Swagger configuration by including XML comments for multiple 
+            assemblies, such as the API, shared DTOs, and presentation layer. It ensures that XML 
+            documentation is only included if the corresponding files exist, avoiding runtime exceptions.
+            </remarks>
+        </member>
         <member name="M:Tournaments.Api.Extensions.SwaggerServiceExtensions.AddSwaggerXmlComments(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
             <summary>
-            Adds Swagger generation and automatically includes XML documentation files 
-            from known projects if the files exist in the build output directory.
+            Registers and configures Swagger services, including automatic inclusion of XML documentation 
+            files from a predefined list of project assemblies.
             </summary>
-            <param name="services">The service collection to configure.</param>
-            <returns>The updated service collection.</returns>
+            <param name="services">The <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection"/> to which Swagger services will be added.</param>
+            <returns>The updated <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection"/> with Swagger services configured.</returns>
+            <remarks>
+            This method checks for the existence of XML files in the output directory before including them.
+            This prevents runtime failures in environments where certain projects or XML files may not be present.
+            </remarks>
         </member>
     </members>
 </doc>
