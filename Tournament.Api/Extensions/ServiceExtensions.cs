@@ -93,3 +93,45 @@ public static class ServiceCollectionExtensions
 }// End of Class ServiceCollectionExtensions.
 
 #endregion ServiceCollectionExtensions
+
+#region SwaggerServiceExtension
+
+public static class SwaggerServiceExtensions
+{
+    /// <summary>
+    /// Adds Swagger generation and automatically includes XML documentation files 
+    /// from known projects if the files exist in the build output directory.
+    /// </summary>
+    /// <param name="services">The service collection to configure.</param>
+    /// <returns>The updated service collection.</returns>
+    public static IServiceCollection AddSwaggerXmlComments(this IServiceCollection services)
+    {
+        services.AddSwaggerGen(options =>
+        {
+            var basePath = AppContext.BaseDirectory;
+
+            // List of known XML documentation files from various projects
+            var xmlFiles = new[]
+                {
+                    "Tournaments.Api.xml",
+                    "Tournaments.Shared.xml",
+                    "Tournaments.Presentation.xml",
+                    "Tournaments.Shared.Request.xml",
+                    // Add any additional XML doc files here
+                    // "Tournaments.Application.xml",
+                    // "Tournaments.Infrastructure.xml"
+                };
+
+            foreach(var file in xmlFiles) {
+                var fullPath = Path.Combine(basePath, file);
+                if(File.Exists(fullPath)) {
+                    options.IncludeXmlComments(fullPath);
+                }
+            }
+        });
+
+        return services;
+    }
+}
+
+#endregion

@@ -44,5 +44,13 @@
             <param name="services">The service collection to add the lazy registration to.</param>
             <returns>The updated <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection"/> with the lazy service registration.</returns>
         </member>
+        <member name="M:Tournaments.Api.Extensions.SwaggerServiceExtensions.AddSwaggerXmlComments(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            Adds Swagger generation and automatically includes XML documentation files 
+            from known projects if the files exist in the build output directory.
+            </summary>
+            <param name="services">The service collection to configure.</param>
+            <returns>The updated service collection.</returns>
+        </member>
     </members>
 </doc>

@@ -23,7 +23,8 @@ namespace Tournaments.Api
             builder.Services.AddEndpointsApiExplorer();
 
             //Implementing xml comment on action in a controller that is then displayed in Swagger.
-            builder.Services.AddSwaggerGen(
+            builder.Services.AddSwaggerXmlComments();
+            /*builder.Services.AddSwaggerGen(
                 options =>
                 {
                     var basePath = AppContext.BaseDirectory;
@@ -55,7 +56,7 @@ namespace Tournaments.Api
 
                     // You can also configure other Swagger options here if needed
 
-                });
+                });*/
 
             //Not needed because using Unit of Work creates instances of the repositories.
             //builder.Services.AddScoped<ITournamentDetailsRepository, TournamentDetailsRepository>();
