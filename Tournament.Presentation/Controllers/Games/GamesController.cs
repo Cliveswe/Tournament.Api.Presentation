@@ -46,8 +46,19 @@ namespace Tournaments.Presentation.Controllers.Games
     {
         #region GET api/Games api/1/Games/
 
-
-        // GET api/tournamentDetails/{tournamentId}/
+        /// <summary>
+        /// Retrieves all games for a specific tournament.
+        /// </summary>
+        /// <param name="requestParameters">Pagination and filtering parameters for the request.</param>
+        /// <param name="tournamentId">The ID of the tournament whose games are to be retrieved.</param>
+        /// <returns>
+        /// A 200 OK response containing a list of games for the specified tournament, along with pagination metadata in the <c>X-Pagination</c> header.
+        /// Returns 400 Bad Request if the tournament ID is invalid, or 404 Not Found if the tournament does not exist.
+        /// </returns>
+        /// <remarks>
+        /// Sample request:
+        /// GET /api/tournamentDetails/{tournamentId}/
+        /// </remarks>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<GameDto>>> GetTournamentGames([FromQuery] TournamentRequestParameters requestParameters, int tournamentId)
         {

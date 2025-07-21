@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Tournaments.Api</name>
+    </assembly>
+    <members>
+        <member name="T:Tournaments.Api.Extensions.ServiceExtensions">
+            <summary>
+            Contains extension methods for configuring repository services and enabling
+            lazy loading support within the application's dependency injection container.
+            </summary>
+        </member>
+        <member name="M:Tournaments.Api.Extensions.ServiceExtensions.ConfigureRepositories(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            Extension method for <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection"/> that registers the Unit of Work
+            and repository services, including support for lazy loading of repositories.
+            </summary>
+            <param name="services">The service collection to which the repositories and Unit of Work are added.</param>
+        </member>
+        <member name="M:Tournaments.Api.Extensions.ServiceExtensions.ConfigureServiceLayerServices(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            Extension method for <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection"/> that registers the core service layer dependencies,
+            including the <see cref="T:Service.Contracts.IServiceManager"/> and individual services such as tournament, game, and authentication services.
+            Also enables lazy loading for these services by registering <see cref="T:System.Lazy`1"/> wrappers,
+            which defer instantiation until the service is actually needed.
+            </summary>
+            <param name="services">The <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection"/> to which the services will be added.</param>
+            <remarks>
+            This configuration centralizes the service layer setup, ensuring that dependent components receive properly scoped instances,
+            and improves performance and testability by deferring service instantiation with lazy loading.
+            </remarks>
+        </member>
+        <member name="T:Tournaments.Api.Extensions.ServiceCollectionExtensions">
+            <summary>
+            Provides extension method to add lazy loading support for services.
+            </summary>
+        </member>
+        <member name="M:Tournaments.Api.Extensions.ServiceCollectionExtensions.AddLazy``1(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            Registers a service to be resolved lazily using <see cref="T:System.Lazy`1"/>, 
+            allowing deferred instantiation until the service is actually needed.
+            </summary>
+            <typeparam name="TService">The type of the service to be registered.</typeparam>
+            <param name="services">The service collection to add the lazy registration to.</param>
+            <returns>The updated <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection"/> with the lazy service registration.</returns>
+        </member>
+    </members>
+</doc>

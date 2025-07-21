@@ -3,7 +3,14 @@
 namespace Tournaments.Shared.Request;
 public class PagedList<T>(IEnumerable<T> items, int count, int pageNumber, int pageSize)
 {
+    /// <summary>
+    /// List of Items.
+    /// </summary>
     public IReadOnlyList<T> Items { get; } = items.ToList();
+
+    /// <summary>
+    /// MetaData object.
+    /// </summary>
     public MetaData MetaData { get; } = new MetaData(
         currentPage: pageNumber,
         totalPages: (int)Math.Ceiling(count / (double)pageSize),

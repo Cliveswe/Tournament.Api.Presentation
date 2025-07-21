@@ -3,7 +3,7 @@ using Tournaments.Api.Extensions;
 using Tournaments.Infrastructure.Data;
 
 
-// Ignore Spelling: Api
+// Ignore Spelling: Api xml
 
 namespace Tournaments.Api
 {
@@ -21,7 +21,41 @@ namespace Tournaments.Api
                 .AddXmlDataContractSerializerFormatters();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+
+            //Implementing xml comment on action in a controller that is then displayed in Swagger.
+            builder.Services.AddSwaggerGen(
+                options =>
+                {
+                    var basePath = AppContext.BaseDirectory;
+
+                    // Helper method to conditionally add XML comments
+                    void TryIncludeXml(string fileName)
+                    {
+                        var fullPath = Path.Combine(basePath, fileName);
+                        if(File.Exists(fullPath)) {
+                            options.IncludeXmlComments(fullPath);
+                        }
+                    }
+
+                    // Main API project
+                    TryIncludeXml("Tournaments.Api.xml");
+
+                    // Shared DTOs or Domain Models
+                    TryIncludeXml("Tournaments.Shared.xml");
+
+                    // Controller/Presentation Layer
+                    TryIncludeXml("Tournaments.Presentation.xml");
+
+                    // Shared pagination MetaData
+                    //TryIncludeXml("Tournaments.Shared.xml");
+
+                    // Optionally include other layers like:
+                    // TryIncludeXml("Tournaments.Infrastructure.xml");
+                    // TryIncludeXml("Tournaments.Application.xml");
+
+                    // You can also configure other Swagger options here if needed
+
+                });
 
             //Not needed because using Unit of Work creates instances of the repositories.
             //builder.Services.AddScoped<ITournamentDetailsRepository, TournamentDetailsRepository>();

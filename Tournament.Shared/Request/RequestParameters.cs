@@ -7,7 +7,9 @@ public class RequestParameters
     private const int MaxPageSize = 100;
     private const int MinPageSize = 2;
 
-    //Set the min and max range for page size.
+    /// <summary>
+    /// Set the min and max range for page size.
+    /// </summary>
     public int PageSize {
         get => pageSize;
         set {
@@ -19,11 +21,17 @@ public class RequestParameters
         }
     }
 
+    /// <summary>
+    /// Page number.
+    /// </summary>
     [Range(1, int.MaxValue)]
     public int PageNumber { get; set; } = 1;
 }
 
 public class TournamentRequestParameters : RequestParameters
 {
+    /// <summary>
+    /// Include games.
+    /// </summary>
     public bool IncludeGames { get; set; } = false;
 }
