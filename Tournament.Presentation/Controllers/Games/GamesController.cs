@@ -203,9 +203,9 @@ namespace Tournaments.Presentation.Controllers.Games
                 return ProcessError(errorResponse);
             }
 
-            TournamentDto? tournamentDto = await serviceManager.TournamentService.GetByIdAsync(tournamentId);
+            ApiBaseResponse? tournamentDto = await serviceManager.TournamentService.GetByIdAsync(tournamentId);
 
-            if(tournamentDto is null) {
+            if(!tournamentDto.Success) {
                 //return NotFound($"Tournament with ID {tournamentId} not found.");
                 return ProcessError(
                     new BadGamePatchDocumentResponse($"Tournament with ID {tournamentId} not found.")
@@ -213,7 +213,7 @@ namespace Tournaments.Presentation.Controllers.Games
             }
 
             //Apply the patched dto to the db.
-            ApiBaseResponse response = await serviceManager.GameService.ApplyToAsync(tournamentId, id, patchedDto, tournamentDto);
+            ApiBaseResponse response = await serviceManager.GameService.ApplyToAsync(tournamentId, id, patchedDto, tournamentDto.GetOkResult<TournamentDto>());
             return response.Success ? Ok(response.GetOkResult<GameDto>()) : ProcessError(response);
         }
 

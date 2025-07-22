@@ -35,6 +35,10 @@ public sealed class ApiOkResponse<TResult>(TResult result, string? message = nul
     public TResult Result { get; } = result;
 }
 
+/// <summary>
+/// 404 Not Found status code.
+/// </summary>
+/// <param name="message">Display error message.</param>
 public class ApiNotFoundResponse(string message) : ApiBaseResponse(false, message, StatusCodes.Status404NotFound)
 {
 }
@@ -61,7 +65,10 @@ public class BadRequestResponse(string message)
     : ApiBaseResponse(false, message, StatusCodes.Status400BadRequest)
 { }
 
-
+/// <summary>
+/// 
+/// </summary>
+/// <param name="message"></param>
 public class GameAlreadyExistsResponse(string message)
     : ApiBaseResponse(false, message, StatusCodes.Status409Conflict)
 {

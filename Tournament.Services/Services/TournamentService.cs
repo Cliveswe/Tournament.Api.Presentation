@@ -3,7 +3,6 @@
 using AutoMapper;
 using Domain.Contracts;
 using Domain.Models.Entities;
-using Domain.Models.Exceptions;
 using Domain.Models.Responses;
 using Service.Contracts;
 using Tournaments.Shared.Dto;
@@ -40,17 +39,17 @@ public class TournamentService(IMapper mapper, IUnitOfWork uoW) : ITournamentSer
         return tournamentDtos.Any() ? (new ApiOkResponse<IEnumerable<TournamentDto>>(tournamentDtos), pagedList.MetaData) : (new TournamentNotFoundResponse("No tournaments found."), pagedList.MetaData);
     }
 
-    public async Task<TournamentDto> GetByIdAsync(int id, bool trackChanges = false)
+    public async Task<ApiBaseResponse> GetByIdAsync(int id, bool trackChanges = false)
     {
-        var tournamentDetails = await uoW
+        TournamentDetails? tournamentDetails = await uoW
             .TournamentDetailsRepository
             .GetAsync(id, trackChanges);
 
-        if(tournamentDetails is null) {
-            throw new TournamentNotFoundException(id);
+        if(tournamentDetails is null || tournamentDetails.Id != id) {
+            return new TournamentNotFoundResponse($"Tournament with ID {id} was not found.");
         }
 
-        return mapper.Map<TournamentDto>(tournamentDetails);
+        return new ApiOkResponse<TournamentDto>(mapper.Map<TournamentDto>(tournamentDetails));
     }
 
     #endregion

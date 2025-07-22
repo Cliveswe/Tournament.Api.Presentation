@@ -74,18 +74,19 @@ namespace Tournaments.Presentation.Controllers.Tournaments
             }
 
             // Retrieve the tournament details by ID using the service manager
-            TournamentDto? tournamentDto = await serviceManager
+            ApiBaseResponse tournamentExists = await serviceManager
                 .TournamentService
                 .GetByIdAsync(id, includeGames);
 
             // Return 404 Not Found if the entity doesn't exist
-            if(tournamentDto == null) {
-                return NotFound($"Tournament with ID {id} was not found.");
+            if(!tournamentExists.Success) {
+                return ProcessError(new ApiNotFoundResponse($"Tournament with ID {id} was not found."));
             }
 
             // Return the found entity with HTTP 200 OK + JSON by default.
             // ASP.NET Core automatically wraps it as Ok(tournamentDetails)
-            return Ok(tournamentDto);
+            //return Ok(tournamentDto);
+            return tournamentExists.Success ? Ok(tournamentExists.GetOkResult<TournamentDto>()) : ProcessError(tournamentExists);
         }
 
         #endregion
