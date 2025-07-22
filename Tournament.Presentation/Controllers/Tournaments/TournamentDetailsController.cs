@@ -138,14 +138,14 @@ namespace Tournaments.Presentation.Controllers.Tournaments
             #endregion
 
             // Check if tournament exists
-            var tournamentDto = await serviceManager.TournamentService.GetByIdAsync(id, trackChanges: true);
-            if(tournamentDto is null)
+            ApiBaseResponse? tournamentExists = await serviceManager.TournamentService.GetByIdAsync(id, trackChanges: true);
+            if(!tournamentExists.Success)
                 return NotFound($"Tournament with ID {id} was not found.");
 
             #region PATCH Document Validation
 
             // Apply the patch to the DTO
-            patchDocument.ApplyTo(tournamentDto, ModelState);
+            patchDocument.ApplyTo(tournamentExists.GetOkResult<TournamentDto>(), ModelState);
 
             // Validate patched DTO
             if(!ModelState.IsValid) {
@@ -155,7 +155,7 @@ namespace Tournaments.Presentation.Controllers.Tournaments
             #endregion
 
             // Call service to update entity from patched DTO
-            bool updated = await serviceManager.TournamentService.ApplyToAsync(id, tournamentDto);
+            bool updated = await serviceManager.TournamentService.ApplyToAsync(id, tournamentExists.GetOkResult<TournamentDto>());
             if(!updated)
                 return StatusCode(500, "An error occurred while updating the tournament.");
 
