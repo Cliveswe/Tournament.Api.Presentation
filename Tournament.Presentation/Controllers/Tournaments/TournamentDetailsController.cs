@@ -25,8 +25,6 @@ using Tournaments.Shared.Request;
 namespace Tournaments.Presentation.Controllers.Tournaments
 {
 
-    [Route("api/tournamentDetails")]
-    [ApiController]
     /// <summary>
     /// Provides RESTful API endpoints to manage tournament details, including
     /// operations to create, read, update, partially update (patch), and delete tournaments.
@@ -40,6 +38,8 @@ namespace Tournaments.Presentation.Controllers.Tournaments
     /// The <see cref="PatchTournament(int, JsonPatchDocument{TournamentDto})"/> method
     /// supports partial updates on tournament entities using JSON Patch.
     /// </remarks>
+    [Route("api/tournamentDetails")]
+    [ApiController]
     public class TournamentDetailsController(IServiceManager serviceManager) : ApiControllerBase
     {
         #region GET api/TournamentDetails/5
