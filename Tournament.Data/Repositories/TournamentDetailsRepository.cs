@@ -67,11 +67,10 @@ public class TournamentDetailsRepository(TournamentApiContext context) : Reposit
     {
         bool trackChanges = false;
 
-        int tournamentCount = await FindByCondition(t => t.Id.Equals(tournamentId), trackChanges)
-                .Include(t => t.Games)
-                .CountAsync();
+        return await FindByCondition(t => t.Id.Equals(tournamentId), trackChanges)
+                .SelectMany(t => t.Games)
+                .AnyAsync();
 
-        return tournamentCount > 0 ? true : false;
     }
 
     #region old code

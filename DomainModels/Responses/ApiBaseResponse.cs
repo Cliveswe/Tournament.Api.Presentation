@@ -44,6 +44,7 @@ public class ApiNotFoundResponse(string message) : ApiBaseResponse(false, messag
 }
 
 public class ApiConflictResponse(string message) : ApiBaseResponse(false, message, StatusCodes.Status409Conflict);
+
 #region Custom Api Responses
 
 

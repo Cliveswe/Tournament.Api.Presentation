@@ -291,15 +291,20 @@ namespace Tournaments.Presentation.Controllers.Tournaments
                 return ProcessError(new BadRequestResponse($"Invalid {id} specified for deletion."));
             }
 
-            var deleteResponse = await serviceManager.TournamentService.RemoveAsync(id);
-            // Attempt to remove the entity from the repository.
-            if(!await serviceManager.TournamentService.RemoveAsync(id)) {
-                // If the removal was not successful, return 404 Not Found
-                return NotFound($"Tournament with ID {id} was not found.");
+            ApiBaseResponse deleteResponse = await serviceManager.TournamentService.RemoveAsync(id);
+
+
+            if(deleteResponse.Success) {
+                return ProcessError(new ApiConflictResponse(""));
             }
+            // Attempt to remove the entity from the repository.
+            //if(!await serviceManager.TournamentService.RemoveAsync(id)) {
+            //    // If the removal was not successful, return 404 Not Found
+            //    return NotFound($"Tournament with ID {id} was not found.");
+            //}
 
             // Return 200 OK with a success message
-            return Ok(new { message = $"Tournament with ID {id} has been deleted successfully." });
+            //return Ok(new { message = $"Tournament with ID {id} has been deleted successfully." });
 
         }
 
