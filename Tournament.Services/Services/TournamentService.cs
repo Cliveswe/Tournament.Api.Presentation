@@ -128,13 +128,13 @@ public class TournamentService(IMapper mapper, IUnitOfWork uoW) : ITournamentSer
         TournamentDetails? tournamentDetails = await uoW.TournamentDetailsRepository.GetAsync(id);
 
         if(tournamentDetails is null) {
-            return new ApiNotFoundResponse($"Could not remove tournament {id}.");
+            return new ApiNotFoundResponse($"Tournament with ID {id} was not found.");
         }
 
         bool hasGames = await uoW.TournamentDetailsRepository.HasGames(id);
 
         if(hasGames) {
-            return new ApiConflictResponse($"Tournament has games attached to it.");
+            return new ApiConflictResponse($"Tournament with ID {id} has games associated and cannot be deleted.");
         }
 
         // If the tournament exists, remove it from the repository.
@@ -143,7 +143,7 @@ public class TournamentService(IMapper mapper, IUnitOfWork uoW) : ITournamentSer
         // Persist the change to the database
         await uoW.CompleteAsync();
 
-        return new ApiOkResponse<TournamentDto>(mapper.Map<TournamentDto>(tournamentDetails));
+        return new ApiNotFoundResponse<TournamentDto>(mapper.Map<TournamentDto>(tournamentDetails));
     }
 
     #endregion
