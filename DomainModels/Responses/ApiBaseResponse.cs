@@ -47,8 +47,6 @@ public class ApiConflictResponse(string message) : ApiBaseResponse(false, messag
 
 public class ApiNoContentResponse() : ApiBaseResponse(true, null, StatusCodes.Status204NoContent);
 
-#region Custom Api Responses
-
 
 public class TournamentNotFoundResponse(string message)
     : ApiNotFoundResponse(message)
@@ -102,4 +100,3 @@ public class UnProcessableContentResponse(string message)
 public class NoChangesMadeResponse(string message)
     : ApiBaseResponse(false, message, StatusCodes.Status422UnprocessableEntity)
 { }
-#endregion

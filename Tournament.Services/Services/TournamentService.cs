@@ -142,7 +142,7 @@ public class TournamentService(IMapper mapper, IUnitOfWork uoW) : ITournamentSer
         uoW.TournamentDetailsRepository.Remove(tournamentDetails);
         await uoW.CompleteAsync();
 
-        return new ApiOkResponse<TournamentDto>(tournamentDto);
+        return new ApiOkResponse<TournamentDto>(tournamentDto, "Tournament successfully deleted.");
     }
 
     #endregion
