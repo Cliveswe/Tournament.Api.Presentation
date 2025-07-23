@@ -137,13 +137,12 @@ public class TournamentService(IMapper mapper, IUnitOfWork uoW) : ITournamentSer
             return new ApiConflictResponse($"Tournament with ID {id} has games associated and cannot be deleted.");
         }
 
-        // If the tournament exists, remove it from the repository.
-        // Remove the tournament details from the repository
+        TournamentDto tournamentDto = mapper.Map<TournamentDto>(tournamentDetails);
+        // Remove tournament and persist changes
         uoW.TournamentDetailsRepository.Remove(tournamentDetails);
-        // Persist the change to the database
         await uoW.CompleteAsync();
 
-        return new ApiNotFoundResponse<TournamentDto>(mapper.Map<TournamentDto>(tournamentDetails));
+        return new ApiOkResponse<TournamentDto>(tournamentDto);
     }
 
     #endregion
