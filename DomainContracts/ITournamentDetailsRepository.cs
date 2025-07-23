@@ -40,6 +40,8 @@ public interface ITournamentDetailsRepository
     /// The task result contains the <see cref="TournamentDetails"/> if found; otherwise, <c>null</c>.</returns>
     Task<TournamentDetails?> GetAsync(int tournamentId, bool includeGames = false, bool trackChanges = false);
 
+    Task<bool> HasGames(int tournamentId);
+
     /// <summary>
     /// Checks asynchronously whether a tournament detail exists with the specified ID.
     /// </summary>

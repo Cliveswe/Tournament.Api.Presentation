@@ -62,6 +62,18 @@ public class TournamentDetailsRepository(TournamentApiContext context) : Reposit
             .AnyAsync();
     }
 
+
+    public async Task<bool> HasGames(int tournamentId)
+    {
+        bool trackChanges = false;
+
+        int tournamentCount = await FindByCondition(t => t.Id.Equals(tournamentId), trackChanges)
+                .Include(t => t.Games)
+                .CountAsync();
+
+        return tournamentCount > 0 ? true : false;
+    }
+
     #region old code
     /// <summary>
     /// Asynchronously retrieves all tournament details, including associated games.
