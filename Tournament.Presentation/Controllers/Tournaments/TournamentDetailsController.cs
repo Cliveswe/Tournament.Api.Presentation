@@ -282,24 +282,16 @@ namespace Tournaments.Presentation.Controllers.Tournaments
 
         #region DELETE api/TournamentDetails/5
 
-        /// <summary>
-        /// Deletes a tournament with the specified ID.
-        /// </summary>
-        /// <param name="id">The unique identifier of the tournament to delete. Must be greater than zero.</param>
-        /// <returns>
-        /// Returns 200 OK with a success message if the tournament was deleted successfully.
-        /// Returns 400 Bad Request if the provided ID is invalid (less than or equal to zero).
-        /// Returns 404 Not Found if a tournament with the specified ID does not exist.
-        /// Returns 500 Internal Server Error if an error occurs during deletion.
-        /// </returns>
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteTournamentDetails(int id)
+        public async Task<ActionResult> DeleteTournamentDetails(int id)
         {
             // Validate the ID parameter
             if(id <= 0) {
-                return BadRequest($"Invalid {id} specified for deletion.");
+                //return BadRequest($"Invalid {id} specified for deletion.");
+                return ProcessError(new BadRequestResponse($"Invalid {id} specified for deletion."));
             }
 
+            var deleteResponse = await serviceManager.TournamentService.RemoveAsync(id);
             // Attempt to remove the entity from the repository.
             if(!await serviceManager.TournamentService.RemoveAsync(id)) {
                 // If the removal was not successful, return 404 Not Found

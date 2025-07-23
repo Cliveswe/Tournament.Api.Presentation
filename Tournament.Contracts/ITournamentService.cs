@@ -16,5 +16,5 @@ public interface ITournamentService
     Task<bool> Update(int id, TournamentUpdateDto tournamentUpdateDto);
     Task<ApiBaseResponse> ExistsAsync(string title, DateTime startDate);
     Task<ApiBaseResponse> ExistsAsync(int id);
-    Task<bool> RemoveAsync(int id);
+    Task<ApiBaseResponse> RemoveAsync(int id);
 }

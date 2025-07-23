@@ -122,22 +122,22 @@ public class TournamentService(IMapper mapper, IUnitOfWork uoW) : ITournamentSer
 
     #region DELETE Tournament details
 
-    public async Task<bool> RemoveAsync(int id)
+    public async Task<ApiBaseResponse> RemoveAsync(int id)
     {
         // Attempt to retrieve the tournament details by ID.
-        var tournamentDetails = await uoW.TournamentDetailsRepository.GetAsync(id);
+        TournamentDetails? tournamentDetails = await uoW.TournamentDetailsRepository.GetAsync(id);
 
-        // If the tournament exists, remove it from the repository.
-        if(tournamentDetails != null) {
-            // Remove the tournament details from the repository
-            uoW.TournamentDetailsRepository.Remove(tournamentDetails);
-            // Persist the change to the database
-            await uoW.CompleteAsync();
-            return true;
+        if(tournamentDetails is null) {
+            return new ApiNotFoundResponse($"Could not remove tournament {id}.");
         }
 
-        // If the tournament does not exist, return false.
-        return false;
+        // If the tournament exists, remove it from the repository.
+        // Remove the tournament details from the repository
+        uoW.TournamentDetailsRepository.Remove(tournamentDetails);
+        // Persist the change to the database
+        await uoW.CompleteAsync();
+
+        return new ApiOkResponse<TournamentDto>(mapper.Map<TournamentDto>(tournamentDetails));
     }
 
     #endregion
