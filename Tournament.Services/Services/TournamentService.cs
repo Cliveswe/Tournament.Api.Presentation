@@ -134,7 +134,7 @@ public class TournamentService(IMapper mapper, IUnitOfWork uoW) : ITournamentSer
         bool hasGames = await uoW.TournamentDetailsRepository.HasGames(id);
 
         if(hasGames) {
-            return new
+            return new ApiConflictResponse($"Tournament has games attached to it.");
         }
 
         // If the tournament exists, remove it from the repository.
