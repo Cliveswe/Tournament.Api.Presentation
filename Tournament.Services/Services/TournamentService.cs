@@ -131,6 +131,12 @@ public class TournamentService(IMapper mapper, IUnitOfWork uoW) : ITournamentSer
             return new ApiNotFoundResponse($"Could not remove tournament {id}.");
         }
 
+        bool hasGames = await uoW.TournamentDetailsRepository.HasGames(id);
+
+        if(hasGames) {
+            return new
+        }
+
         // If the tournament exists, remove it from the repository.
         // Remove the tournament details from the repository
         uoW.TournamentDetailsRepository.Remove(tournamentDetails);
