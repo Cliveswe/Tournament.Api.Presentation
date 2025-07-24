@@ -5,7 +5,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
       <GenerateDocumentationFile>true</GenerateDocumentationFile>
-  <NoWarn>$(NoWarn);1591</NoWarn> <!-- Optional: Suppress missing XML warning -->
+  <NoWarn>$(NoWarn);1591</NoWarn>
+  <DocumentationFile>Tournaments.Shared.xml</DocumentationFile> <!-- Optional: Suppress missing XML warning -->
   </PropertyGroup>
 
   <ItemGroup>

@@ -7,7 +7,7 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);1591</NoWarn>
     <!-- Optional: suppress warnings for missing comments -->
-    <DocumentationFile></DocumentationFile>
+    <DocumentationFile>Tournaments.Presentation.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>

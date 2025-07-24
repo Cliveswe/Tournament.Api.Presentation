@@ -1,0 +1,244 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Tournaments.Shared</name>
+    </assembly>
+    <members>
+        <member name="T:Tournaments.Shared.Dto.GameCreateDto">
+             <summary>
+             Data Transfer Object (DTO) used for creating a new <see cref="!:Game"/> entity.
+             Encapsulates the required data for game creation, including the game’s title,
+             scheduled time, and associated tournament identifier, with validation rules
+             to enforce input correctness and integrity.
+            
+             Key features:
+             - Validates that the title is provided and has a length between 3 and 100 characters.
+             - Requires a scheduled time to indicate when the game will occur.
+             - Ensures the tournament identifier is specified and positive.
+            
+             This DTO is primarily used to receive input data from clients during game creation operations.
+             </summary>
+        </member>
+        <member name="P:Tournaments.Shared.Dto.GameCreateDto.Name">
+            <summary>
+            Gets or sets the name (title) of the game.
+            This field is required and must be between 3 and 100 characters in length.
+            </summary>
+        </member>
+        <member name="P:Tournaments.Shared.Dto.GameCreateDto.Time">
+            <summary>
+            Gets or sets the scheduled time of the game.
+            This field is required and indicates when the game is planned to start.
+            </summary>
+        </member>
+        <member name="T:Tournaments.Shared.Dto.GameDto">
+             <summary>
+             Data Transfer Object (DTO) representing the essential details of a game,
+             including its title and scheduled start date.
+             </summary>
+             <remarks>
+             This DTO is used primarily for transferring game information between application layers,
+             facilitating serialization and deserialization in API requests and responses.
+            
+             Key properties:
+             - <see cref="P:Tournaments.Shared.Dto.GameDto.Title"/>: The name of the game.
+             - <see cref="P:Tournaments.Shared.Dto.GameDto.StartDate"/>: The scheduled date and time when the game begins.
+            
+             This class promotes separation of concerns by decoupling the domain entity from data transport,
+             supporting clean architecture and maintainability.
+             </remarks>
+        </member>
+        <member name="P:Tournaments.Shared.Dto.GameDto.Title">
+            <summary>
+            Gets or sets the title of the game.
+            </summary>
+        </member>
+        <member name="P:Tournaments.Shared.Dto.GameDto.StartDate">
+            <summary>
+            Gets or sets the scheduled start date and time of the game.
+            </summary>
+        </member>
+        <member name="T:Tournaments.Shared.Dto.GameUpdateDto">
+            <summary>
+            Data Transfer Object (DTO) designed specifically for updating an existing <see cref="!:Game"/> entity.
+            This class includes only the modifiable properties, enforcing validation constraints to ensure data integrity.
+            
+            Key features:
+            - Contains the <see cref="P:Tournaments.Shared.Dto.GameUpdateDto.Title"/> property with required and length validation.
+            - Supports partial updates by restricting modifiable fields to those intended for change.
+            
+            This DTO facilitates safe and controlled update operations by exposing only allowed fields
+            and preventing modification of immutable or sensitive properties.
+            </summary>
+        </member>
+        <member name="P:Tournaments.Shared.Dto.GameUpdateDto.Title">
+            <summary>
+            Gets or sets the title of the game.
+            This field is required and has a maximum length of 100 characters.
+            </summary>
+        </member>
+        <member name="T:Tournaments.Shared.Dto.TournamentDetailsCreateDto">
+             <summary>
+             Represents a Data Transfer Object (DTO) for creating new tournament entries.
+             </summary>
+             <remarks>
+             This DTO is used in create operations where new tournament data is submitted by the client.
+             It includes validation rules to ensure required information is present and meets expected formats.
+            
+             Key properties:
+             - <see cref="P:Tournaments.Shared.Dto.TournamentDetailsCreateDto.Title"/>: Required, limited to 100 characters.
+             - <see cref="P:Tournaments.Shared.Dto.TournamentDetailsCreateDto.StartDate"/>: Required, represents when the tournament begins.
+            
+             The validation attributes applied to each property support automatic model binding
+             and server-side validation in web API scenarios.
+             </remarks>
+        </member>
+        <member name="P:Tournaments.Shared.Dto.TournamentDetailsCreateDto.Title">
+            <summary>
+            Gets or sets the title of the tournament.
+            </summary>
+        </member>
+        <member name="P:Tournaments.Shared.Dto.TournamentDetailsCreateDto.StartDate">
+            <summary>
+            Gets or sets the start date of the tournament.
+            </summary>
+        </member>
+        <member name="T:Tournaments.Shared.Dto.TournamentDto">
+             <summary>
+             Represents a data transfer object (DTO) for encapsulating tournament information,
+             including its title, start date, computed end date, and a collection of associated games.
+             </summary>
+             <remarks>
+             This class is used primarily for read operations where tournament data is exposed to clients.
+             The <see cref="P:Tournaments.Shared.Dto.TournamentDto.EndDate"/> property is automatically derived by adding three months to the
+             <see cref="P:Tournaments.Shared.Dto.TournamentDto.StartDate"/>, eliminating the need to persist it in storage.
+            
+             Key characteristics:
+             - Title: The name of the tournament.
+             - StartDate: The date on which the tournament begins.
+             - EndDate: Computed as StartDate + 3 months, not manually settable.
+             - Games: A list of <see cref="T:Tournaments.Shared.Dto.GameDto"/> instances representing games linked to the tournament.
+            
+             This DTO facilitates data projection and serialization for API responses or service interactions.
+             </remarks>
+        </member>
+        <member name="P:Tournaments.Shared.Dto.TournamentDto.Title">
+            <summary>
+            Gets or sets the title of the tournament.
+            </summary>
+        </member>
+        <member name="P:Tournaments.Shared.Dto.TournamentDto.StartDate">
+            <summary>
+            Gets or sets the start date of the tournament.
+            </summary>
+        </member>
+        <member name="P:Tournaments.Shared.Dto.TournamentDto.EndDate">
+            <summary>
+            Gets the end date of the tournament, automatically calculated as StartDate plus 3 months.
+            <note>EndDate is automatically calculated as StartDate + 3 months and always stays in sync with StartDate.</note>
+            </summary>
+        </member>
+        <member name="P:Tournaments.Shared.Dto.TournamentDto.Games">
+            <summary>
+            Navigation Property.
+            Gets or sets the list of games associated with the tournament.
+            </summary>
+        </member>
+        <member name="T:Tournaments.Shared.Dto.TournamentUpdateDto">
+             <summary>
+             Represents a data transfer object (DTO) used to update existing tournament information.
+             </summary>
+             <remarks>
+             This DTO is designed specifically for update operations, exposing only the modifiable properties
+             of a tournament to ensure data integrity and prevent unauthorized changes to immutable fields
+             such as identifiers or related entities.
+            
+             Validation constraints:
+             - <see cref="P:Tournaments.Shared.Dto.TournamentUpdateDto.Title"/>: Required field with a maximum length of 100 characters.
+            
+             This class is typically used in API operations where clients submit partial updates to an existing
+             tournament entity. It supports model validation through data annotations to enforce business rules
+             before the update is applied to the persistence layer.
+             </remarks>
+        </member>
+        <member name="P:Tournaments.Shared.Dto.TournamentUpdateDto.Title">
+            <summary>
+            Gets or sets the title of the tournament.
+            This field is required and cannot exceed 100 characters.
+            </summary>
+        </member>
+        <member name="T:Tournaments.Shared.Request.MetaData">
+            <summary>
+            Represents pagination metadata returned alongside paged API results.
+            </summary>
+            <param name="currentPage">The current page number in the result set.</param>
+            <param name="totalPages">The total number of available pages.</param>
+            <param name="pageSize">The number of items per page.</param>
+            <param name="totalCount">The total number of items across all pages.</param>
+        </member>
+        <member name="M:Tournaments.Shared.Request.MetaData.#ctor(System.Int32,System.Int32,System.Int32,System.Int32)">
+            <summary>
+            Represents pagination metadata returned alongside paged API results.
+            </summary>
+            <param name="currentPage">The current page number in the result set.</param>
+            <param name="totalPages">The total number of available pages.</param>
+            <param name="pageSize">The number of items per page.</param>
+            <param name="totalCount">The total number of items across all pages.</param>
+        </member>
+        <member name="P:Tournaments.Shared.Request.MetaData.CurrentPage">
+            <summary>
+            Gets the current page number.
+            </summary>
+        </member>
+        <member name="P:Tournaments.Shared.Request.MetaData.TotalPages">
+            <summary>
+            Gets the total number of pages available.
+            </summary>
+        </member>
+        <member name="P:Tournaments.Shared.Request.MetaData.PageSize">
+            <summary>
+            Gets the number of items on each page.
+            </summary>
+        </member>
+        <member name="P:Tournaments.Shared.Request.MetaData.TotalCount">
+            <summary>
+            Gets the total number of items across all pages.
+            </summary>
+        </member>
+        <member name="P:Tournaments.Shared.Request.MetaData.HasPrevious">
+            <summary>
+            Indicates whether there is a previous page.
+            </summary>
+        </member>
+        <member name="P:Tournaments.Shared.Request.MetaData.HasNext">
+            <summary>
+            Indicates whether there is a next page.
+            </summary>
+        </member>
+        <member name="P:Tournaments.Shared.Request.PagedList`1.Items">
+            <summary>
+            List of Items.
+            </summary>
+        </member>
+        <member name="P:Tournaments.Shared.Request.PagedList`1.MetaData">
+            <summary>
+            MetaData object.
+            </summary>
+        </member>
+        <member name="P:Tournaments.Shared.Request.RequestParameters.PageSize">
+            <summary>
+            Set the min and max range for page size.
+            </summary>
+        </member>
+        <member name="P:Tournaments.Shared.Request.RequestParameters.PageNumber">
+            <summary>
+            Page number.
+            </summary>
+        </member>
+        <member name="P:Tournaments.Shared.Request.TournamentRequestParameters.IncludeGames">
+            <summary>
+            Include games.
+            </summary>
+        </member>
+    </members>
+</doc>

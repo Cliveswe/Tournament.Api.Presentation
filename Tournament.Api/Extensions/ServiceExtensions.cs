@@ -124,23 +124,36 @@ public static class SwaggerServiceExtensions
             var basePath = AppContext.BaseDirectory;
 
             // List of known XML documentation files from various projects
-            var xmlFiles = new[]
-                {
-                    "Tournaments.Api.xml",
-                    "Tournaments.Shared.xml",
-                    "Tournaments.Presentation.xml",
-                    "Tournaments.Shared.Request.xml",
-                    // Add any additional XML doc files here
-                    // "Tournaments.Application.xml",
-                    // "Tournaments.Infrastructure.xml"
-                };
+            //var xmlFiles = new[]
+            //    {
+            //        "Tournaments.Api.xml",
+            //        "Tournaments.Shared.xml",
+            //        "Tournaments.Presentation.xml",
+            //        "Tournaments.Shared.Request.xml",
+            //        // Add any additional XML doc files here
+            //        // "Tournaments.Application.xml",
+            //        // "Tournaments.Infrastructure.xml"
+            //    };
 
-            foreach(var file in xmlFiles) {
-                var fullPath = Path.Combine(basePath, file);
-                if(File.Exists(fullPath)) {
-                    options.IncludeXmlComments(fullPath);
-                }
+            //foreach(var file in xmlFiles) {
+            //    var fullPath = Path.Combine(basePath, file);
+            //    if(File.Exists(fullPath)) {
+            //        options.IncludeXmlComments(fullPath);
+            //    }
+            //}
+
+            // Auto discover all xml files. This is a dynamic discovery of the xml documentation in each
+            // project of the solution. Important: Make sure that each project has properties/Build/Output/
+            // Documentation file checked. In addition make sure the Xml file documentation path is the
+            // project is populated with the project path for example "Tournaments.Shared.xml". Also note
+            // that the .xml is required.
+            var xmlDocs = Directory.GetFiles(AppContext.BaseDirectory, "*.xml", SearchOption.TopDirectoryOnly);
+
+            foreach(var xmlDoc in xmlDocs) {
+                options.IncludeXmlComments(xmlDoc);
             }
+
+
         });
 
         return services;
