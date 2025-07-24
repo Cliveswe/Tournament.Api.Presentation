@@ -1,0 +1,152 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Tournaments.Presentation</name>
+    </assembly>
+    <members>
+        <member name="T:Tournaments.Presentation.Controllers.Games.GamesController">
+            <summary>
+            API controller for managing <see cref="T:Domain.Models.Entities.Game"/> entities associated with tournaments.
+            </summary>
+            <remarks>
+            This controller provides endpoints to perform CRUD operations on games within specific tournaments:
+            <list type="number">
+            <item>Retrieves games by tournamentEntity ID or by game ID.</item>
+            <item>Creates new games linked to tournaments, ensuring data validity and preventing duplicates.</item>
+            <item>Updates or partially updates existing games with full validation and concurrency handling.</item>
+            <item>Deletes games by their ID with appropriate validation and error handling.</item>
+            <item>Utilizes AutoMapper to map between entity models and data transfer objects (DTOs).</item>
+            <item>Implements the Unit of Work pattern to coordinate database operations through repositories.</item>
+            <item>Validates that game times fall within the tournamentEntity’s start and end dates.</item>
+            <item>Returns standard HTTP response codes such as 200 OK, 201 Created, 204 No Content, 
+            400 Bad Request, 404 Not Found, 409 Conflict, and 500 Internal Server Error.</item>
+            </list>
+            </remarks>
+        </member>
+        <member name="M:Tournaments.Presentation.Controllers.Games.GamesController.#ctor(Service.Contracts.IServiceManager)">
+            <summary>
+            API controller for managing <see cref="T:Domain.Models.Entities.Game"/> entities associated with tournaments.
+            </summary>
+            <remarks>
+            This controller provides endpoints to perform CRUD operations on games within specific tournaments:
+            <list type="number">
+            <item>Retrieves games by tournamentEntity ID or by game ID.</item>
+            <item>Creates new games linked to tournaments, ensuring data validity and preventing duplicates.</item>
+            <item>Updates or partially updates existing games with full validation and concurrency handling.</item>
+            <item>Deletes games by their ID with appropriate validation and error handling.</item>
+            <item>Utilizes AutoMapper to map between entity models and data transfer objects (DTOs).</item>
+            <item>Implements the Unit of Work pattern to coordinate database operations through repositories.</item>
+            <item>Validates that game times fall within the tournamentEntity’s start and end dates.</item>
+            <item>Returns standard HTTP response codes such as 200 OK, 201 Created, 204 No Content, 
+            400 Bad Request, 404 Not Found, 409 Conflict, and 500 Internal Server Error.</item>
+            </list>
+            </remarks>
+        </member>
+        <member name="M:Tournaments.Presentation.Controllers.Games.GamesController.GetTournamentGames(Tournaments.Shared.Request.TournamentRequestParameters,System.Int32)">
+            <summary>
+            Retrieves all games for a specific tournament.
+            </summary>
+            <param name="requestParameters">Pagination and filtering parameters for the request.</param>
+            <param name="tournamentId">The ID of the tournament whose games are to be retrieved.</param>
+            <returns>
+            A 200 OK response containing a list of games for the specified tournament, along with pagination metadata in the <c>X-Pagination</c> header.
+            Returns 400 Bad Request if the tournament ID is invalid, or 404 Not Found if the tournament does not exist.
+            </returns>
+            <remarks>
+            Sample request:
+            GET /api/tournamentDetails/{tournamentId}/
+            </remarks>
+        </member>
+        <member name="T:Tournaments.Presentation.Controllers.Tournaments.TournamentDetailsController">
+            <summary>
+            Provides RESTful API endpoints to manage tournament details, including
+            operations to create, read, update, partially update (patch), and delete tournaments.
+            </summary>
+            <remarks>
+            This controller uses the Unit of Work pattern and AutoMapper to handle
+            data operations and DTO mappings. It supports query options such as
+            including related games in the responses. It returns standard HTTP status
+            codes and messages to indicate operation results.
+            
+            The <see cref="M:Tournaments.Presentation.Controllers.Tournaments.TournamentDetailsController.PatchTournament(System.Int32,Microsoft.AspNetCore.JsonPatch.JsonPatchDocument{Tournaments.Shared.Dto.TournamentDto})"/> method
+            supports partial updates on tournament entities using JSON Patch.
+            </remarks>
+        </member>
+        <member name="M:Tournaments.Presentation.Controllers.Tournaments.TournamentDetailsController.#ctor(Service.Contracts.IServiceManager)">
+            <summary>
+            Provides RESTful API endpoints to manage tournament details, including
+            operations to create, read, update, partially update (patch), and delete tournaments.
+            </summary>
+            <remarks>
+            This controller uses the Unit of Work pattern and AutoMapper to handle
+            data operations and DTO mappings. It supports query options such as
+            including related games in the responses. It returns standard HTTP status
+            codes and messages to indicate operation results.
+            
+            The <see cref="M:Tournaments.Presentation.Controllers.Tournaments.TournamentDetailsController.PatchTournament(System.Int32,Microsoft.AspNetCore.JsonPatch.JsonPatchDocument{Tournaments.Shared.Dto.TournamentDto})"/> method
+            supports partial updates on tournament entities using JSON Patch.
+            </remarks>
+        </member>
+        <member name="M:Tournaments.Presentation.Controllers.Tournaments.TournamentDetailsController.PatchTournament(System.Int32,Microsoft.AspNetCore.JsonPatch.JsonPatchDocument{Tournaments.Shared.Dto.TournamentDto})">
+            <summary>
+            Partially updates an existing tournament identified by <paramref name="id"/> using a JSON Patch document.
+            </summary>
+            <param name="id">The ID of the tournament to be patched. Must be greater than zero.</param>
+            <param name="patchDocument">A <see cref="T:Microsoft.AspNetCore.JsonPatch.JsonPatchDocument`1"/> representing the JSON Patch operations to apply to the tournament DTO.</param>
+            <returns>
+            Returns an <see cref="T:Microsoft.AspNetCore.Mvc.ActionResult`1"/> containing the updated tournament data if the patch succeeds.
+            </returns>
+            <remarks>
+            This method performs the following steps:
+            <list type="number">
+            <item>Validates that the patch document is not null.</item>
+            <item>Validates that the tournament ID is valid (greater than zero).</item>
+            <item>Retrieves the existing tournament entity from the repository via the Unit of Work pattern.</item>
+            <item>If the tournament does not exist, returns 404 Not Found.</item>
+            <item>Maps the existing tournament entity to a <see cref="T:Tournaments.Shared.Dto.TournamentDto"/> for patching.</item>
+            <item>Applies the patch document to the DTO and validates the patched model state.</item>
+            <item>If validation fails, returns 400 Bad Request with validation errors.</item>
+            <item>Maps the patched DTO back to the entity and updates it in the repository.</item>
+            <item>Handles concurrency exceptions and checks if the tournament still exists.</item>
+            <item>Persists changes via Unit of Work.</item>
+            <item>Returns the updated tournament DTO with HTTP 200 OK on success.</item>
+            </list>
+            </remarks>
+            <exception cref="T:Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException">Thrown if a concurrency conflict occurs during update and the tournament still exists.</exception>
+        </member>
+        <member name="M:Tournaments.Presentation.Controllers.Tournaments.TournamentDetailsController.PutTournamentDetails(System.Int32,Tournaments.Shared.Dto.TournamentUpdateDto)">
+            <summary>
+            Updates an existing tournament's details identified by the specified ID.
+            </summary>
+            <param name="id">The unique identifier of the tournament to update.</param>
+            <param name="tournamentUpdateDto">The data transfer object containing the updated tournament information.</param>
+            <returns>
+            Returns 204 No Content if the update is successful.
+            Returns 400 Bad Request if the model state is invalid or the input DTO is null.
+            Returns 404 Not Found if no tournament with the specified ID exists.
+            </returns>
+            <remarks>
+            This method validates the incoming model, retrieves the existing tournament entity,
+            maps the updated fields from the DTO, and attempts to save the changes.
+            It handles concurrency exceptions and ensures RESTful response codes are returned.
+            </remarks>
+        </member>
+        <member name="M:Tournaments.Presentation.Controllers.Tournaments.TournamentDetailsController.PostTournamentDetails(Tournaments.Shared.Dto.TournamentDetailsCreateDto)">
+            <summary>
+            Creates a new tournament record in the data store.
+            </summary>
+            <param name="tournamentDetailsCreateDto">The data transfer object containing the details of the tournament to create.</param>
+            <returns>
+            Returns a <see cref="T:Microsoft.AspNetCore.Mvc.CreatedAtActionResult"/> containing the newly created tournament data with a 201 Created status code.
+            Returns 400 Bad Request if the input model is invalid or null.
+            Returns 409 Conflict if a tournament with the same title and start date already exists.
+            </returns>
+            <remarks>
+            This method validates the input model, checks for duplicates to prevent conflicts,
+            maps the DTO to the domain entity, adds the new entity to the repository,
+            and persists changes asynchronously. It follows RESTful conventions by returning
+            the location of the newly created resource in the response.
+            </remarks>
+        </member>
+    </members>
+</doc>
