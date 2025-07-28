@@ -123,54 +123,29 @@ namespace Tournaments.Presentation.Controllers.Tournaments
 
         #region PUT api/TournamentDetails/5
 
-        /// <summary>
-        /// Updates an existing tournament's details identified by the specified ID.
-        /// </summary>
-        /// <param name="id">The unique identifier of the tournament to update.</param>
-        /// <param name="tournamentUpdateDto">The data transfer object containing the updated tournament information.</param>
-        /// <returns>
-        /// Returns 204 No Content if the update is successful.
-        /// Returns 400 Bad Request if the model state is invalid or the input DTO is null.
-        /// Returns 404 Not Found if no tournament with the specified ID exists.
-        /// </returns>
-        /// <remarks>
-        /// This method validates the incoming model, retrieves the existing tournament entity,
-        /// maps the updated fields from the DTO, and attempts to save the changes.
-        /// It handles concurrency exceptions and ensures RESTful response codes are returned.
-        /// </remarks>
+
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutTournamentDetails(int id, [FromBody] TournamentUpdateDto tournamentUpdateDto)
+        [ProducesResponseType(typeof(ApiNoContentResponse), StatusCodes.Status200OK)]
+
+        public async Task<ActionResult> PutTournamentDetails(int id, [FromBody] TournamentUpdateDto tournamentUpdateDto)
         {
-            #region Validation of Input Parameters
 
-            // Validate the model state, checks data annotations.
-            if(!ModelState.IsValid) {
-                // Return 400 Bad Request with validation errors
-                return BadRequest(ModelState);
-            }
-
-            // Check for null input.
-            if(tournamentUpdateDto == null) {
-                return BadRequest("Update data cannot be null.");
-            }
-
-            #endregion
 
             // If the tournament does not exist.
             ApiBaseResponse entityExists = await serviceManager.TournamentService.ExistsAsync(id);
             if(!entityExists.Success) {
                 // Return 404 Not Found with an error message.
-                return NotFound($"Tournament with ID {id} was not found.");
+                return ProcessError(entityExists);
             }
 
             // If the update was not successful.
             if(!await serviceManager.TournamentService.Update(id, tournamentUpdateDto)) {
                 // Return 404 Not Found if the tournament with the specified ID does not exist.
-                return NotFound($"Tournament with ID {id} was not found.");
+                return ProcessError(new TournamentNotFoundResponse($"Tournament with ID {id} was not found."));
             }
 
             // The update was successful; return HTTP 204 No Content as per REST convention
-            return NoContent();
+            return Ok(new ApiNoContentResponse());
         }
 
         #endregion
