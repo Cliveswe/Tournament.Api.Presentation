@@ -119,45 +119,33 @@ namespace Tournaments.Presentation.Controllers.Tournaments
         /// </remarks>
         /// <exception cref="DbUpdateConcurrencyException">Thrown if a concurrency conflict occurs during update and the tournament still exists.</exception>
         [HttpPatch("{id}")]
-        public async Task<ActionResult<TournamentDto>> PatchTournament(int id, JsonPatchDocument<TournamentDto> patchDocument)
+        public async Task<ActionResult<TournamentDto>> PatchTournament(int id, [FromBody] JsonPatchDocument<TournamentDto> patchDocument)
         {
-            #region Validation of Input Parameters
+            //Validation of Input Parameters
+            if(patchDocument is null)
+                return ProcessError(new BadRequestResponse("Patch document cannot be null."));
 
-            // Validate the model state, checks data annotations.
-            if(patchDocument is null) {
-                // If the model state is invalid, return 400 Bad Request with validation errors.
-                return BadRequest("Patch document cannot be null.");
-            }
-
-            // Check if the tournament ID is valid.
-            if(id <= 0) {
-                // If the tournament ID is invalid, return 400 Bad Request with an error message.
-                return BadRequest($"Invalid tournament ID {id} specified for patching.");
-            }
-
-            #endregion
+            if(id <= 0)
+                return ProcessError(new BadRequestResponse($"Invalid tournament ID {id} specified for patching."));
 
             // Check if tournament exists
             ApiBaseResponse? tournamentExists = await serviceManager.TournamentService.GetByIdAsync(id, trackChanges: true);
             if(!tournamentExists.Success)
-                return NotFound($"Tournament with ID {id} was not found.");
+                return ProcessError(tournamentExists);
 
-            #region PATCH Document Validation
-
+            //PATCH Document and Validation
             // Apply the patch to the DTO
             patchDocument.ApplyTo(tournamentExists.GetOkResult<TournamentDto>(), ModelState);
-
             // Validate patched DTO
             if(!ModelState.IsValid) {
+                //return the actual field-level validation errors (e.g., missing required fields, invalid formats).
                 return UnprocessableEntity(ModelState);
             }
-
-            #endregion
 
             // Call service to update entity from patched DTO
             bool updated = await serviceManager.TournamentService.ApplyToAsync(id, tournamentExists.GetOkResult<TournamentDto>());
             if(!updated)
-                return StatusCode(500, "An error occurred while updating the tournament.");
+                return ProcessError(new NoChangesMadeResponse("An error occurred while updating the tournament."));
 
             return NoContent();
         }

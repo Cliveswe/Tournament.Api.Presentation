@@ -56,7 +56,7 @@ public class TournamentService(IMapper mapper, IUnitOfWork uoW) : ITournamentSer
 
     #region PATCH Tournament details
 
-    public async Task<bool> ApplyToAsync(int id, TournamentDto tournamentDto)
+    public async Task<bool> ApplyToAsync(int id, TournamentDto tournamentUpdateDto)
     {
         // Retrieve the existing tournament details.
         TournamentDetails? existingEntity = await uoW.TournamentDetailsRepository.GetAsync(id, trackChanges: true);
@@ -65,7 +65,7 @@ public class TournamentService(IMapper mapper, IUnitOfWork uoW) : ITournamentSer
         }
 
         // Map the incoming DTO to the existing tournament details.
-        mapper.Map(tournamentDto, existingEntity);
+        mapper.Map(tournamentUpdateDto, existingEntity);
 
         // Update the existing tournament details in the repository.
         uoW.TournamentDetailsRepository.Update(existingEntity);
