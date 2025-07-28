@@ -112,6 +112,10 @@ namespace Tournaments.Presentation.Controllers.Tournaments
 
 
         [HttpPut("{id}")]
+        [ProducesResponseType(typeof(ApiOkResponse<TournamentDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(TournamentNotFoundResponse), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(NoChangesMadeResponse), StatusCodes.Status422UnprocessableEntity)]
+        [ProducesResponseType(typeof(SaveFailedResponse), StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> PutTournamentDetails(int id, [FromBody] TournamentUpdateDto tournamentUpdateDto)
         {
 
@@ -124,13 +128,15 @@ namespace Tournaments.Presentation.Controllers.Tournaments
             }
 
             // If the update was not successful.
-            if(!await serviceManager.TournamentService.Update(id, tournamentUpdateDto)) {
+            ApiBaseResponse updateResponse = await serviceManager.TournamentService.UpdateAsync(id, tournamentUpdateDto);
+            if(!updateResponse.Success) {
                 // Return 404 Not Found if the tournament with the specified ID does not exist.
-                return ProcessError(new TournamentNotFoundResponse($"Tournament with ID {id} was not found."));
+                //new TournamentNotFoundResponse($"Tournament with ID {id} was not found.")
+                return ProcessError(updateResponse);
             }
 
             // The update was successful; return HTTP 204 No Content as per REST convention
-            return NoContent();
+            return Ok(updateResponse); // returns ApiOkResponse<TournamentDto>
 
         }
 

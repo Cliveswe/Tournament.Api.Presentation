@@ -57,35 +57,5 @@
             GET /api/tournamentDetails/{tournamentId}/
             </remarks>
         </member>
-        <member name="T:Tournaments.Presentation.Controllers.Tournaments.TournamentDetailsController">
-            <summary>
-            Provides RESTful API endpoints to manage tournament details, including
-            operations to create, read, update, partially update (patch), and delete tournaments.
-            </summary>
-            <remarks>
-            This controller uses the Unit of Work pattern and AutoMapper to handle
-            data operations and DTO mappings. It supports query options such as
-            including related games in the responses. It returns standard HTTP status
-            codes and messages to indicate operation results.
-            
-            The <see cref="M:Tournaments.Presentation.Controllers.Tournaments.TournamentDetailsController.PatchTournament(System.Int32,Microsoft.AspNetCore.JsonPatch.JsonPatchDocument{Tournaments.Shared.Dto.TournamentDto})"/> method
-            supports partial updates on tournament entities using JSON Patch.
-            </remarks>
-        </member>
-        <member name="M:Tournaments.Presentation.Controllers.Tournaments.TournamentDetailsController.#ctor(Service.Contracts.IServiceManager)">
-            <summary>
-            Provides RESTful API endpoints to manage tournament details, including
-            operations to create, read, update, partially update (patch), and delete tournaments.
-            </summary>
-            <remarks>
-            This controller uses the Unit of Work pattern and AutoMapper to handle
-            data operations and DTO mappings. It supports query options such as
-            including related games in the responses. It returns standard HTTP status
-            codes and messages to indicate operation results.
-            
-            The <see cref="M:Tournaments.Presentation.Controllers.Tournaments.TournamentDetailsController.PatchTournament(System.Int32,Microsoft.AspNetCore.JsonPatch.JsonPatchDocument{Tournaments.Shared.Dto.TournamentDto})"/> method
-            supports partial updates on tournament entities using JSON Patch.
-            </remarks>
-        </member>
     </members>
 </doc>

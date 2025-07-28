@@ -103,6 +103,7 @@ public class TournamentService(IMapper mapper, IUnitOfWork uoW) : ITournamentSer
 
         // Persist the changes to the database.
         int success = await uoW.CompleteAsync();
+
         return success != 0
             ? new ApiOkResponse<TournamentDto>(mapper.Map<TournamentDto>(tournamentDetails))
             : new NoChangesMadeResponse($"The tournament, {tournamentUpdateDto.Title}, was not updated.");
