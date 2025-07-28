@@ -145,7 +145,7 @@ public class GameService(IMapper mapper, IUnitOfWork uoW) : IGameService
         // Map the updated properties from the DTO to the existing game entity.
         mapper.Map(gameUpdateDto, gameEntity);
 
-        // Update the game in the repository.
+        // UpdateAsync the game in the repository.
         uoW.GameRepository.Update(gameEntity);
         int success = await uoW.CompleteAsync();
 
@@ -171,7 +171,7 @@ public class GameService(IMapper mapper, IUnitOfWork uoW) : IGameService
         // Map gameEntity to a GameDto.
         mapper.Map(gameDto, gameEntity);
 
-        // Update the existing game details in the repository.
+        // UpdateAsync the existing game details in the repository.
         uoW.GameRepository.Update(gameEntity);
 
         // Persist the changes to the database.

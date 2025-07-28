@@ -67,7 +67,7 @@ public class TournamentService(IMapper mapper, IUnitOfWork uoW) : ITournamentSer
         // Map the incoming DTO to the existing tournament details.
         mapper.Map(tournamentUpdateDto, existingEntity);
 
-        // Update the existing tournament details in the repository.
+        // UpdateAsync the existing tournament details in the repository.
         uoW.TournamentDetailsRepository.Update(existingEntity);
         // Persist the changes to the database.
         int result = await uoW.CompleteAsync();
@@ -86,26 +86,26 @@ public class TournamentService(IMapper mapper, IUnitOfWork uoW) : ITournamentSer
 
     #region PUT Tournament details
 
-    public async Task<bool> Update(int id, TournamentUpdateDto tournamentUpdateDto)
+    public async Task<ApiBaseResponse> UpdateAsync(int id, TournamentUpdateDto tournamentUpdateDto)
     {
         // Attempt to retrieve the tournament details by ID.
-        var tournamentDetails = await uoW.TournamentDetailsRepository.GetAsync(id);
+        TournamentDetails? tournamentDetails = await uoW.TournamentDetailsRepository.GetAsync(id);
 
         // If the tournament exists, map the DTO to the entity.
-        if(tournamentDetails != null) {
+        if(tournamentDetails is null)
+            return new TournamentNotFoundResponse($"Could not find tournament {id}.");
 
-            // Map the update DTO to the existing tournament details entity.
-            mapper.Map(tournamentUpdateDto, tournamentDetails);
+        // Map the update DTO to the existing tournament details entity.
+        mapper.Map(tournamentUpdateDto, tournamentDetails);
 
-            // Update the tournament details in the repository.
-            uoW.TournamentDetailsRepository.Update(tournamentDetails);
+        // UpdateAsync the tournament details in the repository.
+        uoW.TournamentDetailsRepository.Update(tournamentDetails);
 
-            // Persist the changes to the database.
-            await uoW.CompleteAsync();
-            return true;
-        }
-
-        return false;
+        // Persist the changes to the database.
+        int success = await uoW.CompleteAsync();
+        return success != 0
+            ? new ApiOkResponse<TournamentDto>(mapper.Map<TournamentDto>(tournamentDetails))
+            : new NoChangesMadeResponse($"The tournament, {tournamentUpdateDto.Title}, was not updated.");
     }
 
     #endregion

@@ -23,19 +23,6 @@ using Tournaments.Shared.Request;
 namespace Tournaments.Presentation.Controllers.Tournaments
 {
 
-    /// <summary>
-    /// Provides RESTful API endpoints to manage tournament details, including
-    /// operations to create, read, update, partially update (patch), and delete tournaments.
-    /// </summary>
-    /// <remarks>
-    /// This controller uses the Unit of Work pattern and AutoMapper to handle
-    /// data operations and DTO mappings. It supports query options such as
-    /// including related games in the responses. It returns standard HTTP status
-    /// codes and messages to indicate operation results.
-    /// 
-    /// The <see cref="PatchTournament(int, JsonPatchDocument{TournamentDto})"/> method
-    /// supports partial updates on tournament entities using JSON Patch.
-    /// </remarks>
     [Route("api/tournamentDetails")]
     [ApiController]
     public class TournamentDetailsController(IServiceManager serviceManager) : ApiControllerBase
@@ -125,8 +112,6 @@ namespace Tournaments.Presentation.Controllers.Tournaments
 
 
         [HttpPut("{id}")]
-        [ProducesResponseType(typeof(ApiNoContentResponse), StatusCodes.Status200OK)]
-
         public async Task<ActionResult> PutTournamentDetails(int id, [FromBody] TournamentUpdateDto tournamentUpdateDto)
         {
 
@@ -145,7 +130,8 @@ namespace Tournaments.Presentation.Controllers.Tournaments
             }
 
             // The update was successful; return HTTP 204 No Content as per REST convention
-            return Ok(new ApiNoContentResponse());
+            return NoContent();
+
         }
 
         #endregion

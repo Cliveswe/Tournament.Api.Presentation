@@ -13,7 +13,7 @@ public interface ITournamentService
 
     Task<ApiBaseResponse> ApplyToAsync(int id, TournamentDto tournamentUpdateDto);
 
-    Task<bool> Update(int id, TournamentUpdateDto tournamentUpdateDto);
+    Task<ApiBaseResponse> UpdateAsync(int id, TournamentUpdateDto tournamentUpdateDto);
     Task<ApiBaseResponse> ExistsAsync(string title, DateTime startDate);
     Task<ApiBaseResponse> ExistsAsync(int id);
     Task<ApiBaseResponse> RemoveAsync(int id);

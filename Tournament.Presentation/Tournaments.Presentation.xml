@@ -87,39 +87,5 @@
             supports partial updates on tournament entities using JSON Patch.
             </remarks>
         </member>
-        <member name="M:Tournaments.Presentation.Controllers.Tournaments.TournamentDetailsController.PutTournamentDetails(System.Int32,Tournaments.Shared.Dto.TournamentUpdateDto)">
-            <summary>
-            Updates an existing tournament's details identified by the specified ID.
-            </summary>
-            <param name="id">The unique identifier of the tournament to update.</param>
-            <param name="tournamentUpdateDto">The data transfer object containing the updated tournament information.</param>
-            <returns>
-            Returns 204 No Content if the update is successful.
-            Returns 400 Bad Request if the model state is invalid or the input DTO is null.
-            Returns 404 Not Found if no tournament with the specified ID exists.
-            </returns>
-            <remarks>
-            This method validates the incoming model, retrieves the existing tournament entity,
-            maps the updated fields from the DTO, and attempts to save the changes.
-            It handles concurrency exceptions and ensures RESTful response codes are returned.
-            </remarks>
-        </member>
-        <member name="M:Tournaments.Presentation.Controllers.Tournaments.TournamentDetailsController.PostTournamentDetails(Tournaments.Shared.Dto.TournamentDetailsCreateDto)">
-            <summary>
-            Creates a new tournament record in the data store.
-            </summary>
-            <param name="tournamentDetailsCreateDto">The data transfer object containing the details of the tournament to create.</param>
-            <returns>
-            Returns a <see cref="T:Microsoft.AspNetCore.Mvc.CreatedAtActionResult"/> containing the newly created tournament data with a 201 Created status code.
-            Returns 400 Bad Request if the input model is invalid or null.
-            Returns 409 Conflict if a tournament with the same title and start date already exists.
-            </returns>
-            <remarks>
-            This method validates the input model, checks for duplicates to prevent conflicts,
-            maps the DTO to the domain entity, adds the new entity to the repository,
-            and persists changes asynchronously. It follows RESTful conventions by returning
-            the location of the newly created resource in the response.
-            </remarks>
-        </member>
     </members>
 </doc>
