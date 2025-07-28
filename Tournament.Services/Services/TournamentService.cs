@@ -72,7 +72,14 @@ public class TournamentService(IMapper mapper, IUnitOfWork uoW) : ITournamentSer
         // Persist the changes to the database.
         int result = await uoW.CompleteAsync();
 
-        return result != 0 ? new ApiOkResponse<TournamentDto>(tournamentUpdateDto) : new NotModifiedResponse("The tournament was not updated.");
+        if(result == 0)
+            return new NotModifiedResponse("The tournament was not updated.");
+
+        // Fetch fresh data from DB to reflect all updates
+        var updatedEntity = await uoW.TournamentDetailsRepository.GetAsync(id, trackChanges: false);
+        var updatedDto = mapper.Map<TournamentDto>(updatedEntity);
+
+        return new ApiOkResponse<TournamentDto>(updatedDto);
     }
 
     #endregion

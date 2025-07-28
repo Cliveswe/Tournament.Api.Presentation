@@ -181,7 +181,10 @@ public class GameService(IMapper mapper, IUnitOfWork uoW) : IGameService
             return new NotModifiedResponse("The game entity was not updated.");
         }
 
-        //return ApplyPatchResult.Success;
-        return new ApiOkResponse<GameDto>(gameDto);
+        // Fetch fresh data from DB to reflect all updates
+        Game? updateEntity = await uoW.GameRepository.GetByIdAsync(id, trackChanges:false);
+        GameDto? updateDto = mapper.Map<GameDto>(updateEntity);
+
+        return new ApiOkResponse<GameDto>(updateDto);
     }
 }
