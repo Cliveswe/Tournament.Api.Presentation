@@ -56,12 +56,12 @@ public class TournamentService(IMapper mapper, IUnitOfWork uoW) : ITournamentSer
 
     #region PATCH Tournament details
 
-    public async Task<bool> ApplyToAsync(int id, TournamentDto tournamentUpdateDto)
+    public async Task<ApiBaseResponse> ApplyToAsync(int id, TournamentDto tournamentUpdateDto)
     {
         // Retrieve the existing tournament details.
         TournamentDetails? existingEntity = await uoW.TournamentDetailsRepository.GetAsync(id, trackChanges: true);
         if(existingEntity is null) {
-            return false;
+            return new TournamentNotFoundResponse($"Tournament with id {id} was not found.");
         }
 
         // Map the incoming DTO to the existing tournament details.
@@ -70,9 +70,9 @@ public class TournamentService(IMapper mapper, IUnitOfWork uoW) : ITournamentSer
         // Update the existing tournament details in the repository.
         uoW.TournamentDetailsRepository.Update(existingEntity);
         // Persist the changes to the database.
-        await uoW.CompleteAsync();
+        int result = await uoW.CompleteAsync();
 
-        return true;
+        return result != 0 ? new ApiOkResponse<TournamentDto>(tournamentUpdateDto) : new NotModifiedResponse("The tournament was not updated.");
     }
 
     #endregion
