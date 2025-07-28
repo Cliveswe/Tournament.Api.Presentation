@@ -138,14 +138,11 @@ namespace Tournaments.Presentation.Controllers.Tournaments
             patchDocument.ApplyTo(tournamentExists.GetOkResult<TournamentDto>(), ModelState);
             // Validate patched DTO
             if(!ModelState.IsValid) {
-                //return the actual field-level validation errors (e.g., missing required fields, invalid formats).
                 return UnprocessableEntity(ModelState);
             }
 
             // Call service to update entity from patched DTO
             ApiBaseResponse updated = await serviceManager.TournamentService.ApplyToAsync(id, tournamentExists.GetOkResult<TournamentDto>());
-            //if(!updated.Success)
-            //    return ProcessError(new NoChangesMadeResponse("An error occurred while updating the tournament."));
 
             return updated.Success ? Ok(updated.GetOkResult<TournamentDto>()) : ProcessError(new NoChangesMadeResponse("An error occurred while updating the tournament."));
         }
