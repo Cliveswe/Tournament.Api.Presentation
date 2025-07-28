@@ -38,10 +38,10 @@ public class ApiControllerBase : ControllerBase
             MaxGameLimitReachedResponse limitReached => CreateProblemResult(
                 "Maximum game limit reached", limitReached.Message!, limitReached.StatusCode, limitReached.Timestamp),
 
-            GameAlreadyExistsResponse alreadyExists => CreateProblemResult(
+            AlreadyExistsResponse alreadyExists => CreateProblemResult(
                 "Conflict", alreadyExists.Message!, alreadyExists.StatusCode, alreadyExists.Timestamp),
 
-            GameSaveFailedResponse saveFailed => CreateProblemResult(
+            SaveFailedResponse saveFailed => CreateProblemResult(
                 "Save Failed", saveFailed.Message!, saveFailed.StatusCode, saveFailed.Timestamp),
 
             NoChangesMadeResponse noChangesMade => CreateProblemResult(

@@ -71,12 +71,12 @@ public class BadRequestResponse(string message)
 /// 
 /// </summary>
 /// <param name="message"></param>
-public class GameAlreadyExistsResponse(string message)
+public class AlreadyExistsResponse(string message)
     : ApiBaseResponse(false, message, StatusCodes.Status409Conflict)
 {
 }
 
-public class GameSaveFailedResponse(string message)
+public class SaveFailedResponse(string message)
     : ApiBaseResponse(false, message, StatusCodes.Status500InternalServerError)
 {
 }

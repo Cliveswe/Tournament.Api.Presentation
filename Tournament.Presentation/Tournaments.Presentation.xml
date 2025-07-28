@@ -87,33 +87,6 @@
             supports partial updates on tournament entities using JSON Patch.
             </remarks>
         </member>
-        <member name="M:Tournaments.Presentation.Controllers.Tournaments.TournamentDetailsController.PatchTournament(System.Int32,Microsoft.AspNetCore.JsonPatch.JsonPatchDocument{Tournaments.Shared.Dto.TournamentDto})">
-            <summary>
-            Partially updates an existing tournament identified by <paramref name="id"/> using a JSON Patch document.
-            </summary>
-            <param name="id">The ID of the tournament to be patched. Must be greater than zero.</param>
-            <param name="patchDocument">A <see cref="T:Microsoft.AspNetCore.JsonPatch.JsonPatchDocument`1"/> representing the JSON Patch operations to apply to the tournament DTO.</param>
-            <returns>
-            Returns an <see cref="T:Microsoft.AspNetCore.Mvc.ActionResult`1"/> containing the updated tournament data if the patch succeeds.
-            </returns>
-            <remarks>
-            This method performs the following steps:
-            <list type="number">
-            <item>Validates that the patch document is not null.</item>
-            <item>Validates that the tournament ID is valid (greater than zero).</item>
-            <item>Retrieves the existing tournament entity from the repository via the Unit of Work pattern.</item>
-            <item>If the tournament does not exist, returns 404 Not Found.</item>
-            <item>Maps the existing tournament entity to a <see cref="T:Tournaments.Shared.Dto.TournamentDto"/> for patching.</item>
-            <item>Applies the patch document to the DTO and validates the patched model state.</item>
-            <item>If validation fails, returns 400 Bad Request with validation errors.</item>
-            <item>Maps the patched DTO back to the entity and updates it in the repository.</item>
-            <item>Handles concurrency exceptions and checks if the tournament still exists.</item>
-            <item>Persists changes via Unit of Work.</item>
-            <item>Returns the updated tournament DTO with HTTP 200 OK on success.</item>
-            </list>
-            </remarks>
-            <exception cref="T:Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException">Thrown if a concurrency conflict occurs during update and the tournament still exists.</exception>
-        </member>
         <member name="M:Tournaments.Presentation.Controllers.Tournaments.TournamentDetailsController.PutTournamentDetails(System.Int32,Tournaments.Shared.Dto.TournamentUpdateDto)">
             <summary>
             Updates an existing tournament's details identified by the specified ID.

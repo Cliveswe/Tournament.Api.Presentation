@@ -99,7 +99,7 @@ public class GameService(IMapper mapper, IUnitOfWork uoW) : IGameService
 
         if(existingGameEntity is not null) {
             // Duplicate game found, return a failure result with the existing game.
-            return new GameAlreadyExistsResponse($"A game with the name '{gameCreateDto.Name}' already exists in tournament ID {tournamentId}.");
+            return new AlreadyExistsResponse($"A game with the name '{gameCreateDto.Name}' already exists in tournament ID {tournamentId}.");
         }
 
         // Use your existing paginated method with a high page size to fetch count
@@ -127,7 +127,7 @@ public class GameService(IMapper mapper, IUnitOfWork uoW) : IGameService
         // Check if any changes were made to the database.
         if(changes == 0) {
             // If no changes were made, return a failure result.
-            return new GameSaveFailedResponse("Failed to save the new game.");
+            return new SaveFailedResponse("Failed to save the new game.");
         }
         return new ApiOkResponse<GameDto>(mapper.Map<GameDto>(gameEntity));
     }

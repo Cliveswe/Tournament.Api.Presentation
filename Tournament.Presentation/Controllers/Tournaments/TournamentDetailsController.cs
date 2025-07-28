@@ -11,12 +11,10 @@
 //        including partial updates via JSON Patch.
 // -------------------------------------------------------------------------------------
 
-using Domain.Models.Entities;
 using Domain.Models.Responses;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Service.Contracts;
 using System.Text.Json;
 using Tournaments.Shared.Dto;
@@ -43,7 +41,6 @@ namespace Tournaments.Presentation.Controllers.Tournaments
     public class TournamentDetailsController(IServiceManager serviceManager) : ApiControllerBase
     {
         #region GET api/TournamentDetails/5
-
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TournamentDto>>> GetTournamentDetails([FromQuery] TournamentRequestParameters requestParameters)
@@ -93,31 +90,6 @@ namespace Tournaments.Presentation.Controllers.Tournaments
 
         #region PATCH api/TournamentDetails/5
 
-        /// <summary>
-        /// Partially updates an existing tournament identified by <paramref name="id"/> using a JSON Patch document.
-        /// </summary>
-        /// <param name="id">The ID of the tournament to be patched. Must be greater than zero.</param>
-        /// <param name="patchDocument">A <see cref="JsonPatchDocument{TournamentDto}"/> representing the JSON Patch operations to apply to the tournament DTO.</param>
-        /// <returns>
-        /// Returns an <see cref="ActionResult{TournamentDto}"/> containing the updated tournament data if the patch succeeds.
-        /// </returns>
-        /// <remarks>
-        /// This method performs the following steps:
-        /// <list type="number">
-        /// <item>Validates that the patch document is not null.</item>
-        /// <item>Validates that the tournament ID is valid (greater than zero).</item>
-        /// <item>Retrieves the existing tournament entity from the repository via the Unit of Work pattern.</item>
-        /// <item>If the tournament does not exist, returns 404 Not Found.</item>
-        /// <item>Maps the existing tournament entity to a <see cref="TournamentDto"/> for patching.</item>
-        /// <item>Applies the patch document to the DTO and validates the patched model state.</item>
-        /// <item>If validation fails, returns 400 Bad Request with validation errors.</item>
-        /// <item>Maps the patched DTO back to the entity and updates it in the repository.</item>
-        /// <item>Handles concurrency exceptions and checks if the tournament still exists.</item>
-        /// <item>Persists changes via Unit of Work.</item>
-        /// <item>Returns the updated tournament DTO with HTTP 200 OK on success.</item>
-        /// </list>
-        /// </remarks>
-        /// <exception cref="DbUpdateConcurrencyException">Thrown if a concurrency conflict occurs during update and the tournament still exists.</exception>
         [HttpPatch("{id}")]
         public async Task<ActionResult<TournamentDto>> PatchTournament(int id, [FromBody] JsonPatchDocument<TournamentDto> patchDocument)
         {
@@ -205,58 +177,30 @@ namespace Tournaments.Presentation.Controllers.Tournaments
 
         #region POST api/TournamentDetails
 
-        /// <summary>
-        /// Creates a new tournament record in the data store.
-        /// </summary>
-        /// <param name="tournamentDetailsCreateDto">The data transfer object containing the details of the tournament to create.</param>
-        /// <returns>
-        /// Returns a <see cref="CreatedAtActionResult"/> containing the newly created tournament data with a 201 Created status code.
-        /// Returns 400 Bad Request if the input model is invalid or null.
-        /// Returns 409 Conflict if a tournament with the same title and start date already exists.
-        /// </returns>
-        /// <remarks>
-        /// This method validates the input model, checks for duplicates to prevent conflicts,
-        /// maps the DTO to the domain entity, adds the new entity to the repository,
-        /// and persists changes asynchronously. It follows RESTful conventions by returning
-        /// the location of the newly created resource in the response.
-        /// </remarks>
         [HttpPost]
+        [ProducesResponseType(typeof(TournamentDto), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ApiBaseResponse), StatusCodes.Status409Conflict)]
+        [ProducesResponseType(typeof(ApiBaseResponse), StatusCodes.Status500InternalServerError)]
         // public async Task<ActionResult<TournamentDetails>> PostTournamentDetails(TournamentDetails tournamentDetails)
-        public async Task<ActionResult<TournamentDetails>> PostTournamentDetails(TournamentDetailsCreateDto tournamentDetailsCreateDto)
+        public async Task<ActionResult<TournamentDto>> PostTournamentDetails([FromBody] TournamentDetailsCreateDto tournamentDetailsCreateDto)
         {
-            #region Validation of Input Parameters
-
-            // Validate the model stat, checks data annotations.
-            if(!ModelState.IsValid) {
-                // Return 400 Bad Request with validation errors
-                return BadRequest(ModelState);
-            }
-
-            // Check for null input.
-            if(tournamentDetailsCreateDto == null) {
-                return BadRequest("TournamentDetails cannot be null.");
-            }
-
-            #endregion
-
-            #region Validate that the tournament does not already exist
-
+            //Validate that the tournament does not already exist
             // Check if a tournament with the same title and start date already exists.
-            ApiBaseResponse exists = await serviceManager
+            ApiBaseResponse tournamentExists = await serviceManager
                 .TournamentService
                 .ExistsAsync(tournamentDetailsCreateDto.Title, tournamentDetailsCreateDto.StartDate);
 
-
-            if(exists.Success) {
-                return Conflict($"A tournament with the same name \"{tournamentDetailsCreateDto.Title}\" and start date already exists.");
+            if(tournamentExists.Success) {
+                return ProcessError(new AlreadyExistsResponse($"A tournament with title {tournamentDetailsCreateDto.Title} already exists."));
             }
-
-            #endregion
 
             // This returns a tuple containing the ID of the newly created tournament and the mapped DTO.
             (int id, TournamentDto tournamentDto) = await serviceManager
                 .TournamentService
                 .CreateAsync(tournamentDetailsCreateDto);
+
+            if(tournamentDto is null || id <= 0)
+                return ProcessError(new SaveFailedResponse("Could not save the newly created tournament."));
 
             // Return 201 Created with the route to access the new resource.
             // This follows REST conventions by providing a location header pointing to the new resource.
