@@ -11,7 +11,7 @@ public abstract class ApiBaseResponse(bool success, string? message = null, int 
     public DateTime Timestamp { get; init; } = DateTime.UtcNow;
 
 
-    //Helper methods
+    //Helper methods for, as an example, testing
     public bool IsNotFound() => this is ApiNotFoundResponse;
     public bool IsMaxGameLimitReached() => this is MaxGameLimitReachedResponse;
     public bool IsBadGamePatchDocumentResponse() => this is BadGamePatchDocumentResponse;
