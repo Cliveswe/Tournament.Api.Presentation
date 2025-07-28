@@ -143,11 +143,11 @@ namespace Tournaments.Presentation.Controllers.Tournaments
             }
 
             // Call service to update entity from patched DTO
-            bool updated = await serviceManager.TournamentService.ApplyToAsync(id, tournamentExists.GetOkResult<TournamentDto>());
-            if(!updated)
-                return ProcessError(new NoChangesMadeResponse("An error occurred while updating the tournament."));
+            ApiBaseResponse updated = await serviceManager.TournamentService.ApplyToAsync(id, tournamentExists.GetOkResult<TournamentDto>());
+            //if(!updated.Success)
+            //    return ProcessError(new NoChangesMadeResponse("An error occurred while updating the tournament."));
 
-            return NoContent();
+            return updated.Success ? Ok(updated.GetOkResult<TournamentDto>()) : ProcessError(new NoChangesMadeResponse("An error occurred while updating the tournament."));
         }
 
         #endregion
