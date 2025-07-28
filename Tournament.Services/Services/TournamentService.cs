@@ -76,8 +76,8 @@ public class TournamentService(IMapper mapper, IUnitOfWork uoW) : ITournamentSer
             return new NotModifiedResponse("The tournament was not updated.");
 
         // Fetch fresh data from DB to reflect all updates
-        var updatedEntity = await uoW.TournamentDetailsRepository.GetAsync(id, trackChanges: false);
-        var updatedDto = mapper.Map<TournamentDto>(updatedEntity);
+        TournamentDetails? updatedEntity = await uoW.TournamentDetailsRepository.GetAsync(id, trackChanges: false);
+        TournamentDto updatedDto = mapper.Map<TournamentDto>(updatedEntity);
 
         return new ApiOkResponse<TournamentDto>(updatedDto);
     }
