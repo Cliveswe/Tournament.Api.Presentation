@@ -96,7 +96,7 @@ public class TournamentDetailsRepository(TournamentApiContext context) : Reposit
     public async Task<PagedList<TournamentDetails>> GetAllAsync(TournamentRequestParameters requestParameters, bool trackChanges = false)
     {
         // Retrieve all tournaments without tracking changes
-        IQueryable<TournamentDetails> tournaments = FindAll(trackChanges);
+        IQueryable<TournamentDetails> tournaments = FindAll(trackChanges).OrderBy(t => t.Title);
 
         if(requestParameters.IncludeGames) {
             // If IncludeGames is true, include related games and order them by title.
