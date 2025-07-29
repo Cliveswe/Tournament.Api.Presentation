@@ -96,7 +96,8 @@ public class TournamentDetailsRepository(TournamentApiContext context) : Reposit
     public async Task<PagedList<TournamentDetails>> GetAllAsync(TournamentRequestParameters requestParameters, bool trackChanges = false)
     {
         // Retrieve all tournaments without tracking changes
-        IQueryable<TournamentDetails> tournaments = FindAll(trackChanges).OrderBy(t => t.Title);
+        IQueryable<TournamentDetails> tournaments = FindAll(trackChanges)
+            .OrderBy(t => t.Title);
 
         if(requestParameters.IncludeGames) {
             // If IncludeGames is true, include related games and order them by title.
@@ -119,7 +120,10 @@ public class TournamentDetailsRepository(TournamentApiContext context) : Reposit
         if(requestParameters.IncludeGames) {
             foreach(TournamentDetails tournament in tournaments) {
                 // If IncludeGames is true, order the games by title.
-                tournament.Games = tournament.Games.OrderBy(g => g.Title).ToList();
+                tournament.Games = tournament
+                    .Games
+                    .OrderBy(g => g.Title)
+                    .ToList();
             }
         }
     }
