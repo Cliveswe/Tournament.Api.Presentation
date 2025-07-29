@@ -14,18 +14,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Tournaments.Shared.Dto
 {
-    /// <summary>
-    /// Data Transfer Object (DTO) designed specifically for updating an existing <see cref="Game"/> entity.
-    /// This class includes only the modifiable properties, enforcing validation constraints to ensure data integrity.
-    /// 
-    /// Key features:
-    /// - Contains the <see cref="Title"/> property with required and length validation.
-    /// - Supports partial updates by restricting modifiable fields to those intended for change.
-    /// 
-    /// This DTO facilitates safe and controlled update operations by exposing only allowed fields
-    /// and preventing modification of immutable or sensitive properties.
-    /// </summary>
-    public class GameUpdateDto
+    public record GameUpdateDto
     {
         /// <summary>
         /// Gets or sets the title of the game.

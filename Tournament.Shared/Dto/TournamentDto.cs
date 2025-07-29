@@ -30,7 +30,7 @@ namespace Tournaments.Shared.Dto;
 ///
 /// This DTO facilitates data projection and serialization for API responses or service interactions.
 /// </remarks>
-public class TournamentDto
+public record TournamentDto
 {
     /// <summary>
     /// Gets or sets the title of the tournament.

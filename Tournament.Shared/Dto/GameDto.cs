@@ -29,7 +29,7 @@ namespace Tournaments.Shared.Dto;
 /// supporting clean architecture and maintainability.
 /// </remarks>
 
-public class GameDto
+public record GameDto
 {
     /// <summary>
     /// Gets or sets the title of the game.

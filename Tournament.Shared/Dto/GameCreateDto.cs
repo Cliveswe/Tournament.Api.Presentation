@@ -14,19 +14,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Tournaments.Shared.Dto
 {
-    /// <summary>
-    /// Data Transfer Object (DTO) used for creating a new <see cref="Game"/> entity.
-    /// Encapsulates the required data for game creation, including the game’s title,
-    /// scheduled time, and associated tournament identifier, with validation rules
-    /// to enforce input correctness and integrity.
-    ///
-    /// Key features:
-    /// - Validates that the title is provided and has a length between 3 and 100 characters.
-    /// - Requires a scheduled time to indicate when the game will occur.
-    /// - Ensures the tournament identifier is specified and positive.
-    ///
-    /// This DTO is primarily used to receive input data from clients during game creation operations.
-    /// </summary>
+
     public record GameCreateDto
     {
         /// <summary>

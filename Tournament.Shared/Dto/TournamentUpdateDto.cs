@@ -28,7 +28,7 @@ namespace Tournaments.Shared.Dto;
 /// tournament entity. It supports model validation through data annotations to enforce business rules
 /// before the update is applied to the persistence layer.
 /// </remarks>
-public class TournamentUpdateDto
+public record TournamentUpdateDto
 {
     /// <summary>
     /// Gets or sets the title of the tournament.

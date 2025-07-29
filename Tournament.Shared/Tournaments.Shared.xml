@@ -4,21 +4,6 @@
         <name>Tournaments.Shared</name>
     </assembly>
     <members>
-        <member name="T:Tournaments.Shared.Dto.GameCreateDto">
-             <summary>
-             Data Transfer Object (DTO) used for creating a new <see cref="!:Game"/> entity.
-             Encapsulates the required data for game creation, including the game’s title,
-             scheduled time, and associated tournament identifier, with validation rules
-             to enforce input correctness and integrity.
-            
-             Key features:
-             - Validates that the title is provided and has a length between 3 and 100 characters.
-             - Requires a scheduled time to indicate when the game will occur.
-             - Ensures the tournament identifier is specified and positive.
-            
-             This DTO is primarily used to receive input data from clients during game creation operations.
-             </summary>
-        </member>
         <member name="P:Tournaments.Shared.Dto.GameCreateDto.Name">
             <summary>
             Gets or sets the name (title) of the game.
@@ -56,19 +41,6 @@
         <member name="P:Tournaments.Shared.Dto.GameDto.StartDate">
             <summary>
             Gets or sets the scheduled start date and time of the game.
-            </summary>
-        </member>
-        <member name="T:Tournaments.Shared.Dto.GameUpdateDto">
-            <summary>
-            Data Transfer Object (DTO) designed specifically for updating an existing <see cref="!:Game"/> entity.
-            This class includes only the modifiable properties, enforcing validation constraints to ensure data integrity.
-            
-            Key features:
-            - Contains the <see cref="P:Tournaments.Shared.Dto.GameUpdateDto.Title"/> property with required and length validation.
-            - Supports partial updates by restricting modifiable fields to those intended for change.
-            
-            This DTO facilitates safe and controlled update operations by exposing only allowed fields
-            and preventing modification of immutable or sensitive properties.
             </summary>
         </member>
         <member name="P:Tournaments.Shared.Dto.GameUpdateDto.Title">

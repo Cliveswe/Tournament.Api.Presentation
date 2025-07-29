@@ -28,7 +28,7 @@ namespace Tournaments.Shared.Dto
     /// The validation attributes applied to each property support automatic model binding
     /// and server-side validation in web API scenarios.
     /// </remarks>
-    public class TournamentDetailsCreateDto
+    public record TournamentDetailsCreateDto
     {
         /// <summary>
         /// Gets or sets the title of the tournament.
