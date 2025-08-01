@@ -5,10 +5,26 @@
     </assembly>
     <members>
         <member name="T:Tournaments.Shared.Dto.GameCreateDto">
-            <summary>
-            Data Transfer Object (DTO) used for creating a new game.
-            Contains the essential information such as the game's name and scheduled time.
-            </summary>
+             <summary>
+             Data Transfer Object (DTO) used for creating a new game.
+             Contains the essential information such as the game's name and scheduled time.
+             </summary>
+             <remarks>
+             This DTO is intended for create operations where the client submits game data.
+             It includes validation attributes to enforce required fields and constraints.
+            
+             Key properties:
+             <list type="bullet">
+               <item>
+                 <term><see cref="P:Tournaments.Shared.Dto.GameCreateDto.Name"/></term>
+                 <description>Required; must be between 3 and 100 characters.</description>
+               </item>
+               <item>
+                 <term><see cref="P:Tournaments.Shared.Dto.GameCreateDto.Time"/></term>
+                 <description>Required; indicates when the game is planned to start.</description>
+               </item>
+             </list>
+             </remarks>
         </member>
         <member name="P:Tournaments.Shared.Dto.GameCreateDto.Name">
             <summary>
@@ -23,17 +39,15 @@
             </summary>
         </member>
         <member name="T:Tournaments.Shared.Dto.GameDto">
-             <summary>
-             Data Transfer Object (DTO) representing the essential details of a game,
-             including its title and scheduled start date.
-             </summary>
              <remarks>
              This DTO is used primarily for transferring game information between application layers,
              facilitating serialization and deserialization in API requests and responses.
             
              Key properties:
-             - <see cref="P:Tournaments.Shared.Dto.GameDto.Title"/>: The name of the game.
-             - <see cref="P:Tournaments.Shared.Dto.GameDto.StartDate"/>: The scheduled date and time when the game begins.
+             <list type="bullet">
+               <item><term><see cref="P:Tournaments.Shared.Dto.GameDto.Title"/></term><description>The name of the game.</description></item>
+               <item><term><see cref="P:Tournaments.Shared.Dto.GameDto.StartDate"/></term><description>The scheduled date and time when the game begins.</description></item>
+             </list>
             
              This class promotes separation of concerns by decoupling the domain entity from data transport,
              supporting clean architecture and maintainability.
