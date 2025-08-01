@@ -281,19 +281,35 @@
             <param name="pageSize">The number of items per page.</param>
             <returns>A task representing the asynchronous operation, containing the paginated list.</returns>
         </member>
+        <member name="T:Tournaments.Shared.Request.RequestParameters">
+            <summary>
+            Represents the base class for paginated API request parameters,
+            providing control over page number and page size with validation and clamping.
+            </summary>
+        </member>
         <member name="P:Tournaments.Shared.Request.RequestParameters.PageSize">
             <summary>
-            Set the min and max range for page size.
+            Gets or sets the number of items per page.
+            Automatically clamps values outside the allowed range (2–100) to the max page size.
             </summary>
         </member>
         <member name="P:Tournaments.Shared.Request.RequestParameters.PageNumber">
             <summary>
-            Page number.
+            Gets or sets the current page number.
+            Must be greater than or equal to 1.
+            </summary>
+        </member>
+        <member name="T:Tournaments.Shared.Request.TournamentRequestParameters">
+            <summary>
+            Represents additional tournament-specific request parameters,
+            including optional inclusion of related game data in the response.
+            Inherits pagination behavior from <see cref="T:Tournaments.Shared.Request.RequestParameters"/>.
             </summary>
         </member>
         <member name="P:Tournaments.Shared.Request.TournamentRequestParameters.IncludeGames">
             <summary>
-            Include games.
+            Gets or sets a value indicating whether to include related games in the response.
+            Default is false.
             </summary>
         </member>
     </members>

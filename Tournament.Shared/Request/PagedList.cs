@@ -8,9 +8,7 @@
 //        method for creating paged results directly from an IQueryable data source.
 // -------------------------------------------------------------------------------------
 
-
 using Microsoft.EntityFrameworkCore;
-
 
 namespace Tournaments.Shared.Request;
 
