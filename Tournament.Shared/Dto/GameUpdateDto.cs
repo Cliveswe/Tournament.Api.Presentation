@@ -11,6 +11,7 @@
 // ------------------------------------------------------------------------------------
 
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace Tournaments.Shared.Dto;
 
@@ -33,5 +34,6 @@ public record GameUpdateDto
     /// </summary>
     [Required(ErrorMessage = "Title is a required field.")]
     [MaxLength(100, ErrorMessage = "Maximum length for the Title is 100 characters.")]
+    [JsonPropertyName("title")]
     public required string Title { get; set; }
 }

@@ -11,6 +11,7 @@
 
 
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace Tournaments.Shared.Dto;
 
@@ -42,11 +43,13 @@ public record TournamentDetailsCreateDto
     /// </summary>
     [Required(ErrorMessage = "Title is a required field.")]
     [StringLength(100, ErrorMessage = "Maximum length for the Title is 100 characters.")]
+    [JsonPropertyName("title")]
     public required string Title { get; set; }
 
     /// <summary>
     /// Gets or sets the start date of the tournament.
     /// </summary>
     [Required(ErrorMessage = "StartDate is a required field.")]
+    [JsonPropertyName("startDate")]
     public required DateTime StartDate { get; set; }
 }

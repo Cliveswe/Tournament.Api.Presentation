@@ -11,6 +11,7 @@
 // --------------------------------------------------------------------------------
 
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace Tournaments.Shared.Dto;
 
@@ -53,12 +54,14 @@ public record TournamentDto
     /// </summary>
     [Required(ErrorMessage = "Title is a required field.")]
     [StringLength(100, ErrorMessage = "Maximum length for the Title is 100 characters.")]
+    [JsonPropertyName("title")]
     public required string Title { get; set; }
 
     /// <summary>
     /// Gets or sets the start date of the tournament.
     /// </summary>
     [Required(ErrorMessage = "StartDate is a required field.")]
+    [JsonPropertyName("startDate")]
     public required DateTime StartDate { get; set; }
 
 
@@ -66,6 +69,7 @@ public record TournamentDto
     /// Gets the end date of the tournament, automatically calculated as StartDate plus 3 months.
     /// <note>EndDate is automatically calculated as StartDate + 3 months and always stays in sync with StartDate.</note>
     /// </summary>
+    [JsonPropertyName("endDate")]
     public DateTime EndDate => StartDate.AddMonths(3);
 
 
@@ -74,5 +78,6 @@ public record TournamentDto
     /// Gets or sets the list of games associated with the tournament.
     /// </summary>
     [Required(ErrorMessage = "Games collection is required.")]
+    [JsonPropertyName("games")]
     public required List<GameDto> Games { get; set; }
 }

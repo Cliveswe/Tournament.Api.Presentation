@@ -10,6 +10,7 @@
 // -----------------------------------------------------------------------------
 
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace Tournaments.Shared.Dto;
 
@@ -36,11 +37,13 @@ public record GameDto
     /// </summary>
     [Required(ErrorMessage = "Game title is required.")]
     [MaxLength(100, ErrorMessage = "Maximum length for the Title is 100 characters.")]
+    [JsonPropertyName("title")]
     public required string Title { get; set; }
 
     /// <summary>
     /// Gets or sets the scheduled start date and time of the game.
     /// </summary>
     [Required(ErrorMessage = "Time is required.")]
+    [JsonPropertyName("startDate")]
     public required DateTime StartDate { get; set; }
 }
