@@ -12,32 +12,27 @@
 
 using System.ComponentModel.DataAnnotations;
 
-namespace Tournaments.Shared.Dto
+namespace Tournaments.Shared.Dto;
+
+/// <summary>
+/// Data Transfer Object (DTO) used for creating a new game.
+/// Contains the essential information such as the game's name and scheduled time.
+/// </summary>
+public record GameCreateDto
 {
+    /// <summary>
+    /// Gets or sets the name (title) of the game.
+    /// This field is required and must be between 3 and 100 characters in length.
+    /// </summary>
+    [Required(ErrorMessage = "Title is required.")]
+    [StringLength(100, MinimumLength = 3, ErrorMessage = "Title must be between 3 and 100 characters.")]
+    public required string Name { get; set; }
 
-    public record GameCreateDto
-    {
-        /// <summary>
-        /// Gets or sets the name (title) of the game.
-        /// This field is required and must be between 3 and 100 characters in length.
-        /// </summary>
-        [Required(ErrorMessage = "Title is required.")]
-        [StringLength(100, MinimumLength = 3, ErrorMessage = "Title must be between 3 and 100 characters.")]
-        public required string Name { get; set; }
+    /// <summary>
+    /// Gets or sets the scheduled time of the game.
+    /// This field is required and indicates when the game is planned to start.
+    /// </summary>
+    [Required(ErrorMessage = "Time is required.")]
+    public required DateTime Time { get; set; }
 
-        /// <summary>
-        /// Gets or sets the scheduled time of the game.
-        /// This field is required and indicates when the game is planned to start.
-        /// </summary>
-        [Required(ErrorMessage = "Time is required.")]
-        public required DateTime Time { get; set; }
-
-        /// <summary>
-        /// Gets or sets the identifier of the tournament to which this game belongs.
-        /// This field is required and must be a positive integer greater than zero.
-        /// </summary>
-        //[Required(ErrorMessage = "TournamentDetailsId is required.")]
-        //[Range(1, int.MaxValue, ErrorMessage = "TournamentDetailsId must be greater than 0.")]
-        //public required int TournamentDetailsId { get; set; }
-    }
 }
