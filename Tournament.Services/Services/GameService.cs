@@ -9,7 +9,7 @@ using Tournaments.Shared.Dto;
 using Tournaments.Shared.Request;
 
 namespace Tournaments.Services.Services;
-public class GameService(IMapper mapper, IUnitOfWork uoW) : IGameService
+public class GameService(IMapper mapper, IUnitOfWork unitOfWork) : IGameService
 {
     public int MaxNumberOfGames { get; init; } = 10;
 
@@ -17,7 +17,7 @@ public class GameService(IMapper mapper, IUnitOfWork uoW) : IGameService
     {
         TournamentRequestParameters clampedParameters =  ServiceManager.ClampRequestParameters(requestParameters);
 
-        PagedList<Game> pagedList = await uoW
+        PagedList<Game> pagedList = await unitOfWork
             .GameRepository
             .GetByTournamentIdAsync(clampedParameters, tournamentId);
 
@@ -26,7 +26,7 @@ public class GameService(IMapper mapper, IUnitOfWork uoW) : IGameService
             clampedParameters.PageNumber = pagedList.MetaData.TotalPages;
 
             // Fetch again with corrected PageNumber
-            pagedList = await uoW
+            pagedList = await unitOfWork
                 .GameRepository
                 .GetByTournamentIdAsync(clampedParameters, tournamentId);
         }
@@ -42,7 +42,7 @@ public class GameService(IMapper mapper, IUnitOfWork uoW) : IGameService
 
     public async Task<ApiBaseResponse> GetGameAsync(int tournamentId, int id)
     {
-        Game? gameExists = await uoW.GameRepository.GetByIdAsync(id);
+        Game? gameExists = await unitOfWork.GameRepository.GetByIdAsync(id);
 
         if(gameExists is null || gameExists.TournamentDetailsId != tournamentId) {
             return new ApiGameNotFoundByIdResponse($"Game with id {id} was not found.");
@@ -56,7 +56,7 @@ public class GameService(IMapper mapper, IUnitOfWork uoW) : IGameService
 
     public async Task<ApiBaseResponse> GetGameAsync(int tournamentId, string title)
     {
-        Game? gameExists = await uoW.GameRepository.GetByTitleAndTournamentIdAsync(title, tournamentId);
+        Game? gameExists = await unitOfWork.GameRepository.GetByTitleAndTournamentIdAsync(title, tournamentId);
         // Check if a game with the same title already exists for the specified tournament.
         if(gameExists is null) {
             return new ApiGameNotFoundByTitleResponse($"Game with title {title} was not found.");
@@ -68,7 +68,7 @@ public class GameService(IMapper mapper, IUnitOfWork uoW) : IGameService
     //public async Task<bool> RemoveAsync(int tournamentId, int id)
     public async Task<ApiBaseResponse> RemoveAsync(int tournamentId, int id)
     {
-        Game? game = await uoW.GameRepository.GetByIdAsync(id);
+        Game? game = await unitOfWork.GameRepository.GetByIdAsync(id);
 
         if(game == null) {
 
@@ -80,14 +80,14 @@ public class GameService(IMapper mapper, IUnitOfWork uoW) : IGameService
             return new ApiNotFoundResponse($"Could not remove game {game.Title} from tournament.");
         }
 
-        uoW.GameRepository.Remove(game);
-        await uoW.CompleteAsync();
+        unitOfWork.GameRepository.Remove(game);
+        await unitOfWork.CompleteAsync();
 
         return new ApiOkResponse<GameDto>(mapper.Map<GameDto>(game));
     }
     public async Task<ApiBaseResponse> ExistsAsync(int id)
     {
-        bool entityExists = await uoW.GameRepository.AnyAsync(id);
+        bool entityExists = await unitOfWork.GameRepository.AnyAsync(id);
         return entityExists ? new ApiOkResponse<bool>(entityExists) : new ApiNotFoundResponse("Game does not exists.");
     }
 
@@ -95,7 +95,7 @@ public class GameService(IMapper mapper, IUnitOfWork uoW) : IGameService
     {
         //Validation of GameCreateDto with tournamentId
         // Check if there is a duplicate game in the tournament.
-        Game? existingGameEntity = await uoW.GameRepository.GetByTitleAndTournamentIdAsync(gameCreateDto.Name, tournamentId);
+        Game? existingGameEntity = await unitOfWork.GameRepository.GetByTitleAndTournamentIdAsync(gameCreateDto.Name, tournamentId);
 
         if(existingGameEntity is not null) {
             // Duplicate game found, return a failure result with the existing game.
@@ -109,7 +109,7 @@ public class GameService(IMapper mapper, IUnitOfWork uoW) : IGameService
             PageSize = MaxNumberOfGames + 1 // To check if limit is already exceeded
         };
 
-        PagedList<Game> games = await uoW.GameRepository.GetByTournamentIdAsync(requestParams,tournamentId);
+        PagedList<Game> games = await unitOfWork.GameRepository.GetByTournamentIdAsync(requestParams,tournamentId);
 
         if(games.Items.Count >= MaxNumberOfGames) {
             return new ApiMaxGameLimitReachedResponse($"Tournament {tournamentId} has reached its maximum number of {MaxNumberOfGames} games per tournament.");
@@ -121,8 +121,8 @@ public class GameService(IMapper mapper, IUnitOfWork uoW) : IGameService
         gameEntity.TournamentDetailsId = tournamentId;
 
         // Persist the changes to the database.
-        uoW.GameRepository.Add(gameEntity);
-        int changes = await uoW.CompleteAsync();
+        unitOfWork.GameRepository.Add(gameEntity);
+        int changes = await unitOfWork.CompleteAsync();
 
         // Check if any changes were made to the database.
         if(changes == 0) {
@@ -135,7 +135,7 @@ public class GameService(IMapper mapper, IUnitOfWork uoW) : IGameService
     public async Task<ApiBaseResponse> UpdateAsync(int tournamentId, string title, GameUpdateDto gameUpdateDto)
     {
         // Retrieve the game by title and tournament ID.
-        Game? gameEntity = await uoW.GameRepository.GetByTitleAndTournamentIdAsync(title, tournamentId);
+        Game? gameEntity = await unitOfWork.GameRepository.GetByTitleAndTournamentIdAsync(title, tournamentId);
 
         // If the game does not exist, return null.
         if(gameEntity == null) {
@@ -146,8 +146,8 @@ public class GameService(IMapper mapper, IUnitOfWork uoW) : IGameService
         mapper.Map(gameUpdateDto, gameEntity);
 
         // UpdateAsync the game in the repository.
-        uoW.GameRepository.Update(gameEntity);
-        int success = await uoW.CompleteAsync();
+        unitOfWork.GameRepository.Update(gameEntity);
+        int success = await unitOfWork.CompleteAsync();
 
         return success != 0 ? new ApiOkResponse<GameDto>(mapper.Map<GameDto>(gameEntity)) : new ApiNoChangesMadeResponse($"The game {title} was not updated.");
 
@@ -162,7 +162,7 @@ public class GameService(IMapper mapper, IUnitOfWork uoW) : IGameService
         }
 
         // Fetch the existing game by ID.
-        Game? gameEntity = await uoW.GameRepository.GetByIdAsync(id);
+        Game? gameEntity = await unitOfWork.GameRepository.GetByIdAsync(id);
         if(gameEntity is null) {
             //return ApplyPatchResult.GameNotFound;
             return new ApiGameNotFoundByIdResponse($"Game with id {id} was not found.");
@@ -172,17 +172,17 @@ public class GameService(IMapper mapper, IUnitOfWork uoW) : IGameService
         mapper.Map(gameDto, gameEntity);
 
         // UpdateAsync the existing game details in the repository.
-        uoW.GameRepository.Update(gameEntity);
+        unitOfWork.GameRepository.Update(gameEntity);
 
         // Persist the changes to the database.
-        int result = await uoW.CompleteAsync();
+        int result = await unitOfWork.CompleteAsync();
         if(result == 0) {
             //return ApplyPatchResult.NoChanges;
             return new ApiNotModifiedResponse("The game entity was not updated.");
         }
 
         // Fetch fresh data from DB to reflect all updates
-        Game? updateEntity = await uoW.GameRepository.GetByIdAsync(id, trackChanges:false);
+        Game? updateEntity = await unitOfWork.GameRepository.GetByIdAsync(id, trackChanges:false);
         GameDto? updateDto = mapper.Map<GameDto>(updateEntity);
 
         return new ApiOkResponse<GameDto>(updateDto);

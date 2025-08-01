@@ -9,7 +9,7 @@ using Tournaments.Shared.Dto;
 using Tournaments.Shared.Request;
 
 namespace Tournaments.Services.Services;
-public class TournamentService(IMapper mapper, IUnitOfWork uoW) : ITournamentService
+public class TournamentService(IMapper mapper, IUnitOfWork unitOfWork) : ITournamentService
 {
     #region Get Tournament details
 
@@ -18,7 +18,7 @@ public class TournamentService(IMapper mapper, IUnitOfWork uoW) : ITournamentSer
     {
         TournamentRequestParameters clampedParameters =  ServiceManager.ClampRequestParameters(requestParameters);
 
-        var pagedList = await uoW
+        var pagedList = await unitOfWork
             .TournamentDetailsRepository
             .GetAllAsync(requestParameters, trackChanges);
 
@@ -28,7 +28,7 @@ public class TournamentService(IMapper mapper, IUnitOfWork uoW) : ITournamentSer
             clampedParameters.PageNumber = pagedList.MetaData.TotalPages;
 
             // Fetch again with corrected PageNumber
-            pagedList = await uoW
+            pagedList = await unitOfWork
            .TournamentDetailsRepository
            .GetAllAsync(requestParameters, trackChanges);
         }
@@ -41,7 +41,7 @@ public class TournamentService(IMapper mapper, IUnitOfWork uoW) : ITournamentSer
 
     public async Task<ApiBaseResponse> GetByIdAsync(int id, bool trackChanges = false)
     {
-        TournamentDetails? tournamentDetails = await uoW
+        TournamentDetails? tournamentDetails = await unitOfWork
             .TournamentDetailsRepository
             .GetAsync(id, trackChanges);
 
@@ -59,7 +59,7 @@ public class TournamentService(IMapper mapper, IUnitOfWork uoW) : ITournamentSer
     public async Task<ApiBaseResponse> ApplyToAsync(int id, TournamentDto tournamentUpdateDto)
     {
         // Retrieve the existing tournament details.
-        TournamentDetails? existingEntity = await uoW.TournamentDetailsRepository.GetAsync(id, trackChanges: true);
+        TournamentDetails? existingEntity = await unitOfWork.TournamentDetailsRepository.GetAsync(id, trackChanges: true);
         if(existingEntity is null) {
             return new ApiTournamentNotFoundResponse($"Tournament with id {id} was not found.");
         }
@@ -68,15 +68,15 @@ public class TournamentService(IMapper mapper, IUnitOfWork uoW) : ITournamentSer
         mapper.Map(tournamentUpdateDto, existingEntity);
 
         // UpdateAsync the existing tournament details in the repository.
-        uoW.TournamentDetailsRepository.Update(existingEntity);
+        unitOfWork.TournamentDetailsRepository.Update(existingEntity);
         // Persist the changes to the database.
-        int result = await uoW.CompleteAsync();
+        int result = await unitOfWork.CompleteAsync();
 
         if(result == 0)
             return new ApiNotModifiedResponse("The tournament was not updated.");
 
         // Fetch fresh data from DB to reflect all updates
-        TournamentDetails? updatedEntity = await uoW.TournamentDetailsRepository.GetAsync(id, trackChanges: false);
+        TournamentDetails? updatedEntity = await unitOfWork.TournamentDetailsRepository.GetAsync(id, trackChanges: false);
         TournamentDto updatedDto = mapper.Map<TournamentDto>(updatedEntity);
 
         return new ApiOkResponse<TournamentDto>(updatedDto);
@@ -89,7 +89,7 @@ public class TournamentService(IMapper mapper, IUnitOfWork uoW) : ITournamentSer
     public async Task<ApiBaseResponse> UpdateAsync(int id, TournamentUpdateDto tournamentUpdateDto)
     {
         // Attempt to retrieve the tournament details by ID.
-        TournamentDetails? tournamentDetails = await uoW.TournamentDetailsRepository.GetAsync(id);
+        TournamentDetails? tournamentDetails = await unitOfWork.TournamentDetailsRepository.GetAsync(id);
 
         // If the tournament exists, map the DTO to the entity.
         if(tournamentDetails is null)
@@ -99,10 +99,10 @@ public class TournamentService(IMapper mapper, IUnitOfWork uoW) : ITournamentSer
         mapper.Map(tournamentUpdateDto, tournamentDetails);
 
         // UpdateAsync the tournament details in the repository.
-        uoW.TournamentDetailsRepository.Update(tournamentDetails);
+        unitOfWork.TournamentDetailsRepository.Update(tournamentDetails);
 
         // Persist the changes to the database.
-        int success = await uoW.CompleteAsync();
+        int success = await unitOfWork.CompleteAsync();
 
         return success != 0
             ? new ApiOkResponse<TournamentDto>(mapper.Map<TournamentDto>(tournamentDetails))
@@ -118,9 +118,9 @@ public class TournamentService(IMapper mapper, IUnitOfWork uoW) : ITournamentSer
         // Map the DTO to the TournamentDetails entity.
         TournamentDetails tournamentDetails = mapper.Map<TournamentDetails>(tournamentDetailsCreateDto);
         // Add the new TournamentDetails entity to the repository
-        uoW.TournamentDetailsRepository.Add(tournamentDetails);
+        unitOfWork.TournamentDetailsRepository.Add(tournamentDetails);
         // Persist the changes to the database
-        await uoW.CompleteAsync();
+        await unitOfWork.CompleteAsync();
         // Return the ID of the newly created tournament and the mapped DTO as a tuple.
         return (tournamentDetails.Id, mapper.Map<TournamentDto>(tournamentDetails));
 
@@ -133,13 +133,13 @@ public class TournamentService(IMapper mapper, IUnitOfWork uoW) : ITournamentSer
     public async Task<ApiBaseResponse> RemoveAsync(int id)
     {
         // Attempt to retrieve the tournament details by ID.
-        TournamentDetails? tournamentDetails = await uoW.TournamentDetailsRepository.GetAsync(id);
+        TournamentDetails? tournamentDetails = await unitOfWork.TournamentDetailsRepository.GetAsync(id);
 
         if(tournamentDetails is null) {
             return new ApiNotFoundResponse($"Tournament with ID {id} was not found.");
         }
 
-        bool hasGames = await uoW.TournamentDetailsRepository.HasGames(id);
+        bool hasGames = await unitOfWork.TournamentDetailsRepository.HasGames(id);
 
         if(hasGames) {
             return new ApiConflictResponse($"Tournament with ID {id} has games associated and cannot be deleted.");
@@ -147,8 +147,8 @@ public class TournamentService(IMapper mapper, IUnitOfWork uoW) : ITournamentSer
 
         TournamentDto tournamentDto = mapper.Map<TournamentDto>(tournamentDetails);
         // Remove tournament and persist changes
-        uoW.TournamentDetailsRepository.Remove(tournamentDetails);
-        await uoW.CompleteAsync();
+        unitOfWork.TournamentDetailsRepository.Remove(tournamentDetails);
+        await unitOfWork.CompleteAsync();
 
         return new ApiOkResponse<TournamentDto>(tournamentDto, "Tournament successfully deleted.");
     }
@@ -159,14 +159,14 @@ public class TournamentService(IMapper mapper, IUnitOfWork uoW) : ITournamentSer
 
     public async Task<ApiBaseResponse> ExistsAsync(string title, DateTime startDate)
     {
-        bool entityExists = await uoW.TournamentDetailsRepository
+        bool entityExists = await unitOfWork.TournamentDetailsRepository
             .ExistsByTitleAndStartDateAsync(title, startDate);
         return entityExists ? new ApiOkResponse<bool>(entityExists) : new ApiNotFoundResponse($"Tournament {title} with start date {startDate} does not exists.");
     }
 
     public async Task<ApiBaseResponse> ExistsAsync(int id)
     {
-        bool entityExists = await uoW.TournamentDetailsRepository.AnyAsync(id);
+        bool entityExists = await unitOfWork.TournamentDetailsRepository.AnyAsync(id);
         return entityExists ? new ApiOkResponse<bool>(entityExists) : new ApiNotFoundResponse("Tournament does not exists.");
     }
 
