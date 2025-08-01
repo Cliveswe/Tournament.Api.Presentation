@@ -249,15 +249,37 @@
             Indicates whether there is a next page.
             </summary>
         </member>
+        <member name="T:Tournaments.Shared.Request.PagedList`1">
+            <summary>
+            Represents a paginated list of items and accompanying metadata for API pagination support.
+            </summary>
+            <typeparam name="T">The type of elements in the list.</typeparam>
+        </member>
+        <member name="M:Tournaments.Shared.Request.PagedList`1.#ctor(System.Collections.Generic.IEnumerable{`0},System.Int32,System.Int32,System.Int32)">
+            <summary>
+            Represents a paginated list of items and accompanying metadata for API pagination support.
+            </summary>
+            <typeparam name="T">The type of elements in the list.</typeparam>
+        </member>
         <member name="P:Tournaments.Shared.Request.PagedList`1.Items">
             <summary>
-            List of Items.
+            Gets the read-only list of items on the current page.
             </summary>
         </member>
         <member name="P:Tournaments.Shared.Request.PagedList`1.MetaData">
             <summary>
-            MetaData object.
+            Gets the pagination metadata including total count, current page, page size, and total pages.
             </summary>
+        </member>
+        <member name="M:Tournaments.Shared.Request.PagedList`1.CreateAsync(System.Linq.IQueryable{`0},System.Int32,System.Int32)">
+            <summary>
+            Asynchronously creates a paginated list from the given IQueryable source by applying
+            skip/take operations and calculating pagination metadata.
+            </summary>
+            <param name="source">The IQueryable source of items to paginate.</param>
+            <param name="pageNumber">The current page number.</param>
+            <param name="pageSize">The number of items per page.</param>
+            <returns>A task representing the asynchronous operation, containing the paginated list.</returns>
         </member>
         <member name="P:Tournaments.Shared.Request.RequestParameters.PageSize">
             <summary>

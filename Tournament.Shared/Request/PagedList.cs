@@ -10,7 +10,7 @@
 
 
 using Microsoft.EntityFrameworkCore;
-using Swashbuckle.AspNetCore.Annotations;
+
 
 namespace Tournaments.Shared.Request;
 
@@ -18,19 +18,16 @@ namespace Tournaments.Shared.Request;
 /// Represents a paginated list of items and accompanying metadata for API pagination support.
 /// </summary>
 /// <typeparam name="T">The type of elements in the list.</typeparam>
-[SwaggerSchema("Represents a paginated set of data along with metadata.")]
 public class PagedList<T>(IEnumerable<T> items, int count, int pageNumber, int pageSize)
 {
     /// <summary>
     /// Gets the read-only list of items on the current page.
     /// </summary>
-    [SwaggerSchema("The items contained on the current page of results.")]
     public IReadOnlyList<T> Items { get; } = items.ToList();
 
     /// <summary>
     /// Gets the pagination metadata including total count, current page, page size, and total pages.
     /// </summary>
-    [SwaggerSchema("Metadata containing pagination information such as page number and total pages.")]
     public MetaData MetaData { get; } = new MetaData(
         currentPage: pageNumber,
         totalPages: (int)Math.Ceiling(count / (double)pageSize),
