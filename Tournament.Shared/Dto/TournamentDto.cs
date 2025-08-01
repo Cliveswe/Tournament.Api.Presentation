@@ -13,22 +13,38 @@
 using System.ComponentModel.DataAnnotations;
 
 namespace Tournaments.Shared.Dto;
+
 /// <summary>
-/// Represents a data transfer object (DTO) for encapsulating tournament information,
-/// including its title, start date, computed end date, and a collection of associated games.
+/// Data Transfer Object (DTO) representing the details of a tournament, 
+/// including its name, start date, computed end date, and associated games.
 /// </summary>
 /// <remarks>
-/// This class is used primarily for read operations where tournament data is exposed to clients.
-/// The <see cref="EndDate"/> property is automatically derived by adding three months to the
-/// <see cref="StartDate"/>, eliminating the need to persist it in storage.
-///
-/// Key characteristics:
-/// - Title: The name of the tournament.
-/// - StartDate: The date on which the tournament begins.
-/// - EndDate: Computed as StartDate + 3 months, not manually settable.
-/// - Games: A list of <see cref="GameDto"/> instances representing games linked to the tournament.
-///
-/// This DTO facilitates data projection and serialization for API responses or service interactions.
+/// This DTO is intended for read operations (e.g., API responses) and supports structured serialization 
+/// of tournament-related data.
+/// 
+/// <para>
+/// The <see cref="EndDate"/> property is computed automatically based on the <see cref="StartDate"/>,
+/// extending it by 3 months. It is not meant to be manually set or persisted.
+/// </para>
+/// 
+/// <list type="bullet">
+///   <item>
+///     <term><see cref="Title"/></term>
+///     <description>Required. The tournament's display name (max 100 characters).</description>
+///   </item>
+///   <item>
+///     <term><see cref="StartDate"/></term>
+///     <description>Required. The tournament's official start date.</description>
+///   </item>
+///   <item>
+///     <term><see cref="EndDate"/></term>
+///     <description>Derived from <see cref="StartDate"/>. Equals StartDate + 3 months.</description>
+///   </item>
+///   <item>
+///     <term><see cref="Games"/></term>
+///     <description>Required. A list of games (of type <see cref="GameDto"/>) associated with the tournament.</description>
+///   </item>
+/// </list>
 /// </remarks>
 public record TournamentDto
 {
