@@ -19,6 +19,22 @@ namespace Tournaments.Shared.Dto;
 /// Data Transfer Object (DTO) used for creating a new game.
 /// Contains the essential information such as the game's name and scheduled time.
 /// </summary>
+/// <remarks>
+/// This DTO is intended for create operations where the client submits game data.
+/// It includes validation attributes to enforce required fields and constraints.
+///
+/// Key properties:
+/// <list type="bullet">
+///   <item>
+///     <term><see cref="Name"/></term>
+///     <description>Required; must be between 3 and 100 characters.</description>
+///   </item>
+///   <item>
+///     <term><see cref="Time"/></term>
+///     <description>Required; indicates when the game is planned to start.</description>
+///   </item>
+/// </list>
+/// </remarks>
 public record GameCreateDto
 {
     /// <summary>

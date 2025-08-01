@@ -14,22 +14,19 @@ using System.Text.Json.Serialization;
 
 namespace Tournaments.Shared.Dto;
 
-/// <summary>
-/// Data Transfer Object (DTO) representing the essential details of a game,
-/// including its title and scheduled start date.
-/// </summary>
 /// <remarks>
 /// This DTO is used primarily for transferring game information between application layers,
 /// facilitating serialization and deserialization in API requests and responses.
 ///
 /// Key properties:
-/// - <see cref="Title"/>: The name of the game.
-/// - <see cref="StartDate"/>: The scheduled date and time when the game begins.
+/// <list type="bullet">
+///   <item><term><see cref="Title"/></term><description>The name of the game.</description></item>
+///   <item><term><see cref="StartDate"/></term><description>The scheduled date and time when the game begins.</description></item>
+/// </list>
 ///
 /// This class promotes separation of concerns by decoupling the domain entity from data transport,
 /// supporting clean architecture and maintainability.
 /// </remarks>
-
 public record GameDto
 {
     /// <summary>
