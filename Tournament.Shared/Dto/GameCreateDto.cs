@@ -11,6 +11,7 @@
 // ------------------------------------------------------------------------------------
 
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace Tournaments.Shared.Dto;
 
@@ -26,6 +27,7 @@ public record GameCreateDto
     /// </summary>
     [Required(ErrorMessage = "Title is required.")]
     [StringLength(100, MinimumLength = 3, ErrorMessage = "Title must be between 3 and 100 characters.")]
+    [JsonPropertyName("name")]
     public required string Name { get; set; }
 
     /// <summary>
@@ -33,6 +35,7 @@ public record GameCreateDto
     /// This field is required and indicates when the game is planned to start.
     /// </summary>
     [Required(ErrorMessage = "Time is required.")]
+    [JsonPropertyName("time")]
     public required DateTime Time { get; set; }
 
 }

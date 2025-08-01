@@ -14,19 +14,26 @@ using System.ComponentModel.DataAnnotations;
 namespace Tournaments.Shared.Dto;
 
 /// <summary>
-/// Represents a data transfer object (DTO) used to update existing tournament information.
+/// Represents a Data Transfer Object (DTO) used to update the title of an existing tournament.
 /// </summary>
 /// <remarks>
-/// This DTO is designed specifically for update operations, exposing only the modifiable properties
-/// of a tournament to ensure data integrity and prevent unauthorized changes to immutable fields
-/// such as identifiers or related entities.
-///
-/// Validation constraints:
-/// - <see cref="Title"/>: Required field with a maximum length of 100 characters.
-///
-/// This class is typically used in API operations where clients submit partial updates to an existing
-/// tournament entity. It supports model validation through data annotations to enforce business rules
-/// before the update is applied to the persistence layer.
+/// This DTO is intended strictly for update (PUT/PATCH) operations where only mutable fields of a 
+/// tournament can be changed. It ensures that:
+/// 
+/// <list type="bullet">
+///   <item>
+///     <term><see cref="Title"/></term>
+///     <description>
+///     Must be provided and limited to a maximum of 100 characters. Used to rename a tournament.
+///     </description>
+///   </item>
+/// </list>
+/// 
+/// Immutable fields like identifiers or associated collections (e.g., games) are intentionally excluded
+/// to protect domain integrity and simplify validation.
+/// 
+/// Validation attributes ensure that the update request conforms to business rules before reaching 
+/// the application or data layer.
 /// </remarks>
 public record TournamentUpdateDto
 {

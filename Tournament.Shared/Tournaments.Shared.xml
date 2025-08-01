@@ -4,6 +4,12 @@
         <name>Tournaments.Shared</name>
     </assembly>
     <members>
+        <member name="T:Tournaments.Shared.Dto.GameCreateDto">
+            <summary>
+            Data Transfer Object (DTO) used for creating a new game.
+            Contains the essential information such as the game's name and scheduled time.
+            </summary>
+        </member>
         <member name="P:Tournaments.Shared.Dto.GameCreateDto.Name">
             <summary>
             Gets or sets the name (title) of the game.
@@ -43,6 +49,19 @@
             Gets or sets the scheduled start date and time of the game.
             </summary>
         </member>
+        <member name="T:Tournaments.Shared.Dto.GameUpdateDto">
+            <summary>
+            Data Transfer Object (DTO) used for updating an existing game's title.
+            </summary>
+            <remarks>
+            This DTO is designed to carry only the mutable property of a game—its <see cref="P:Tournaments.Shared.Dto.GameUpdateDto.Title"/>.
+            It is used primarily in update operations to encapsulate client input,
+            promoting separation of concerns between domain and transport layers.
+            
+            Validation:
+            - <see cref="P:Tournaments.Shared.Dto.GameUpdateDto.Title"/> is required and must not exceed 100 characters.
+            </remarks>
+        </member>
         <member name="P:Tournaments.Shared.Dto.GameUpdateDto.Title">
             <summary>
             Gets or sets the title of the game.
@@ -50,20 +69,27 @@
             </summary>
         </member>
         <member name="T:Tournaments.Shared.Dto.TournamentDetailsCreateDto">
-             <summary>
-             Represents a Data Transfer Object (DTO) for creating new tournament entries.
-             </summary>
-             <remarks>
-             This DTO is used in create operations where new tournament data is submitted by the client.
-             It includes validation rules to ensure required information is present and meets expected formats.
+            <summary>
+            Data Transfer Object (DTO) used for creating new tournament entries.
+            </summary>
+            <remarks>
+            This DTO is intended for use in create operations where a client submits data to register a new tournament.
             
-             Key properties:
-             - <see cref="P:Tournaments.Shared.Dto.TournamentDetailsCreateDto.Title"/>: Required, limited to 100 characters.
-             - <see cref="P:Tournaments.Shared.Dto.TournamentDetailsCreateDto.StartDate"/>: Required, represents when the tournament begins.
+            It includes validation attributes to enforce required fields and value constraints:
+            <list type="bullet">
+              <item>
+                <term><see cref="P:Tournaments.Shared.Dto.TournamentDetailsCreateDto.Title"/></term>
+                <description>Required; maximum length of 100 characters.</description>
+              </item>
+              <item>
+                <term><see cref="P:Tournaments.Shared.Dto.TournamentDetailsCreateDto.StartDate"/></term>
+                <description>Required; represents the scheduled start date of the tournament.</description>
+              </item>
+            </list>
             
-             The validation attributes applied to each property support automatic model binding
-             and server-side validation in web API scenarios.
-             </remarks>
+            The model is suitable for serialization and model binding in ASP.NET Core Web APIs,
+            and aligns with clean architecture practices by decoupling domain logic from transport structures.
+            </remarks>
         </member>
         <member name="P:Tournaments.Shared.Dto.TournamentDetailsCreateDto.Title">
             <summary>
@@ -76,23 +102,38 @@
             </summary>
         </member>
         <member name="T:Tournaments.Shared.Dto.TournamentDto">
-             <summary>
-             Represents a data transfer object (DTO) for encapsulating tournament information,
-             including its title, start date, computed end date, and a collection of associated games.
-             </summary>
-             <remarks>
-             This class is used primarily for read operations where tournament data is exposed to clients.
-             The <see cref="P:Tournaments.Shared.Dto.TournamentDto.EndDate"/> property is automatically derived by adding three months to the
-             <see cref="P:Tournaments.Shared.Dto.TournamentDto.StartDate"/>, eliminating the need to persist it in storage.
+            <summary>
+            Data Transfer Object (DTO) representing the details of a tournament, 
+            including its name, start date, computed end date, and associated games.
+            </summary>
+            <remarks>
+            This DTO is intended for read operations (e.g., API responses) and supports structured serialization 
+            of tournament-related data.
             
-             Key characteristics:
-             - Title: The name of the tournament.
-             - StartDate: The date on which the tournament begins.
-             - EndDate: Computed as StartDate + 3 months, not manually settable.
-             - Games: A list of <see cref="T:Tournaments.Shared.Dto.GameDto"/> instances representing games linked to the tournament.
+            <para>
+            The <see cref="P:Tournaments.Shared.Dto.TournamentDto.EndDate"/> property is computed automatically based on the <see cref="P:Tournaments.Shared.Dto.TournamentDto.StartDate"/>,
+            extending it by 3 months. It is not meant to be manually set or persisted.
+            </para>
             
-             This DTO facilitates data projection and serialization for API responses or service interactions.
-             </remarks>
+            <list type="bullet">
+              <item>
+                <term><see cref="P:Tournaments.Shared.Dto.TournamentDto.Title"/></term>
+                <description>Required. The tournament's display name (max 100 characters).</description>
+              </item>
+              <item>
+                <term><see cref="P:Tournaments.Shared.Dto.TournamentDto.StartDate"/></term>
+                <description>Required. The tournament's official start date.</description>
+              </item>
+              <item>
+                <term><see cref="P:Tournaments.Shared.Dto.TournamentDto.EndDate"/></term>
+                <description>Derived from <see cref="P:Tournaments.Shared.Dto.TournamentDto.StartDate"/>. Equals StartDate + 3 months.</description>
+              </item>
+              <item>
+                <term><see cref="P:Tournaments.Shared.Dto.TournamentDto.Games"/></term>
+                <description>Required. A list of games (of type <see cref="T:Tournaments.Shared.Dto.GameDto"/>) associated with the tournament.</description>
+              </item>
+            </list>
+            </remarks>
         </member>
         <member name="P:Tournaments.Shared.Dto.TournamentDto.Title">
             <summary>
@@ -117,21 +158,28 @@
             </summary>
         </member>
         <member name="T:Tournaments.Shared.Dto.TournamentUpdateDto">
-             <summary>
-             Represents a data transfer object (DTO) used to update existing tournament information.
-             </summary>
-             <remarks>
-             This DTO is designed specifically for update operations, exposing only the modifiable properties
-             of a tournament to ensure data integrity and prevent unauthorized changes to immutable fields
-             such as identifiers or related entities.
+            <summary>
+            Represents a Data Transfer Object (DTO) used to update the title of an existing tournament.
+            </summary>
+            <remarks>
+            This DTO is intended strictly for update (PUT/PATCH) operations where only mutable fields of a 
+            tournament can be changed. It ensures that:
             
-             Validation constraints:
-             - <see cref="P:Tournaments.Shared.Dto.TournamentUpdateDto.Title"/>: Required field with a maximum length of 100 characters.
+            <list type="bullet">
+              <item>
+                <term><see cref="P:Tournaments.Shared.Dto.TournamentUpdateDto.Title"/></term>
+                <description>
+                Must be provided and limited to a maximum of 100 characters. Used to rename a tournament.
+                </description>
+              </item>
+            </list>
             
-             This class is typically used in API operations where clients submit partial updates to an existing
-             tournament entity. It supports model validation through data annotations to enforce business rules
-             before the update is applied to the persistence layer.
-             </remarks>
+            Immutable fields like identifiers or associated collections (e.g., games) are intentionally excluded
+            to protect domain integrity and simplify validation.
+            
+            Validation attributes ensure that the update request conforms to business rules before reaching 
+            the application or data layer.
+            </remarks>
         </member>
         <member name="P:Tournaments.Shared.Dto.TournamentUpdateDto.Title">
             <summary>
