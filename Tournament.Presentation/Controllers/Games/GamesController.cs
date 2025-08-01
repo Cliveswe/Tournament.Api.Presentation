@@ -69,7 +69,7 @@ namespace Tournaments.Presentation.Controllers.Games
             if(tournamentId <= 0) {
                 // If the tournamentEntity ID is invalid (less than or equal to zero), return 400 Bad Request.
                 // This ensures that the client must provide a valid tournamentEntity ID to retrieve games.
-                return ProcessError(new BadRequestResponse($"Invalid tournamentEntity ID {tournamentId}."));
+                return ProcessError(new ApiBadRequestResponse($"Invalid tournamentEntity ID {tournamentId}."));
             }
 
             // Check if the tournamentEntity with the specified ID exists
@@ -100,7 +100,7 @@ namespace Tournaments.Presentation.Controllers.Games
 
             // Validate the tournamentEntity ID and game ID
             if(id <= 0 || tournamentId <= 0) {
-                return ProcessError(new BadRequestResponse("Invalid tournamentEntity id or game id."));
+                return ProcessError(new ApiBadRequestResponse("Invalid tournamentEntity id or game id."));
             }
 
             // Check if the tournamentEntity exists.
@@ -123,7 +123,7 @@ namespace Tournaments.Presentation.Controllers.Games
         {
             // Validation of input parameters
             if(string.IsNullOrWhiteSpace(title)) {
-                return ProcessError(new BadRequestResponse("Title must be a non-empty string."));
+                return ProcessError(new ApiBadRequestResponse("Title must be a non-empty string."));
             }
 
             // Trim whitespace from the title to ensure accurate matching.
@@ -131,7 +131,7 @@ namespace Tournaments.Presentation.Controllers.Games
 
             // Validate the tournamentEntity ID.
             if(tournamentId <= 0) {
-                return ProcessError(new BadRequestResponse("Invalid tournamentEntity id."));
+                return ProcessError(new ApiBadRequestResponse("Invalid tournamentEntity id."));
             }
 
             // The GameService.GetAsync method internally verifies the tournament exists.
@@ -150,14 +150,14 @@ namespace Tournaments.Presentation.Controllers.Games
             // Validate the tournamentEntity ID from the route parameter.
             if(tournamentId <= 0) {
                 // Return 400 Bad Request if the tournamentEntity ID is invalid
-                return ProcessError(new BadGamePatchDocumentResponse($"Invalid tournament {tournamentId}."));
+                return ProcessError(new ApiBadGamePatchDocumentResponse($"Invalid tournament {tournamentId}."));
             }
 
             // Validate the game title input
             title = title.Trim();
             if(string.IsNullOrWhiteSpace(title)) {
                 // Return 400 Bad Request if the title ID is invalid
-                return ProcessError(new BadGamePatchDocumentResponse("Game title must be a non-empty string."));
+                return ProcessError(new ApiBadGamePatchDocumentResponse("Game title must be a non-empty string."));
             }
 
             // The GameService.UpdateAsync method internally verifies the tournament exists and the game title matches.
@@ -199,7 +199,7 @@ namespace Tournaments.Presentation.Controllers.Games
                     ModelState.Values
                     .SelectMany(v => v.Errors)
                     .Select(e => e.ErrorMessage));
-                UnProcessableContentResponse errorResponse = new UnProcessableContentResponse(errorMessage);
+                ApiUnProcessableContentResponse errorResponse = new ApiUnProcessableContentResponse(errorMessage);
                 return ProcessError(errorResponse);
             }
 
@@ -208,7 +208,7 @@ namespace Tournaments.Presentation.Controllers.Games
             if(!tournamentDto.Success) {
                 //return NotFound($"Tournament with ID {tournamentId} not found.");
                 return ProcessError(
-                    new BadGamePatchDocumentResponse($"Tournament with ID {tournamentId} not found.")
+                    new ApiBadGamePatchDocumentResponse($"Tournament with ID {tournamentId} not found.")
                     );
             }
 
@@ -227,23 +227,23 @@ namespace Tournaments.Presentation.Controllers.Games
         private ApiBaseResponse? ValidatePatchRequest(int tournamentId, int id, JsonPatchDocument<GameDto>? patchDocument)
         {
             if(patchDocument is null) {
-                return new BadGamePatchDocumentResponse("Patch document cannot be null.");
+                return new ApiBadGamePatchDocumentResponse("Patch document cannot be null.");
             }
 
             if(patchDocument.Operations is null || !patchDocument.Operations.Any()) {
-                return new BadGamePatchDocumentResponse("Patch document must contain at least one operation.");
+                return new ApiBadGamePatchDocumentResponse("Patch document must contain at least one operation.");
             }
 
 
             if(tournamentId <= 0) {
                 // If the tournament ID is invalid (less than or equal to zero), return 400 Bad Request.
-                return new BadGamePatchDocumentResponse("Invalid tournament id.");
+                return new ApiBadGamePatchDocumentResponse("Invalid tournament id.");
             }
             // Validate the game ID from the route parameter
 
             if(id <= 0) {
                 // If the game ID is invalid (less than or equal to zero), return 400 Bad Request.
-                return new BadGamePatchDocumentResponse("Invalid game id.");
+                return new ApiBadGamePatchDocumentResponse("Invalid game id.");
             }
 
             return null;
@@ -259,7 +259,7 @@ namespace Tournaments.Presentation.Controllers.Games
         {
             //Validate input Parameters
             if(tournamentId < 0) {
-                return ProcessError(new BadRequestResponse($"Invalid tournamentEntity ID {tournamentId}."));
+                return ProcessError(new ApiBadRequestResponse($"Invalid tournamentEntity ID {tournamentId}."));
             }
 
             // Trim whitespace from the gameEntity name
@@ -296,7 +296,7 @@ namespace Tournaments.Presentation.Controllers.Games
             // Validate the ID to ensure it is a positive integer.
             // If the ID is less than or equal to zero, return 400 Bad Request.
             if(tournamentId <= 0 || id <= 0) {
-                return ProcessError(new BadRequestResponse("Invalid tournamentEntity id or game id."));
+                return ProcessError(new ApiBadRequestResponse("Invalid tournamentEntity id or game id."));
             }
 
             ApiBaseResponse response = await serviceManager.GameService.RemoveAsync(tournamentId, id);

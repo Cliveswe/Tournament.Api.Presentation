@@ -54,7 +54,7 @@ namespace Tournaments.Presentation.Controllers.Tournaments
             if(id <= 0) {
                 // If the ID is invalid, return 400 Bad Request with an error message.
                 //return BadRequest($"Invalid tournament ID {id} specified.");
-                return ProcessError(new BadRequestResponse($"Invalid tournament ID {id} specified."));
+                return ProcessError(new ApiBadRequestResponse($"Invalid tournament ID {id} specified."));
             }
 
             // Retrieve the tournament details by ID using the service manager
@@ -82,10 +82,10 @@ namespace Tournaments.Presentation.Controllers.Tournaments
         {
             //Validation of Input Parameters
             if(patchDocument is null)
-                return ProcessError(new BadRequestResponse("Patch document cannot be null."));
+                return ProcessError(new ApiBadRequestResponse("Patch document cannot be null."));
 
             if(id <= 0)
-                return ProcessError(new BadRequestResponse($"Invalid tournament ID {id} specified for patching."));
+                return ProcessError(new ApiBadRequestResponse($"Invalid tournament ID {id} specified for patching."));
 
             // Check if tournament exists
             ApiBaseResponse? tournamentExists = await serviceManager.TournamentService.GetByIdAsync(id, trackChanges: true);
@@ -103,7 +103,7 @@ namespace Tournaments.Presentation.Controllers.Tournaments
             // Call service to update entity from patched DTO
             ApiBaseResponse updated = await serviceManager.TournamentService.ApplyToAsync(id, tournamentExists.GetOkResult<TournamentDto>());
 
-            return updated.Success ? Ok(updated.GetOkResult<TournamentDto>()) : ProcessError(new NoChangesMadeResponse("An error occurred while updating the tournament."));
+            return updated.Success ? Ok(updated.GetOkResult<TournamentDto>()) : ProcessError(new ApiNoChangesMadeResponse("An error occurred while updating the tournament."));
         }
 
         #endregion
@@ -113,9 +113,9 @@ namespace Tournaments.Presentation.Controllers.Tournaments
 
         [HttpPut("{id}")]
         [ProducesResponseType(typeof(ApiOkResponse<TournamentDto>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(TournamentNotFoundResponse), StatusCodes.Status404NotFound)]
-        [ProducesResponseType(typeof(NoChangesMadeResponse), StatusCodes.Status422UnprocessableEntity)]
-        [ProducesResponseType(typeof(SaveFailedResponse), StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(typeof(ApiTournamentNotFoundResponse), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ApiNoChangesMadeResponse), StatusCodes.Status422UnprocessableEntity)]
+        [ProducesResponseType(typeof(ApiSaveFailedResponse), StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> PutTournamentDetails(int id, [FromBody] TournamentUpdateDto tournamentUpdateDto)
         {
 
@@ -131,7 +131,7 @@ namespace Tournaments.Presentation.Controllers.Tournaments
             ApiBaseResponse updateResponse = await serviceManager.TournamentService.UpdateAsync(id, tournamentUpdateDto);
             if(!updateResponse.Success) {
                 // Return 404 Not Found if the tournament with the specified ID does not exist.
-                //new TournamentNotFoundResponse($"Tournament with ID {id} was not found.")
+                //new ApiTournamentNotFoundResponse($"Tournament with ID {id} was not found.")
                 return ProcessError(updateResponse);
             }
 
@@ -158,7 +158,7 @@ namespace Tournaments.Presentation.Controllers.Tournaments
                 .ExistsAsync(tournamentDetailsCreateDto.Title, tournamentDetailsCreateDto.StartDate);
 
             if(tournamentExists.Success) {
-                return ProcessError(new AlreadyExistsResponse($"A tournament with title {tournamentDetailsCreateDto.Title} already exists."));
+                return ProcessError(new ApiAlreadyExistsResponse($"A tournament with title {tournamentDetailsCreateDto.Title} already exists."));
             }
 
             // This returns a tuple containing the ID of the newly created tournament and the mapped DTO.
@@ -167,7 +167,7 @@ namespace Tournaments.Presentation.Controllers.Tournaments
                 .CreateAsync(tournamentDetailsCreateDto);
 
             if(tournamentDto is null || id <= 0)
-                return ProcessError(new SaveFailedResponse("Could not save the newly created tournament."));
+                return ProcessError(new ApiSaveFailedResponse("Could not save the newly created tournament."));
 
             // Return 201 Created with the route to access the new resource.
             // This follows REST conventions by providing a location header pointing to the new resource.
@@ -183,7 +183,7 @@ namespace Tournaments.Presentation.Controllers.Tournaments
         {
             // Validate the ID parameter
             if(id <= 0) {
-                return ProcessError(new BadRequestResponse($"Invalid {id} specified for deletion."));
+                return ProcessError(new ApiBadRequestResponse($"Invalid {id} specified for deletion."));
             }
 
             // Attempt to remove the entity from the repository.

@@ -36,7 +36,7 @@ public class TournamentService(IMapper mapper, IUnitOfWork uoW) : ITournamentSer
         var tournamentDtos = mapper.Map<IEnumerable<TournamentDto>>(pagedList.Items);
 
         //return (tournamentDtos, pagedList.MetaData);
-        return tournamentDtos.Any() ? (new ApiOkResponse<IEnumerable<TournamentDto>>(tournamentDtos), pagedList.MetaData) : (new TournamentNotFoundResponse("No tournaments found."), pagedList.MetaData);
+        return tournamentDtos.Any() ? (new ApiOkResponse<IEnumerable<TournamentDto>>(tournamentDtos), pagedList.MetaData) : (new ApiTournamentNotFoundResponse("No tournaments found."), pagedList.MetaData);
     }
 
     public async Task<ApiBaseResponse> GetByIdAsync(int id, bool trackChanges = false)
@@ -46,7 +46,7 @@ public class TournamentService(IMapper mapper, IUnitOfWork uoW) : ITournamentSer
             .GetAsync(id, trackChanges);
 
         if(tournamentDetails is null || tournamentDetails.Id != id) {
-            return new TournamentNotFoundResponse($"Tournament with ID {id} was not found.");
+            return new ApiTournamentNotFoundResponse($"Tournament with ID {id} was not found.");
         }
 
         return new ApiOkResponse<TournamentDto>(mapper.Map<TournamentDto>(tournamentDetails));
@@ -61,7 +61,7 @@ public class TournamentService(IMapper mapper, IUnitOfWork uoW) : ITournamentSer
         // Retrieve the existing tournament details.
         TournamentDetails? existingEntity = await uoW.TournamentDetailsRepository.GetAsync(id, trackChanges: true);
         if(existingEntity is null) {
-            return new TournamentNotFoundResponse($"Tournament with id {id} was not found.");
+            return new ApiTournamentNotFoundResponse($"Tournament with id {id} was not found.");
         }
 
         // Map the incoming DTO to the existing tournament details.
@@ -73,7 +73,7 @@ public class TournamentService(IMapper mapper, IUnitOfWork uoW) : ITournamentSer
         int result = await uoW.CompleteAsync();
 
         if(result == 0)
-            return new NotModifiedResponse("The tournament was not updated.");
+            return new ApiNotModifiedResponse("The tournament was not updated.");
 
         // Fetch fresh data from DB to reflect all updates
         TournamentDetails? updatedEntity = await uoW.TournamentDetailsRepository.GetAsync(id, trackChanges: false);
@@ -93,7 +93,7 @@ public class TournamentService(IMapper mapper, IUnitOfWork uoW) : ITournamentSer
 
         // If the tournament exists, map the DTO to the entity.
         if(tournamentDetails is null)
-            return new TournamentNotFoundResponse($"Could not find tournament {id}.");
+            return new ApiTournamentNotFoundResponse($"Could not find tournament {id}.");
 
         // Map the update DTO to the existing tournament details entity.
         mapper.Map(tournamentUpdateDto, tournamentDetails);
@@ -106,7 +106,7 @@ public class TournamentService(IMapper mapper, IUnitOfWork uoW) : ITournamentSer
 
         return success != 0
             ? new ApiOkResponse<TournamentDto>(mapper.Map<TournamentDto>(tournamentDetails))
-            : new NoChangesMadeResponse($"The tournament, {tournamentUpdateDto.Title}, was not updated.");
+            : new ApiNoChangesMadeResponse($"The tournament, {tournamentUpdateDto.Title}, was not updated.");
     }
 
     #endregion

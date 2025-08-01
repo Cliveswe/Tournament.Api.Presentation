@@ -34,7 +34,7 @@ public class GameService(IMapper mapper, IUnitOfWork uoW) : IGameService
         IEnumerable<GameDto> gameDtos = mapper.Map<IEnumerable<GameDto>>(pagedList.Items);
 
         if(!gameDtos.Any()) {
-            return (new TournamentNotFoundResponse($"Tournament with id {tournamentId} not found."), pagedList.MetaData);
+            return (new ApiTournamentNotFoundResponse($"Tournament with id {tournamentId} not found."), pagedList.MetaData);
         }
 
         return (new ApiOkResponse<IEnumerable<GameDto>>(gameDtos), pagedList.MetaData);
@@ -45,7 +45,7 @@ public class GameService(IMapper mapper, IUnitOfWork uoW) : IGameService
         Game? gameExists = await uoW.GameRepository.GetByIdAsync(id);
 
         if(gameExists is null || gameExists.TournamentDetailsId != tournamentId) {
-            return new GameNotFoundByIdResponse($"Game with id {id} was not found.");
+            return new ApiGameNotFoundByIdResponse($"Game with id {id} was not found.");
         }
 
         // Map the retrieved game entity to a GameDto object using AutoMapper.
@@ -59,7 +59,7 @@ public class GameService(IMapper mapper, IUnitOfWork uoW) : IGameService
         Game? gameExists = await uoW.GameRepository.GetByTitleAndTournamentIdAsync(title, tournamentId);
         // Check if a game with the same title already exists for the specified tournament.
         if(gameExists is null) {
-            return new GameNotFoundByTitleResponse($"Game with title {title} was not found.");
+            return new ApiGameNotFoundByTitleResponse($"Game with title {title} was not found.");
         }
 
         return new ApiOkResponse<GameDto>(mapper.Map<GameDto>(gameExists));
@@ -99,7 +99,7 @@ public class GameService(IMapper mapper, IUnitOfWork uoW) : IGameService
 
         if(existingGameEntity is not null) {
             // Duplicate game found, return a failure result with the existing game.
-            return new AlreadyExistsResponse($"A game with the name '{gameCreateDto.Name}' already exists in tournament ID {tournamentId}.");
+            return new ApiAlreadyExistsResponse($"A game with the name '{gameCreateDto.Name}' already exists in tournament ID {tournamentId}.");
         }
 
         // Use your existing paginated method with a high page size to fetch count
@@ -112,7 +112,7 @@ public class GameService(IMapper mapper, IUnitOfWork uoW) : IGameService
         PagedList<Game> games = await uoW.GameRepository.GetByTournamentIdAsync(requestParams,tournamentId);
 
         if(games.Items.Count >= MaxNumberOfGames) {
-            return new MaxGameLimitReachedResponse($"Tournament {tournamentId} has reached its maximum number of {MaxNumberOfGames} games per tournament.");
+            return new ApiMaxGameLimitReachedResponse($"Tournament {tournamentId} has reached its maximum number of {MaxNumberOfGames} games per tournament.");
         }
 
         // Map the GameCreateDto to a Game entity.
@@ -127,7 +127,7 @@ public class GameService(IMapper mapper, IUnitOfWork uoW) : IGameService
         // Check if any changes were made to the database.
         if(changes == 0) {
             // If no changes were made, return a failure result.
-            return new SaveFailedResponse("Failed to save the new game.");
+            return new ApiSaveFailedResponse("Failed to save the new game.");
         }
         return new ApiOkResponse<GameDto>(mapper.Map<GameDto>(gameEntity));
     }
@@ -140,7 +140,7 @@ public class GameService(IMapper mapper, IUnitOfWork uoW) : IGameService
         // If the game does not exist, return null.
         if(gameEntity == null) {
             //return UpdateGameResult.NotFound;
-            return new GameNotFoundByTitleResponse($"Could not find game {title} in tournament {tournamentId}.");
+            return new ApiGameNotFoundByTitleResponse($"Could not find game {title} in tournament {tournamentId}.");
         }
         // Map the updated properties from the DTO to the existing game entity.
         mapper.Map(gameUpdateDto, gameEntity);
@@ -149,7 +149,7 @@ public class GameService(IMapper mapper, IUnitOfWork uoW) : IGameService
         uoW.GameRepository.Update(gameEntity);
         int success = await uoW.CompleteAsync();
 
-        return success != 0 ? new ApiOkResponse<GameDto>(mapper.Map<GameDto>(gameEntity)) : new NoChangesMadeResponse($"The game {title} was not updated.");
+        return success != 0 ? new ApiOkResponse<GameDto>(mapper.Map<GameDto>(gameEntity)) : new ApiNoChangesMadeResponse($"The game {title} was not updated.");
 
     }
 
@@ -158,14 +158,14 @@ public class GameService(IMapper mapper, IUnitOfWork uoW) : IGameService
 
         if(gameDto.StartDate < tournamentDto.StartDate || gameDto.StartDate > tournamentDto.EndDate) {
             //return ApplyPatchResult.InvalidDateRange;
-            return new UnProcessableContentResponse("Date is out of range for the tournament.");
+            return new ApiUnProcessableContentResponse("Date is out of range for the tournament.");
         }
 
         // Fetch the existing game by ID.
         Game? gameEntity = await uoW.GameRepository.GetByIdAsync(id);
         if(gameEntity is null) {
             //return ApplyPatchResult.GameNotFound;
-            return new GameNotFoundByIdResponse($"Game with id {id} was not found.");
+            return new ApiGameNotFoundByIdResponse($"Game with id {id} was not found.");
         }
 
         // Map gameEntity to a GameDto.
@@ -178,7 +178,7 @@ public class GameService(IMapper mapper, IUnitOfWork uoW) : IGameService
         int result = await uoW.CompleteAsync();
         if(result == 0) {
             //return ApplyPatchResult.NoChanges;
-            return new NotModifiedResponse("The game entity was not updated.");
+            return new ApiNotModifiedResponse("The game entity was not updated.");
         }
 
         // Fetch fresh data from DB to reflect all updates

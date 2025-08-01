@@ -35,19 +35,19 @@ public class ApiControllerBase : ControllerBase
             ApiNotFoundResponse notFound => CreateProblemResult(
                 "Not found", notFound.Message!, notFound.StatusCode, notFound.Timestamp),
 
-            MaxGameLimitReachedResponse limitReached => CreateProblemResult(
+            ApiMaxGameLimitReachedResponse limitReached => CreateProblemResult(
                 "Maximum game limit reached", limitReached.Message!, limitReached.StatusCode, limitReached.Timestamp),
 
-            AlreadyExistsResponse alreadyExists => CreateProblemResult(
+            ApiAlreadyExistsResponse alreadyExists => CreateProblemResult(
                 "Conflict", alreadyExists.Message!, alreadyExists.StatusCode, alreadyExists.Timestamp),
 
-            SaveFailedResponse saveFailed => CreateProblemResult(
+            ApiSaveFailedResponse saveFailed => CreateProblemResult(
                 "Save Failed", saveFailed.Message!, saveFailed.StatusCode, saveFailed.Timestamp),
 
-            NoChangesMadeResponse noChangesMade => CreateProblemResult(
+            ApiNoChangesMadeResponse noChangesMade => CreateProblemResult(
                 "No Changes Made", noChangesMade.Message!, noChangesMade.StatusCode, noChangesMade.Timestamp),
 
-            UnProcessableContentResponse unprocessable => CreateProblemResult(
+            ApiUnProcessableContentResponse unprocessable => CreateProblemResult(
                 "Non-processable Content", unprocessable.Message!, unprocessable.StatusCode, unprocessable.Timestamp),
 
             // A generic response as an alternative of a "Throw"
