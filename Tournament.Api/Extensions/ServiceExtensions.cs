@@ -4,6 +4,7 @@
 //          lazy-loading, and Swagger XML comment integration for the Tournament API.
 // Author: [Clive Leddy]
 // Created: [2025-07-21]
+// Last modified: [2025-08-02]
 // Notes: Consolidates dependency injection configuration across repositories,
 //        services, and Swagger for improved modularity, maintainability, and 
 //        documentation support.
@@ -18,6 +19,7 @@ using Tournaments.Services.Services;
 namespace Tournaments.Api.Extensions;
 
 #region ServiceExtensions
+
 /// <summary>
 /// Contains extension methods for configuring repository services and enabling
 /// lazy loading support within the application's dependency injection container.
@@ -122,25 +124,6 @@ public static class SwaggerServiceExtensions
         services.AddSwaggerGen(options =>
         {
             var basePath = AppContext.BaseDirectory;
-
-            // List of known XML documentation files from various projects
-            //var xmlFiles = new[]
-            //    {
-            //        "Tournaments.Api.xml",
-            //        "Tournaments.Shared.xml",
-            //        "Tournaments.Presentation.xml",
-            //        "Tournaments.Shared.Request.xml",
-            //        // Add any additional XML doc files here
-            //        // "Tournaments.Application.xml",
-            //        // "Tournaments.Infrastructure.xml"
-            //    };
-
-            //foreach(var file in xmlFiles) {
-            //    var fullPath = Path.Combine(basePath, file);
-            //    if(File.Exists(fullPath)) {
-            //        options.IncludeXmlComments(fullPath);
-            //    }
-            //}
 
             // Auto discover all xml files. This is a dynamic discovery of the xml documentation in each
             // project of the solution. Important: Make sure that each project has properties/Build/Output/
