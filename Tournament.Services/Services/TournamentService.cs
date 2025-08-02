@@ -198,7 +198,7 @@ public class TournamentService(IMapper mapper, IUnitOfWork unitOfWork) : ITourna
     /// <returns>
     /// A tuple containing:
     /// - <c>id</c>: The ID of the newly created tournament.
-    /// - <c>tournamentDto</c>: The mapped DTO representing the created tournament.
+    /// - <c>response</c>: An <see cref="ApiBaseResponse"/> wrapping the created tournament DTO and a success message.
     /// </returns>
     public async Task<(int id, ApiBaseResponse response)> CreateAsync(TournamentDetailsCreateDto tournamentDetailsCreateDto)
     {

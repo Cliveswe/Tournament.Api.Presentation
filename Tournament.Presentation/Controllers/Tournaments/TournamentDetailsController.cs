@@ -1,4 +1,4 @@
-﻿// Ignore Spelling: Api Dto Ok
+﻿// Ignore Spelling: Api Dto Ok json
 
 // -------------------------------------------------------------------------------------
 // File: TournamentDetailsController.cs
@@ -25,11 +25,15 @@ namespace Tournaments.Presentation.Controllers.Tournaments
 
     [Route("api/tournamentDetails")]
     [ApiController]
+    [Produces("application/json")] // Ensures all responses are documented as JSON
     public class TournamentDetailsController(IServiceManager serviceManager) : ApiControllerBase
     {
         #region GET api/TournamentDetails/5
 
         [HttpGet]
+        [ProducesResponseType(typeof(IEnumerable<TournamentDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiBaseResponse), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ApiBaseResponse), StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<IEnumerable<TournamentDto>>> GetTournamentDetails([FromQuery] TournamentRequestParameters requestParameters)
         {
             // Fetch all tournaments using the service manager
@@ -49,6 +53,9 @@ namespace Tournaments.Presentation.Controllers.Tournaments
         }
 
         [HttpGet("{id}")]
+        [ProducesResponseType(typeof(TournamentDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiBadRequestResponse), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiNotFoundResponse), StatusCodes.Status404NotFound)]
         public async Task<ActionResult<TournamentDto>> GetTournamentDetails(int id, [FromQuery] bool includeGames = false)
         {
             if(id <= 0) {
@@ -72,6 +79,11 @@ namespace Tournaments.Presentation.Controllers.Tournaments
         #region PATCH api/TournamentDetails/5
 
         [HttpPatch("{id}")]
+        [ProducesResponseType(typeof(TournamentDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiBadRequestResponse), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiNotFoundResponse), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ApiUnProcessableContentResponse), StatusCodes.Status422UnprocessableEntity)]
+        [ProducesResponseType(typeof(ApiSaveFailedResponse), StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<TournamentDto>> PatchTournament(int id, [FromBody] JsonPatchDocument<TournamentDto> patchDocument)
         {
             //Validation of Input Parameters
@@ -111,6 +123,7 @@ namespace Tournaments.Presentation.Controllers.Tournaments
 
         [HttpPut("{id}")]
         [ProducesResponseType(typeof(ApiOkResponse<TournamentDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiBadRequestResponse), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiTournamentNotFoundResponse), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ApiNoChangesMadeResponse), StatusCodes.Status422UnprocessableEntity)]
         [ProducesResponseType(typeof(ApiSaveFailedResponse), StatusCodes.Status500InternalServerError)]
@@ -139,8 +152,8 @@ namespace Tournaments.Presentation.Controllers.Tournaments
 
         [HttpPost]
         [ProducesResponseType(typeof(TournamentDto), StatusCodes.Status201Created)]
-        [ProducesResponseType(typeof(ApiBaseResponse), StatusCodes.Status409Conflict)]
-        [ProducesResponseType(typeof(ApiBaseResponse), StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(typeof(ApiAlreadyExistsResponse), StatusCodes.Status409Conflict)]
+        [ProducesResponseType(typeof(ApiSaveFailedResponse), StatusCodes.Status500InternalServerError)]
         // public async Task<ActionResult<TournamentDetails>> PostTournamentDetails(TournamentDetails tournamentDetails)
         public async Task<ActionResult<TournamentDto>> PostTournamentDetails([FromBody] TournamentDetailsCreateDto tournamentDetailsCreateDto)
         {
@@ -154,8 +167,8 @@ namespace Tournaments.Presentation.Controllers.Tournaments
                 return ProcessError(new ApiAlreadyExistsResponse($"A tournament with title {tournamentDetailsCreateDto.Title} already exists."));
             }
 
-            // This returns a tuple containing the ID of the newly created tournament and the mapped DTO.
-            (int id, TournamentDto tournamentDto) = await serviceManager
+            // Call service to create new tournament, returning tuple (id, ApiBaseResponse)
+            (int id, ApiBaseResponse tournamentDto) = await serviceManager
                 .TournamentService
                 .CreateAsync(tournamentDetailsCreateDto);
 
@@ -173,6 +186,10 @@ namespace Tournaments.Presentation.Controllers.Tournaments
         #region DELETE api/TournamentDetails/5
 
         [HttpDelete("{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(ApiBadRequestResponse), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiNotFoundResponse), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ApiSaveFailedResponse), StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> DeleteTournamentDetails(int id)
         {
             // Validate the ID parameter
