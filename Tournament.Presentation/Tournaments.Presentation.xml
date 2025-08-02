@@ -4,6 +4,35 @@
         <name>Tournaments.Presentation</name>
     </assembly>
     <members>
+        <member name="T:Tournaments.Presentation.Controllers.ApiControllerBase">
+            <summary>
+            Serves as a base API controller providing shared error-handling logic for derived controllers.
+            Converts <see cref="T:Domain.Models.Responses.ApiBaseResponse"/> instances into standardized <see cref="T:Microsoft.AspNetCore.Mvc.ProblemDetails"/> results
+            to ensure consistent error response formatting across the API.
+            </summary>
+            <remarks>
+            Intended to be inherited by resource-specific API controllers (e.g., GameController, TournamentController).
+            Helps centralize response shaping and improves maintainability by encapsulating reusable behavior.
+            </remarks>
+        </member>
+        <member name="M:Tournaments.Presentation.Controllers.ApiControllerBase.CreateProblemResult(System.String,System.String,System.Int32,System.DateTime)">
+            <summary>
+            Constructs a <see cref="T:Microsoft.AspNetCore.Mvc.ProblemDetails"/> object with the given error metadata and a timestamp.
+            </summary>
+            <param name="title">A short, human-readable summary of the error.</param>
+            <param name="detail">A more detailed explanation of the error.</param>
+            <param name="statusCode">The HTTP status code associated with the error.</param>
+            <param name="timestamp">The timestamp indicating when the error occurred.</param>
+            <returns>A populated <see cref="T:Microsoft.AspNetCore.Mvc.ProblemDetails"/> instance.</returns>
+        </member>
+        <member name="M:Tournaments.Presentation.Controllers.ApiControllerBase.ProcessError(Domain.Models.Responses.ApiBaseResponse)">
+            <summary>
+            Converts an <see cref="T:Domain.Models.Responses.ApiBaseResponse"/> instance into a standardized <see cref="T:Microsoft.AspNetCore.Mvc.ProblemDetails"/> response,
+            mapping specific subclasses to appropriate HTTP status codes and messages.
+            </summary>
+            <param name="baseResponse">The response object containing error details.</param>
+            <returns>An <see cref="T:Microsoft.AspNetCore.Mvc.ObjectResult"/> containing a structured <see cref="T:Microsoft.AspNetCore.Mvc.ProblemDetails"/> payload.</returns>
+        </member>
         <member name="T:Tournaments.Presentation.Controllers.Games.GamesController">
             <summary>
             API controller for managing <see cref="T:Domain.Models.Entities.Game"/> entities associated with tournaments.
