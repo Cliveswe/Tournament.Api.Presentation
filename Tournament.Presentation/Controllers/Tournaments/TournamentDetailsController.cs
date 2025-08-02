@@ -75,22 +75,30 @@ namespace Tournaments.Presentation.Controllers.Tournaments
         public async Task<ActionResult<TournamentDto>> PatchTournament(int id, [FromBody] JsonPatchDocument<TournamentDto> patchDocument)
         {
             //Validation of Input Parameters
-            if(patchDocument is null)
-                return ProcessError(new ApiBadRequestResponse("Patch document cannot be null."));
+            if(patchDocument is null) {
 
-            if(id <= 0)
+                return ProcessError(new ApiBadRequestResponse("Patch document cannot be null."));
+            }
+
+            if(id <= 0) {
+
                 return InvalidId(id, "PATCH");
+            }
 
             // Check if tournament exists
             ApiBaseResponse? tournamentExists = await serviceManager.TournamentService.GetByIdAsync(id, trackChanges: true);
-            if(!tournamentExists.Success)
+
+            if(!tournamentExists.Success) {
+
                 return ProcessError(tournamentExists);
+            }
 
             //PATCH Document and Validation
             // Apply the patch to the DTO
             patchDocument.ApplyTo(tournamentExists.GetOkResult<TournamentDto>(), ModelState);
             // Validate patched DTO
             if(!ModelState.IsValid) {
+
                 return UnprocessableEntity(ModelState);
             }
 
@@ -147,6 +155,7 @@ namespace Tournaments.Presentation.Controllers.Tournaments
                 .ExistsAsync(tournamentDetailsCreateDto.Title, tournamentDetailsCreateDto.StartDate);
 
             if(tournamentExists.Success) {
+
                 return ProcessError(new ApiAlreadyExistsResponse($"A tournament with title {tournamentDetailsCreateDto.Title} already exists."));
             }
 
@@ -155,8 +164,10 @@ namespace Tournaments.Presentation.Controllers.Tournaments
                 .TournamentService
                 .CreateAsync(tournamentDetailsCreateDto);
 
-            if(tournamentDto is null || id <= 0)
+            if(tournamentDto is null || id <= 0) {
+
                 return ProcessError(new ApiSaveFailedResponse("Could not save the newly created tournament."));
+            }
 
             // Return 201 Created with the route to access the new resource.
             // This follows REST conventions by providing a location header pointing to the new resource.
@@ -172,6 +183,7 @@ namespace Tournaments.Presentation.Controllers.Tournaments
         {
             // Validate the ID parameter
             if(id <= 0) {
+
                 return InvalidId(id, "DELETE");
             }
 
