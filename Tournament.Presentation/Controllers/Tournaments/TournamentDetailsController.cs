@@ -62,13 +62,9 @@ namespace Tournaments.Presentation.Controllers.Tournaments
                 .GetByIdAsync(id, includeGames);
 
             // Return 404 Not Found if the entity doesn't exist
-            if(!tournamentExists.Success) {
-                return ProcessError(new ApiNotFoundResponse($"Tournament with ID {id} was not found."));
-            }
-
             // Return the found entity with HTTP 200 OK + JSON by default.
             // ASP.NET Core automatically wraps it as Ok(tournamentDetails)
-            return tournamentExists.Success ? Ok(tournamentExists.GetOkResult<TournamentDto>()) : ProcessError(tournamentExists);
+            return HandleResponse<TournamentDto>(tournamentExists);
         }
 
         #endregion
@@ -101,7 +97,7 @@ namespace Tournaments.Presentation.Controllers.Tournaments
             // Call service to update entity from patched DTO
             ApiBaseResponse updated = await serviceManager.TournamentService.ApplyToAsync(id, tournamentExists.GetOkResult<TournamentDto>());
 
-            return updated.Success ? Ok(updated.GetOkResult<TournamentDto>()) : ProcessError(new ApiNoChangesMadeResponse("An error occurred while updating the tournament."));
+            return HandleResponse<TournamentDto>(updated);
         }
 
         #endregion
@@ -117,7 +113,6 @@ namespace Tournaments.Presentation.Controllers.Tournaments
         public async Task<ActionResult> PutTournamentDetails(int id, [FromBody] TournamentUpdateDto tournamentUpdateDto)
         {
 
-
             // If the tournament does not exist.
             ApiBaseResponse entityExists = await serviceManager.TournamentService.ExistsAsync(id);
             if(!entityExists.Success) {
@@ -127,14 +122,10 @@ namespace Tournaments.Presentation.Controllers.Tournaments
 
             // If the update was not successful.
             ApiBaseResponse updateResponse = await serviceManager.TournamentService.UpdateAsync(id, tournamentUpdateDto);
-            if(!updateResponse.Success) {
-                // Return 404 Not Found if the tournament with the specified ID does not exist.
-                //new ApiTournamentNotFoundResponse($"Tournament with ID {id} was not found.")
-                return ProcessError(updateResponse);
-            }
 
+            // Return 404 Not Found if the tournament with the specified ID does not exist.
             // The update was successful; return HTTP 204 No Content as per REST convention
-            return Ok(updateResponse); // returns ApiOkResponse<TournamentDto>
+            return HandleResponse(updateResponse);
 
         }
 
