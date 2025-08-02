@@ -99,7 +99,7 @@ public class ApiControllerBase : ControllerBase
     //Use this when you expect a typed result back from the service (like a DTO or collection of DTOs).
     protected ActionResult<T> HandleResponse<T>(ApiBaseResponse response) =>
         response.Success
-        ? Ok(response.GetOkResult<T>())// Return the deleted object wrapped in ApiOkResponse
+        ? Ok(response.GetOkResult<T>()) // Return the typed success result (e.g., a DTO or collection)
         : ProcessError(response);// If delete was not successful
 
     //Use this when you're not expecting a typed DTO, but just want to return a general Ok(...) or
