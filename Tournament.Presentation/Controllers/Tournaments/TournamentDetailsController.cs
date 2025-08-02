@@ -54,7 +54,8 @@ namespace Tournaments.Presentation.Controllers.Tournaments
             if(id <= 0) {
                 // If the ID is invalid, return 400 Bad Request with an error message.
                 //return BadRequest($"Invalid tournament ID {id} specified.");
-                return ProcessError(new ApiBadRequestResponse($"Invalid tournament ID {id} specified."));
+                //return ProcessError(new ApiBadRequestResponse($"Invalid tournament ID {id} specified."));
+                return InvalidId(id, "Get.");
             }
 
             // Retrieve the tournament details by ID using the service manager
@@ -200,6 +201,10 @@ namespace Tournaments.Presentation.Controllers.Tournaments
         }
 
         #endregion
+
+
+        private ActionResult InvalidId(int id, string operation) =>
+            ProcessError(new ApiBadRequestResponse($"Invalid tournament ID {id} specified for {operation}."));
 
     }
 }
