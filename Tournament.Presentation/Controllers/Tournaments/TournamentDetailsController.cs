@@ -53,8 +53,6 @@ namespace Tournaments.Presentation.Controllers.Tournaments
         {
             if(id <= 0) {
                 // If the ID is invalid, return 400 Bad Request with an error message.
-                //return BadRequest($"Invalid tournament ID {id} specified.");
-                //return ProcessError(new ApiBadRequestResponse($"Invalid tournament ID {id} specified."));
                 return InvalidId(id, "Get.");
             }
 
@@ -70,7 +68,6 @@ namespace Tournaments.Presentation.Controllers.Tournaments
 
             // Return the found entity with HTTP 200 OK + JSON by default.
             // ASP.NET Core automatically wraps it as Ok(tournamentDetails)
-            //return Ok(tournamentDto);
             return tournamentExists.Success ? Ok(tournamentExists.GetOkResult<TournamentDto>()) : ProcessError(tournamentExists);
         }
 
