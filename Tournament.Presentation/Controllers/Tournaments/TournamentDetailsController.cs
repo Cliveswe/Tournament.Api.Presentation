@@ -52,6 +52,7 @@ namespace Tournaments.Presentation.Controllers.Tournaments
             return Ok(tournamentResponse.GetOkResult<IEnumerable<TournamentDto>>());
         }
 
+
         [HttpGet("{id}")]
         [ProducesResponseType(typeof(TournamentDto), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiBadRequestResponse), StatusCodes.Status400BadRequest)]
