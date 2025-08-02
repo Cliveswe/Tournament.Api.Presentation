@@ -83,7 +83,7 @@ namespace Tournaments.Presentation.Controllers.Tournaments
                 return ProcessError(new ApiBadRequestResponse("Patch document cannot be null."));
 
             if(id <= 0)
-                return ProcessError(new ApiBadRequestResponse($"Invalid tournament ID {id} specified for patching."));
+                return InvalidId(id, "PATCH");
 
             // Check if tournament exists
             ApiBaseResponse? tournamentExists = await serviceManager.TournamentService.GetByIdAsync(id, trackChanges: true);
@@ -181,19 +181,14 @@ namespace Tournaments.Presentation.Controllers.Tournaments
         {
             // Validate the ID parameter
             if(id <= 0) {
-                return ProcessError(new ApiBadRequestResponse($"Invalid {id} specified for deletion."));
+                return InvalidId(id, "DELETE");
             }
 
             // Attempt to remove the entity from the repository.
             ApiBaseResponse deleteResponse = await serviceManager.TournamentService.RemoveAsync(id);
 
-            // If the removal was not successful
-            if(!deleteResponse.Success) {
-                return ProcessError(deleteResponse);
-            }
-
             // Return the deleted object wrapped in ApiOkResponse
-            return Ok(deleteResponse);
+            return HandleResponse(deleteResponse);
 
         }
 
@@ -202,6 +197,19 @@ namespace Tournaments.Presentation.Controllers.Tournaments
 
         private ActionResult InvalidId(int id, string operation) =>
             ProcessError(new ApiBadRequestResponse($"Invalid tournament ID {id} specified for {operation}."));
+
+        //Use this when you expect a typed result back from the service (like a DTO or collection of DTOs).
+        private ActionResult<T> HandleResponse<T>(ApiBaseResponse response) =>
+            response.Success
+            ? Ok(response.GetOkResult<T>())// Return the deleted object wrapped in ApiOkResponse
+            : ProcessError(response);// If delete was not successful
+
+        //Use this when you're not expecting a typed DTO, but just want to return a general Ok(...) or
+        //handle errors. This is common in PUT, DELETE, etc., where success might just mean an operation completed.
+        private ActionResult HandleResponse(ApiBaseResponse response) =>
+            response.Success
+            ? Ok(response) // Return the deleted object wrapped in ApiOkResponse
+            : ProcessError(response);// If delete was not successful
 
     }
 }
