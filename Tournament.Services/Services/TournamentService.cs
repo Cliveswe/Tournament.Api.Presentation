@@ -200,18 +200,25 @@ public class TournamentService(IMapper mapper, IUnitOfWork unitOfWork) : ITourna
     /// - <c>id</c>: The ID of the newly created tournament.
     /// - <c>tournamentDto</c>: The mapped DTO representing the created tournament.
     /// </returns>
-    public async Task<(int id, TournamentDto tournamentDto)> CreateAsync(TournamentDetailsCreateDto tournamentDetailsCreateDto)
+    public async Task<(int id, ApiBaseResponse response)> CreateAsync(TournamentDetailsCreateDto tournamentDetailsCreateDto)
     {
         // Creates a new tournament and returns its ID and DTO.
 
         // Map the DTO to the TournamentDetails entity.
         TournamentDetails tournamentDetails = mapper.Map<TournamentDetails>(tournamentDetailsCreateDto);
+
         // Add the new TournamentDetails entity to the repository
         unitOfWork.TournamentDetailsRepository.Add(tournamentDetails);
+
         // Persist the changes to the database
         await unitOfWork.CompleteAsync();
+
         // Return the ID of the newly created tournament and the mapped DTO as a tuple.
-        return (tournamentDetails.Id, mapper.Map<TournamentDto>(tournamentDetails));
+        var tournamentDto = mapper.Map<TournamentDto>(tournamentDetails);
+        // Create response object
+        var response = new ApiOkResponse<TournamentDto>(tournamentDto, "Tournament successfully created.");
+
+        return (tournamentDetails.Id, response);
 
     }
 

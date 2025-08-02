@@ -59,7 +59,7 @@ public interface ITournamentService
     /// - <c>id</c>: The ID of the newly created tournament.
     /// - <c>tournamentDto</c>: The mapped DTO representing the created tournament.
     /// </returns>
-    Task<(int id, TournamentDto tournamentDto)> CreateAsync(TournamentDetailsCreateDto tournamentDetailsCreateDto);
+    Task<(int id, ApiBaseResponse response)> CreateAsync(TournamentDetailsCreateDto tournamentDetailsCreateDto);
 
     /// <summary>
     /// Applies partial updates to an existing tournament entity using a provided DTO.
