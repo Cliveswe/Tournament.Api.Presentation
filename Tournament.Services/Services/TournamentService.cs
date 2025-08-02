@@ -12,34 +12,42 @@ namespace Tournaments.Services.Services;
 public class TournamentService(IMapper mapper, IUnitOfWork unitOfWork) : ITournamentService
 {
     #region GET Tournament details
+    // Methods for retrieving tournament information, including list queries and individual fetches.
 
     public async Task<(ApiBaseResponse tournamentDto, MetaData metaData)> GetAllAsync(TournamentRequestParameters requestParameters, bool trackChanges = false)
     {
+        // Retrieves a paginated list of tournaments based on the given parameters.
+        // Adjusts page number if it exceeds the total available pages.
+
+        // Clamp request parameters to valid ranges
         TournamentRequestParameters clampedParameters =  ServiceManager.ClampRequestParameters(requestParameters);
 
         var pagedList = await unitOfWork
             .TournamentDetailsRepository
             .GetAllAsync(requestParameters, trackChanges);
 
-        // Clamp PageNumber if it exceeds total pages
-        if(pagedList.MetaData.TotalPages > 0 && clampedParameters.PageNumber > pagedList.MetaData.TotalPages) {
+        // If requested page number exceeds total pages, clamp and fetch again
+        if(pagedList.MetaData.TotalPages > 0
+            && clampedParameters.PageNumber > pagedList.MetaData.TotalPages) {
 
             clampedParameters.PageNumber = pagedList.MetaData.TotalPages;
 
             // Fetch again with corrected PageNumber
             pagedList = await unitOfWork
-           .TournamentDetailsRepository
-           .GetAllAsync(requestParameters, trackChanges);
+                .TournamentDetailsRepository
+                .GetAllAsync(clampedParameters, trackChanges);
         }
 
         var tournamentDtos = mapper.Map<IEnumerable<TournamentDto>>(pagedList.Items);
 
-        //return (tournamentDtos, pagedList.MetaData);
-        return tournamentDtos.Any() ? (new ApiOkResponse<IEnumerable<TournamentDto>>(tournamentDtos), pagedList.MetaData) : (new ApiTournamentNotFoundResponse("No tournaments found."), pagedList.MetaData);
+        return tournamentDtos.Any()
+            ? (new ApiOkResponse<IEnumerable<TournamentDto>>(tournamentDtos), pagedList.MetaData)
+            : (new ApiTournamentNotFoundResponse("No tournaments found."), pagedList.MetaData);
     }
 
     public async Task<ApiBaseResponse> GetByIdAsync(int id, bool trackChanges = false)
     {
+        // Fetches a tournament by its unique ID.
         TournamentDetails? tournamentDetails = await unitOfWork
             .TournamentDetailsRepository
             .GetAsync(id, trackChanges);
@@ -54,9 +62,12 @@ public class TournamentService(IMapper mapper, IUnitOfWork unitOfWork) : ITourna
     #endregion
 
     #region PATCH Tournament details
+    // Methods for partially updating tournament information using DTOs.
 
     public async Task<ApiBaseResponse> ApplyToAsync(int id, TournamentDto tournamentUpdateDto)
     {
+        // Applies partial updates to an existing tournament entity.
+
         // Retrieve the existing tournament details.
         TournamentDetails? existingEntity = await unitOfWork.TournamentDetailsRepository.GetAsync(id, trackChanges: true);
         if(existingEntity is null) {
@@ -84,9 +95,12 @@ public class TournamentService(IMapper mapper, IUnitOfWork unitOfWork) : ITourna
     #endregion
 
     #region PUT Tournament details
+    // Methods for full updates to tournament data.
 
     public async Task<ApiBaseResponse> UpdateAsync(int id, TournamentUpdateDto tournamentUpdateDto)
     {
+        // Performs a full update of a tournament's details.
+
         // Attempt to retrieve the tournament details by ID.
         TournamentDetails? tournamentDetails = await unitOfWork.TournamentDetailsRepository.GetAsync(id);
 
@@ -111,9 +125,12 @@ public class TournamentService(IMapper mapper, IUnitOfWork unitOfWork) : ITourna
     #endregion
 
     #region POST Tournament details
+    // Methods to create new tournament entries.
 
     public async Task<(int id, TournamentDto tournamentDto)> CreateAsync(TournamentDetailsCreateDto tournamentDetailsCreateDto)
     {
+        // Creates a new tournament and returns its ID and DTO.
+
         // Map the DTO to the TournamentDetails entity.
         TournamentDetails tournamentDetails = mapper.Map<TournamentDetails>(tournamentDetailsCreateDto);
         // Add the new TournamentDetails entity to the repository
@@ -128,9 +145,12 @@ public class TournamentService(IMapper mapper, IUnitOfWork unitOfWork) : ITourna
     #endregion
 
     #region DELETE Tournament details
+    // Methods to delete tournaments, ensuring no related games exist.
 
     public async Task<ApiBaseResponse> RemoveAsync(int id)
     {
+        // Removes a tournament if no games are associated.
+
         // Attempt to retrieve the tournament details by ID.
         TournamentDetails? tournamentDetails = await unitOfWork.TournamentDetailsRepository.GetAsync(id);
 
@@ -155,18 +175,29 @@ public class TournamentService(IMapper mapper, IUnitOfWork unitOfWork) : ITourna
     #endregion
 
     #region Exists Tournament details
+    // Methods to verify existence of tournaments by ID or by title and start date.
 
     public async Task<ApiBaseResponse> ExistsAsync(string title, DateTime startDate)
     {
+        // Checks existence of a tournament by title and start date.
+
         bool entityExists = await unitOfWork.TournamentDetailsRepository
             .ExistsByTitleAndStartDateAsync(title, startDate);
-        return entityExists ? new ApiOkResponse<bool>(entityExists) : new ApiNotFoundResponse($"Tournament {title} with start date {startDate} does not exists.");
+
+        return entityExists
+            ? new ApiOkResponse<bool>(entityExists)
+            : new ApiNotFoundResponse($"Tournament {title} with start date {startDate} does not exists.");
     }
 
     public async Task<ApiBaseResponse> ExistsAsync(int id)
     {
+        // Checks existence of a tournament by its ID.
+
         bool entityExists = await unitOfWork.TournamentDetailsRepository.AnyAsync(id);
-        return entityExists ? new ApiOkResponse<bool>(entityExists) : new ApiNotFoundResponse("Tournament does not exists.");
+
+        return entityExists
+            ? new ApiOkResponse<bool>(entityExists)
+            : new ApiNotFoundResponse("Tournament does not exists.");
     }
 
     #endregion
