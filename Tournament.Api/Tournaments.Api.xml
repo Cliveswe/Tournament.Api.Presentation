@@ -4,6 +4,47 @@
         <name>Tournaments.Api</name>
     </assembly>
     <members>
+        <member name="T:Tournaments.Api.Extensions.ApplicationBuilderExtensions">
+            <summary>
+            Contains extension methods for the <see cref="T:Microsoft.AspNetCore.Builder.IApplicationBuilder"/> interface,
+            including methods to seed initial data into the database.
+            </summary>
+        </member>
+        <member name="M:Tournaments.Api.Extensions.ApplicationBuilderExtensions.SeedDataAsync(Microsoft.AspNetCore.Builder.IApplicationBuilder)">
+            <summary>
+            Runs asynchronous database seed operations during application startup.
+            </summary>
+            <param name="builder">The application builder instance.</param>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the asynchronous seed operation.</returns>
+        </member>
+        <member name="T:Tournaments.Api.Extensions.ExceptionMiddleware">
+            <summary>
+            Provides extension methods to configure global exception handling middleware
+            for the web application pipeline.
+            </summary>
+        </member>
+        <member name="M:Tournaments.Api.Extensions.ExceptionMiddleware.ConfigureExceptionHandler(Microsoft.AspNetCore.Builder.WebApplication)">
+            <summary>
+            Configures the global exception handler middleware to catch unhandled exceptions,
+            map known exceptions to appropriate HTTP status codes, and return
+            ProblemDetails-formatted JSON responses.
+            </summary>
+            <param name="app">The <see cref="T:Microsoft.AspNetCore.Builder.WebApplication"/> instance to configure.</param>
+        </member>
+        <member name="M:Tournaments.Api.Extensions.ExceptionMiddleware.CreateProblemDetails(Microsoft.AspNetCore.Http.HttpContext,System.Exception,Microsoft.AspNetCore.Mvc.Infrastructure.ProblemDetailsFactory,Microsoft.AspNetCore.Builder.WebApplication)">
+            <summary>
+            Creates a <see cref="T:Microsoft.AspNetCore.Mvc.ProblemDetails"/> instance based on the exception type,
+            setting the HTTP status code, title, detail message, and request path.
+            Known exceptions like <see cref="T:Domain.Models.Exceptions.TournamentNotFoundException"/> return 404 responses.
+            Unhandled exceptions return a generic 500 response with optional detailed messages
+            in development environments.
+            </summary>
+            <param name="context">The current HTTP context.</param>
+            <param name="error">The caught exception.</param>
+            <param name="problemDetailsFactory">Factory to create ProblemDetails instances.</param>
+            <param name="app">The <see cref="T:Microsoft.AspNetCore.Builder.WebApplication"/> for environment info.</param>
+            <returns>A configured <see cref="T:Microsoft.AspNetCore.Mvc.ProblemDetails"/> instance for the response.</returns>
+        </member>
         <member name="T:Tournaments.Api.Extensions.ServiceExtensions">
             <summary>
             Contains extension methods for configuring repository services and enabling
