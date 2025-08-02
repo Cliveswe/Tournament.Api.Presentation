@@ -37,6 +37,7 @@ namespace Tournaments.Services.Services;
 /// </remarks>
 public class GameService(IMapper mapper, IUnitOfWork unitOfWork) : IGameService
 {
+    #region properties
 
     /// <summary>
     /// Maximum number of games allowed inside a single tournament.
@@ -44,6 +45,10 @@ public class GameService(IMapper mapper, IUnitOfWork unitOfWork) : IGameService
     /// <see cref="ApiMaxGameLimitReachedResponse"/>.
     /// </summary>
     public int MaxNumberOfGames { get; init; } = 10;
+
+    #endregion
+
+    #region GET Games
 
     /// <summary>
     /// Retrieves a paginated list of games associated with a specific tournament,
@@ -135,6 +140,10 @@ public class GameService(IMapper mapper, IUnitOfWork unitOfWork) : IGameService
         return new ApiOkResponse<GameDto>(mapper.Map<GameDto>(gameExists));
     }
 
+    #endregion
+
+    #region Delete Game
+
     /// <summary>
     /// Removes a game from the specified tournament by its ID.
     /// </summary>
@@ -167,19 +176,9 @@ public class GameService(IMapper mapper, IUnitOfWork unitOfWork) : IGameService
         return new ApiOkResponse<GameDto>(mapper.Map<GameDto>(game));
     }
 
-    /// <summary>
-    /// Checks if a game with the specified ID exists in the repository.
-    /// </summary>
-    /// <param name="id">The ID of the game to check for existence.</param>
-    /// <returns>
-    /// An <see cref="ApiOkResponse{bool}"/> with value true if the game exists; 
-    /// otherwise, an <see cref="ApiNotFoundResponse"/> indicating the game was not found.
-    /// </returns>
-    public async Task<ApiBaseResponse> ExistsAsync(int id)
-    {
-        bool entityExists = await unitOfWork.GameRepository.AnyAsync(id);
-        return entityExists ? new ApiOkResponse<bool>(entityExists) : new ApiNotFoundResponse("Game does not exists.");
-    }
+    #endregion
+
+    #region POST Game
 
     /// <summary>
     /// Adds a new game to the specified tournament if it doesn't already exist and the game limit hasn't been exceeded.
@@ -236,6 +235,10 @@ public class GameService(IMapper mapper, IUnitOfWork unitOfWork) : IGameService
         return new ApiOkResponse<GameDto>(mapper.Map<GameDto>(gameEntity));
     }
 
+    #endregion
+
+    #region PUT Game
+
     /// <summary>
     /// Updates an existing game in a tournament using the provided title and update data.
     /// </summary>
@@ -270,6 +273,10 @@ public class GameService(IMapper mapper, IUnitOfWork unitOfWork) : IGameService
         return success != 0 ? new ApiOkResponse<GameDto>(mapper.Map<GameDto>(gameEntity)) : new ApiNoChangesMadeResponse($"The game {title} was not updated.");
 
     }
+
+    #endregion
+
+    #region PATCH Game
 
     /// <summary>
     /// Applies updates from a <see cref="GameDto"/> to an existing game entity identified by its ID,
@@ -322,4 +329,25 @@ public class GameService(IMapper mapper, IUnitOfWork unitOfWork) : IGameService
 
         return new ApiOkResponse<GameDto>(updateDto);
     }
+
+    #endregion
+
+    #region Exists Game
+
+    /// <summary>
+    /// Checks if a game with the specified ID exists in the repository.
+    /// </summary>
+    /// <param name="id">The ID of the game to check for existence.</param>
+    /// <returns>
+    /// An <see cref="ApiOkResponse{bool}"/> with value true if the game exists; 
+    /// otherwise, an <see cref="ApiNotFoundResponse"/> indicating the game was not found.
+    /// </returns>
+    public async Task<ApiBaseResponse> ExistsAsync(int id)
+    {
+        bool entityExists = await unitOfWork.GameRepository.AnyAsync(id);
+        return entityExists ? new ApiOkResponse<bool>(entityExists) : new ApiNotFoundResponse("Game does not exists.");
+    }
+
+    #endregion
+
 }

@@ -11,9 +11,8 @@ using Tournaments.Shared.Request;
 namespace Tournaments.Services.Services;
 public class TournamentService(IMapper mapper, IUnitOfWork unitOfWork) : ITournamentService
 {
-    #region Get Tournament details
+    #region GET Tournament details
 
-    //public async Task<IEnumerable<TournamentDto>> GetAllAsync(TournamentRequestParameters requestParameters, bool trackChanges = false)
     public async Task<(ApiBaseResponse tournamentDto, MetaData metaData)> GetAllAsync(TournamentRequestParameters requestParameters, bool trackChanges = false)
     {
         TournamentRequestParameters clampedParameters =  ServiceManager.ClampRequestParameters(requestParameters);
