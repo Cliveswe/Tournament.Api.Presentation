@@ -52,7 +52,7 @@ namespace Tournaments.Presentation.Controllers.Tournaments
         public async Task<ActionResult<TournamentDto>> GetTournamentDetails(int id, [FromQuery] bool includeGames = false)
         {
             if(id <= 0) {
-                // If the ID is invalid, return 400 Bad Request with an error message.
+                // ID is invalid, return 400 Bad Request with an error message.
                 return InvalidId(id, "Get.");
             }
 
@@ -76,12 +76,10 @@ namespace Tournaments.Presentation.Controllers.Tournaments
         {
             //Validation of Input Parameters
             if(patchDocument is null) {
-
                 return ProcessError(new ApiBadRequestResponse("Patch document cannot be null."));
             }
 
             if(id <= 0) {
-
                 return InvalidId(id, "PATCH");
             }
 
@@ -89,7 +87,6 @@ namespace Tournaments.Presentation.Controllers.Tournaments
             ApiBaseResponse? tournamentExists = await serviceManager.TournamentService.GetByIdAsync(id, trackChanges: true);
 
             if(!tournamentExists.Success) {
-
                 return ProcessError(tournamentExists);
             }
 
@@ -98,7 +95,6 @@ namespace Tournaments.Presentation.Controllers.Tournaments
             patchDocument.ApplyTo(tournamentExists.GetOkResult<TournamentDto>(), ModelState);
             // Validate patched DTO
             if(!ModelState.IsValid) {
-
                 return UnprocessableEntity(ModelState);
             }
 
@@ -155,7 +151,6 @@ namespace Tournaments.Presentation.Controllers.Tournaments
                 .ExistsAsync(tournamentDetailsCreateDto.Title, tournamentDetailsCreateDto.StartDate);
 
             if(tournamentExists.Success) {
-
                 return ProcessError(new ApiAlreadyExistsResponse($"A tournament with title {tournamentDetailsCreateDto.Title} already exists."));
             }
 
@@ -165,7 +160,6 @@ namespace Tournaments.Presentation.Controllers.Tournaments
                 .CreateAsync(tournamentDetailsCreateDto);
 
             if(tournamentDto is null || id <= 0) {
-
                 return ProcessError(new ApiSaveFailedResponse("Could not save the newly created tournament."));
             }
 
@@ -183,7 +177,6 @@ namespace Tournaments.Presentation.Controllers.Tournaments
         {
             // Validate the ID parameter
             if(id <= 0) {
-
                 return InvalidId(id, "DELETE");
             }
 
@@ -201,18 +194,7 @@ namespace Tournaments.Presentation.Controllers.Tournaments
         private ActionResult InvalidId(int id, string operation) =>
             ProcessError(new ApiBadRequestResponse($"Invalid tournament ID {id} specified for {operation}."));
 
-        //Use this when you expect a typed result back from the service (like a DTO or collection of DTOs).
-        private ActionResult<T> HandleResponse<T>(ApiBaseResponse response) =>
-            response.Success
-            ? Ok(response.GetOkResult<T>())// Return the deleted object wrapped in ApiOkResponse
-            : ProcessError(response);// If delete was not successful
 
-        //Use this when you're not expecting a typed DTO, but just want to return a general Ok(...) or
-        //handle errors. This is common in PUT, DELETE, etc., where success might just mean an operation completed.
-        private ActionResult HandleResponse(ApiBaseResponse response) =>
-            response.Success
-            ? Ok(response) // Return the deleted object wrapped in ApiOkResponse
-            : ProcessError(response);// If delete was not successful
 
     }
 }

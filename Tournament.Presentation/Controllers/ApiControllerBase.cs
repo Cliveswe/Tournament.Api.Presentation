@@ -96,5 +96,16 @@ public class ApiControllerBase : ControllerBase
             StatusCode = problem.Status
         };
     }
+    //Use this when you expect a typed result back from the service (like a DTO or collection of DTOs).
+    protected ActionResult<T> HandleResponse<T>(ApiBaseResponse response) =>
+        response.Success
+        ? Ok(response.GetOkResult<T>())// Return the deleted object wrapped in ApiOkResponse
+        : ProcessError(response);// If delete was not successful
 
+    //Use this when you're not expecting a typed DTO, but just want to return a general Ok(...) or
+    //handle errors. This is common in PUT, DELETE, etc., where success might just mean an operation completed.
+    protected ActionResult HandleResponse(ApiBaseResponse response) =>
+        response.Success
+        ? Ok(response) // Return the deleted object wrapped in ApiOkResponse
+        : ProcessError(response);// If delete was not successful
 }
