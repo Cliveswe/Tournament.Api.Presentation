@@ -73,18 +73,149 @@
         </member>
         <member name="M:Tournaments.Presentation.Controllers.Games.GamesController.GetTournamentGames(Tournaments.Shared.Request.TournamentRequestParameters,System.Int32)">
             <summary>
-            Retrieves all games for a specific tournament.
+            Retrieves all games for a specified tournament with optional filtering and pagination.
             </summary>
-            <param name="requestParameters">Pagination and filtering parameters for the request.</param>
-            <param name="tournamentId">The ID of the tournament whose games are to be retrieved.</param>
+            <param name="requestParameters">Query parameters for paging, sorting, etc.</param>
+            <param name="tournamentId">The ID of the tournament to retrieve games from.</param>
             <returns>
-            A 200 OK response containing a list of games for the specified tournament, along with pagination metadata in the <c>X-Pagination</c> header.
+            A list of <see cref="T:Tournaments.Shared.Dto.GameDto"/> wrapped in a 200 OK response if found.
             Returns 400 Bad Request if the tournament ID is invalid, or 404 Not Found if the tournament does not exist.
             </returns>
-            <remarks>
-            Sample request:
-            GET /api/tournamentDetails/{tournamentId}/
-            </remarks>
+        </member>
+        <member name="M:Tournaments.Presentation.Controllers.Games.GamesController.GetGameById(System.Int32,System.Int32)">
+            <summary>
+            Retrieves a specific game by its ID within a given tournament.
+            </summary>
+            <param name="tournamentId">The ID of the tournament containing the game.</param>
+            <param name="id">The ID of the game to retrieve.</param>
+            <returns>
+            Returns a <see cref="T:Tournaments.Shared.Dto.GameDto"/> with HTTP 200 OK if found; otherwise, returns an appropriate error response:
+            400 Bad Request if input IDs are invalid,
+            404 Not Found if the tournament or game does not exist.
+            </returns>
+        </member>
+        <member name="M:Tournaments.Presentation.Controllers.Games.GamesController.GetGameByTitle(System.Int32,System.String)">
+            <summary>
+            Retrieves a game by its title for the specified tournament.
+            </summary>
+            <param name="tournamentId">The ID of the tournament containing the game.</param>
+            <param name="title">The title of the game to retrieve.</param>
+            <returns>
+            A <see cref="T:Tournaments.Shared.Dto.GameDto"/> object if found, otherwise a relevant error response.
+            </returns>
+        </member>
+        <member name="M:Tournaments.Presentation.Controllers.Games.GamesController.PutGame(System.Int32,System.String,Tournaments.Shared.Dto.GameUpdateDto)">
+            <summary>
+            Updates an existing game identified by title within a specific tournament.
+            </summary>
+            <param name="tournamentId">The ID of the tournament that contains the game.</param>
+            <param name="title">The title of the game to update.</param>
+            <param name="gameUpdateDto">The update payload for the game.</param>
+            <returns>
+            A success response with the updated <see cref="T:Tournaments.Shared.Dto.GameDto"/>, or an error response.
+            </returns>
+        </member>
+        <member name="M:Tournaments.Presentation.Controllers.Games.GamesController.PatchGame(System.Int32,System.Int32,Microsoft.AspNetCore.JsonPatch.JsonPatchDocument{Tournaments.Shared.Dto.GameDto})">
+            <summary>
+            Applies a JSON Patch to an existing game within a specified tournament.
+            </summary>
+            <param name="tournamentId">The ID of the tournament containing the game.</param>
+            <param name="id">The ID of the game to patch.</param>
+            <param name="patchDocument">The JSON Patch document with operations to apply.</param>
+            <returns>A response indicating the result of the patch operation.</returns>
+        </member>
+        <member name="M:Tournaments.Presentation.Controllers.Games.GamesController.PostGame(Tournaments.Shared.Dto.GameCreateDto,System.Int32)">
+            <summary>
+            Creates a new game within the specified tournament.
+            </summary>
+            <param name="gameCreateDto">The game details to create.</param>
+            <param name="tournamentId">The ID of the tournament where the game should be created.</param>
+            <returns>
+            Returns a <see cref="T:Tournaments.Shared.Dto.GameDto"/> representing the newly created game if successful.
+            Otherwise, returns appropriate error responses for invalid input, conflicts, or failures.
+            </returns>
+        </member>
+        <member name="M:Tournaments.Presentation.Controllers.Games.GamesController.DeleteGame(System.Int32,System.Int32)">
+            <summary>
+            Deletes a game by its ID from the specified tournament.
+            </summary>
+            <param name="id">The ID of the game to delete.</param>
+            <param name="tournamentId">The ID of the tournament the game belongs to.</param>
+            <returns>
+            Returns 200 OK with a confirmation message if the deletion is successful.
+            Returns 400 Bad Request if the IDs are invalid.
+            Returns 404 Not Found if the tournament or game is not found.
+            </returns>
+        </member>
+        <member name="M:Tournaments.Presentation.Controllers.Tournaments.TournamentDetailsController.GetTournamentDetails(Tournaments.Shared.Request.TournamentRequestParameters)">
+            <summary>
+            Retrieves a paginated list of tournament details based on the specified query parameters.
+            </summary>
+            <param name="requestParameters">Filtering, sorting, and pagination parameters for tournaments.</param>
+            <returns>An <see cref="T:Microsoft.AspNetCore.Mvc.ActionResult"/> containing a collection of <see cref="T:Tournaments.Shared.Dto.TournamentDto"/> objects
+            if successful, or an appropriate error response.</returns>
+            <response code="200">Returns the list of tournaments matching the criteria.</response>
+            <response code="404">No tournaments found matching the query parameters.</response>
+            <response code="500">Internal server error occurred while processing the request.</response>
+        </member>
+        <member name="M:Tournaments.Presentation.Controllers.Tournaments.TournamentDetailsController.GetTournamentDetails(System.Int32,System.Boolean)">
+            <summary>
+            Retrieves the details of a tournament by its ID.
+            </summary>
+            <param name="id">The unique identifier of the tournament to retrieve.</param>
+            <param name="includeGames">Optional query parameter to include related games in the response.</param>
+            <returns>
+            An <see cref="T:Microsoft.AspNetCore.Mvc.ActionResult"/> containing the <see cref="T:Tournaments.Shared.Dto.TournamentDto"/> if found,
+            or an error response indicating why the tournament could not be retrieved.
+            </returns>
+            <response code="200">Returns the tournament details.</response>
+            <response code="400">If the provided tournament ID is invalid.</response>
+            <response code="404">If the tournament with the specified ID is not found.</response>
+        </member>
+        <member name="M:Tournaments.Presentation.Controllers.Tournaments.TournamentDetailsController.PatchTournament(System.Int32,Microsoft.AspNetCore.JsonPatch.JsonPatchDocument{Tournaments.Shared.Dto.TournamentDto})">
+            <summary>
+            Applies a JSON Patch document to partially update an existing tournament.
+            </summary>
+            <param name="id">The ID of the tournament to update.</param>
+            <param name="patchDocument">The JSON Patch document containing the changes.</param>
+            <returns>
+            An <see cref="T:Microsoft.AspNetCore.Mvc.ActionResult"/> containing the updated <see cref="T:Tournaments.Shared.Dto.TournamentDto"/> if successful,
+            or an error response if the patch is invalid, the tournament is not found, or the update fails.
+            </returns>
+            <response code="200">Returns the updated tournament details.</response>
+            <response code="400">If the patch document is null or the ID is invalid.</response>
+            <response code="404">If the tournament with the specified ID is not found.</response>
+            <response code="422">If the patch document results in validation errors.</response>
+            <response code="500">If there is a failure saving the updated tournament.</response>
+        </member>
+        <member name="M:Tournaments.Presentation.Controllers.Tournaments.TournamentDetailsController.PutTournamentDetails(System.Int32,Tournaments.Shared.Dto.TournamentUpdateDto)">
+            <summary>
+            Updates the details of an existing tournament identified by its ID.
+            </summary>
+            <param name="id">The ID of the tournament to update.</param>
+            <param name="tournamentUpdateDto">The updated tournament data transfer object.</param>
+            <returns>
+            An <see cref="T:Microsoft.AspNetCore.Mvc.ActionResult"/> indicating the result of the update operation.
+            Returns the updated tournament details on success.
+            </returns>
+            <response code="200">The tournament was successfully updated and the updated data is returned.</response>
+            <response code="400">The request was invalid, such as invalid input data.</response>
+            <response code="404">The tournament with the specified ID was not found.</response>
+            <response code="422">No changes were made during the update.</response>
+            <response code="500">An error occurred while saving the updated tournament.</response>
+        </member>
+        <member name="M:Tournaments.Presentation.Controllers.Tournaments.TournamentDetailsController.PostTournamentDetails(Tournaments.Shared.Dto.TournamentDetailsCreateDto)">
+            <summary>
+            Creates a new tournament with the provided tournament details.
+            </summary>
+            <param name="tournamentDetailsCreateDto">The DTO containing details of the tournament to be created.</param>
+            <returns>
+            An <see cref="T:Microsoft.AspNetCore.Mvc.ActionResult`1"/> containing the created tournament if successful,
+            or an error response if creation fails or the tournament already exists.
+            </returns>
+            <response code="201">Returns the created tournament with a location header.</response>
+            <response code="409">If a tournament with the same title and start date already exists.</response>
+            <response code="500">If an error occurs while saving the tournament.</response>
         </member>
     </members>
 </doc>

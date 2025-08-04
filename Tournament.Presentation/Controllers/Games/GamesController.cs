@@ -8,6 +8,7 @@
 //          reliable and efficient data access management.
 // <author> [Clive Leddy] </author>
 // <created> [2025-06-28] </created>
+// <lastModified> [2025-08-04] </lastModified>
 // Notes: Implements RESTful endpoints with proper validation, concurrency control,
 //        appropriate status codes (200, 201, 204, 400, 404, 409, 500), and
 //        comprehensive error handling to ensure API robustness and data integrity.
@@ -42,24 +43,24 @@ namespace Tournaments.Presentation.Controllers.Games
     /// </remarks>
     [ApiController]
     [Route("api/tournamentDetails/{tournamentId}/games")]
+    [Produces("application/json")] // Ensures all responses are documented as JSON
     public class GamesController(IServiceManager serviceManager) : ApiControllerBase
     {
-        #region GET api/Games api/1/Games/
+        #region GET api/Games api/1/Games/ api/1/Games/21
 
         /// <summary>
-        /// Retrieves all games for a specific tournament.
+        /// Retrieves all games for a specified tournament with optional filtering and pagination.
         /// </summary>
-        /// <param name="requestParameters">Pagination and filtering parameters for the request.</param>
-        /// <param name="tournamentId">The ID of the tournament whose games are to be retrieved.</param>
+        /// <param name="requestParameters">Query parameters for paging, sorting, etc.</param>
+        /// <param name="tournamentId">The ID of the tournament to retrieve games from.</param>
         /// <returns>
-        /// A 200 OK response containing a list of games for the specified tournament, along with pagination metadata in the <c>X-Pagination</c> header.
+        /// A list of <see cref="GameDto"/> wrapped in a 200 OK response if found.
         /// Returns 400 Bad Request if the tournament ID is invalid, or 404 Not Found if the tournament does not exist.
         /// </returns>
-        /// <remarks>
-        /// Sample request:
-        /// GET /api/tournamentDetails/{tournamentId}/
-        /// </remarks>
         [HttpGet]
+        [ProducesResponseType(typeof(IEnumerable<GameDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiBadRequestResponse), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiNotFoundResponse), StatusCodes.Status404NotFound)]
         public async Task<ActionResult<IEnumerable<GameDto>>> GetTournamentGames([FromQuery] TournamentRequestParameters requestParameters, int tournamentId)
         {
 
@@ -93,8 +94,21 @@ namespace Tournaments.Presentation.Controllers.Games
             return Ok(gameResponse.GetOkResult<IEnumerable<GameDto>>());
         }
 
+        /// <summary>
+        /// Retrieves a specific game by its ID within a given tournament.
+        /// </summary>
+        /// <param name="tournamentId">The ID of the tournament containing the game.</param>
+        /// <param name="id">The ID of the game to retrieve.</param>
+        /// <returns>
+        /// Returns a <see cref="GameDto"/> with HTTP 200 OK if found; otherwise, returns an appropriate error response:
+        /// 400 Bad Request if input IDs are invalid,
+        /// 404 Not Found if the tournament or game does not exist.
+        /// </returns>
         // GET api/tournamentDetails/{tournamentId}/games/{id}
         [HttpGet("{id:int}")]
+        [ProducesResponseType(typeof(GameDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiBadRequestResponse), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiNotFoundResponse), StatusCodes.Status404NotFound)]
         public async Task<ActionResult<GameDto>> GetGameById(int tournamentId, int id)
         {
 
@@ -116,9 +130,19 @@ namespace Tournaments.Presentation.Controllers.Games
             return response.Success ? Ok(response.GetOkResult<GameDto>()) : ProcessError(response);//
         }
 
-
+        /// <summary>
+        /// Retrieves a game by its title for the specified tournament.
+        /// </summary>
+        /// <param name="tournamentId">The ID of the tournament containing the game.</param>
+        /// <param name="title">The title of the game to retrieve.</param>
+        /// <returns>
+        /// A <see cref="GameDto"/> object if found, otherwise a relevant error response.
+        /// </returns>
+        [HttpGet("title/{title}")]
+        [ProducesResponseType(typeof(GameDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiBadRequestResponse), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiGameNotFoundByTitleResponse), StatusCodes.Status404NotFound)]
         // GET api/tournamentDetails/{tournamentId}/games/byTitle/{title}
-        [HttpGet("byTitle/{title}")]
         public async Task<ActionResult<GameDto>> GetGameByTitle(int tournamentId, string title)
         {
             // Validation of input parameters
@@ -144,7 +168,24 @@ namespace Tournaments.Presentation.Controllers.Games
         #endregion
 
         #region PUT api/tournamentDetails/1/Games/5
+
+
+        /// <summary>
+        /// Updates an existing game identified by title within a specific tournament.
+        /// </summary>
+        /// <param name="tournamentId">The ID of the tournament that contains the game.</param>
+        /// <param name="title">The title of the game to update.</param>
+        /// <param name="gameUpdateDto">The update payload for the game.</param>
+        /// <returns>
+        /// A success response with the updated <see cref="GameDto"/>, or an error response.
+        /// </returns>
         [HttpPut]
+        [ProducesResponseType(typeof(GameDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiBadGamePatchDocumentResponse), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiGameNotFoundByTitleResponse), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ApiAlreadyExistsResponse), StatusCodes.Status409Conflict)]
+        [ProducesResponseType(typeof(ApiNoChangesMadeResponse), StatusCodes.Status422UnprocessableEntity)]
+        [Consumes("application/json-patch+json")]//Make sure your controller/method allows only application/json-patch+json to improve client request correctness.
         public async Task<ActionResult> PutGame(int tournamentId, [FromQuery] string title, [FromBody] GameUpdateDto gameUpdateDto)
         {
             // Validate the tournamentEntity ID from the route parameter.
@@ -170,8 +211,19 @@ namespace Tournaments.Presentation.Controllers.Games
 
         #region PATCH api/tournamentDetails/1/Games/5
 
-        [Consumes("application/json-patch+json")]//Make sure your controller/method allows only application/json-patch+json to improve client request correctness.
+        /// <summary>
+        /// Applies a JSON Patch to an existing game within a specified tournament.
+        /// </summary>
+        /// <param name="tournamentId">The ID of the tournament containing the game.</param>
+        /// <param name="id">The ID of the game to patch.</param>
+        /// <param name="patchDocument">The JSON Patch document with operations to apply.</param>
+        /// <returns>A response indicating the result of the patch operation.</returns>
         [HttpPatch("{id:int}")]
+        [ProducesResponseType(typeof(GameDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiBadGamePatchDocumentResponse), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiGameNotFoundByIdResponse), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ApiUnProcessableContentResponse), StatusCodes.Status422UnprocessableEntity)]
+        [Consumes("application/json-patch+json")]//Make sure your controller/method allows only application/json-patch+json to improve client request correctness.
         public async Task<ActionResult> PatchGame(int tournamentId, int id, [FromBody] JsonPatchDocument<GameDto> patchDocument)
         {
             //Early validation.
@@ -253,8 +305,22 @@ namespace Tournaments.Presentation.Controllers.Games
 
         #region POST api/tournamentDetails/1/Games
 
-        // POST: api/tournamentDetails/1/Games
+        /// <summary>
+        /// Creates a new game within the specified tournament.
+        /// </summary>
+        /// <param name="gameCreateDto">The game details to create.</param>
+        /// <param name="tournamentId">The ID of the tournament where the game should be created.</param>
+        /// <returns>
+        /// Returns a <see cref="GameDto"/> representing the newly created game if successful.
+        /// Otherwise, returns appropriate error responses for invalid input, conflicts, or failures.
+        /// </returns>
         [HttpPost]
+        [Consumes("application/json")]
+        [ProducesResponseType(typeof(GameDto), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ApiBadRequestResponse), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiNotFoundResponse), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ApiAlreadyExistsResponse), StatusCodes.Status409Conflict)]
+        [ProducesResponseType(typeof(ApiSaveFailedResponse), StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<GameDto>> PostGame([FromBody] GameCreateDto gameCreateDto, int tournamentId)
         {
             //Validate input Parameters
@@ -289,7 +355,22 @@ namespace Tournaments.Presentation.Controllers.Games
 
         #region DELETE api/tournamentDetails/1/Games/5
 
+        /// <summary>
+        /// Deletes a game by its ID from the specified tournament.
+        /// </summary>
+        /// <param name="id">The ID of the game to delete.</param>
+        /// <param name="tournamentId">The ID of the tournament the game belongs to.</param>
+        /// <returns>
+        /// Returns 200 OK with a confirmation message if the deletion is successful.
+        /// Returns 400 Bad Request if the IDs are invalid.
+        /// Returns 404 Not Found if the tournament or game is not found.
+        /// </returns>
         [HttpDelete("{id:int}")]
+        [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiBadRequestResponse), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiGameNotFoundByIdResponse), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ApiTournamentNotFoundResponse), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ApiSaveFailedResponse), StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<GameDto>> DeleteGame(int id, int tournamentId)
         {
 

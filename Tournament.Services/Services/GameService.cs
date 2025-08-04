@@ -6,9 +6,9 @@
 //          creation, retrieval, update, patch, and deletion – while enforcing
 //          domain rules (e.g., max-game limit) and returning rich
 //          <see cref="Domain.Models.Responses.ApiBaseResponse"/> results.
-// Author: [Clive Leddy]
-// Created: [2025-07-09]
-// Last Modified:  [2025-08-02]
+// <author> [Clive Leddy] </author>
+// <created> [2025-07-09] </created>
+// <lastModified> [2025-08-02] </lastModified>
 // Notes:  Uses AutoMapper for DTO↔entity mapping and the Unit-of-Work pattern
 //         for persistence. All public members are fully XML-documented for
 //         Swagger / IntelliSense.
