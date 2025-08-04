@@ -169,7 +169,6 @@ namespace Tournaments.Presentation.Controllers.Games
 
         #region PUT api/tournamentDetails/1/Games/5
 
-
         /// <summary>
         /// Updates an existing game identified by title within a specific tournament.
         /// </summary>
@@ -185,7 +184,7 @@ namespace Tournaments.Presentation.Controllers.Games
         [ProducesResponseType(typeof(ApiGameNotFoundByTitleResponse), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ApiAlreadyExistsResponse), StatusCodes.Status409Conflict)]
         [ProducesResponseType(typeof(ApiNoChangesMadeResponse), StatusCodes.Status422UnprocessableEntity)]
-        [Consumes("application/json-patch+json")]//Make sure your controller/method allows only application/json-patch+json to improve client request correctness.
+        [Consumes("application/json")] // PUT consumes normal JSON payloads
         public async Task<ActionResult> PutGame(int tournamentId, [FromQuery] string title, [FromBody] GameUpdateDto gameUpdateDto)
         {
             // Validate the tournamentEntity ID from the route parameter.
@@ -223,7 +222,7 @@ namespace Tournaments.Presentation.Controllers.Games
         [ProducesResponseType(typeof(ApiBadGamePatchDocumentResponse), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiGameNotFoundByIdResponse), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ApiUnProcessableContentResponse), StatusCodes.Status422UnprocessableEntity)]
-        [Consumes("application/json-patch+json")]//Make sure your controller/method allows only application/json-patch+json to improve client request correctness.
+        [Consumes("application/json-patch+json")] // PATCH consumes JSON Patch content type
         public async Task<ActionResult> PatchGame(int tournamentId, int id, [FromBody] JsonPatchDocument<GameDto> patchDocument)
         {
             //Early validation.
@@ -269,6 +268,14 @@ namespace Tournaments.Presentation.Controllers.Games
             return response.Success ? Ok(response.GetOkResult<GameDto>()) : ProcessError(response);
         }
 
+        /// <summary>
+        /// Clears the current <see cref="ModelState"/> and attempts to validate the patched <see cref="GameDto"/> object.
+        /// </summary>
+        /// <param name="dto">The patched <see cref="GameDto"/> instance to validate.</param>
+        /// <returns>
+        /// <c>true</c> if the patched model is valid according to the data annotations and validation rules;
+        /// otherwise, <c>false</c>.
+        /// </returns>
         private bool TryValidatePatchedGame(GameDto dto)
         {
             ModelState.Clear();
@@ -276,6 +283,16 @@ namespace Tournaments.Presentation.Controllers.Games
             return TryValidateModel(dto, prefix: string.Empty);
         }
 
+        /// <summary>
+        /// Validates the inputs for a JSON Patch request targeting a game within a tournament.
+        /// </summary>
+        /// <param name="tournamentId">The ID of the tournament that contains the game.</param>
+        /// <param name="id">The ID of the game to be patched.</param>
+        /// <param name="patchDocument">The JSON Patch document specifying the changes to apply.</param>
+        /// <returns>
+        /// Returns <see cref="ApiBadGamePatchDocumentResponse"/> if validation fails due to null patch document,
+        /// empty operations, or invalid IDs; otherwise, returns <c>null</c> to indicate valid input.
+        /// </returns>
         private ApiBaseResponse? ValidatePatchRequest(int tournamentId, int id, JsonPatchDocument<GameDto>? patchDocument)
         {
             if(patchDocument is null) {
@@ -321,6 +338,7 @@ namespace Tournaments.Presentation.Controllers.Games
         [ProducesResponseType(typeof(ApiNotFoundResponse), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ApiAlreadyExistsResponse), StatusCodes.Status409Conflict)]
         [ProducesResponseType(typeof(ApiSaveFailedResponse), StatusCodes.Status500InternalServerError)]
+        [Consumes("application/json")] // Correct MIME type for POSTing a DTO
         public async Task<ActionResult<GameDto>> PostGame([FromBody] GameCreateDto gameCreateDto, int tournamentId)
         {
             //Validate input Parameters

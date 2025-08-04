@@ -147,6 +147,44 @@
             Returns 404 Not Found if the tournament or game is not found.
             </returns>
         </member>
+        <member name="T:Tournaments.Presentation.Controllers.Tournaments.TournamentDetailsController">
+            <summary>
+            Handles HTTP API requests related to tournament details, including retrieval, creation,
+            updating, partial updates via JSON Patch, and deletion of tournament entities.
+            </summary>
+            <remarks>
+            This controller implements RESTful endpoints following standard HTTP semantics and status codes.
+            It uses dependency-injected services via <see cref="T:Service.Contracts.IServiceManager"/> to manage tournament operations,
+            applies DTO mapping, pagination metadata, custom error responses, and enforces JSON content-type constraints.
+            </remarks>
+            <response code="200">Successful request with data returned (GET, PUT, PATCH).</response>
+            <response code="201">Resource successfully created (POST).</response>
+            <response code="204">Resource successfully deleted (DELETE).</response>
+            <response code="400">Invalid input or malformed request.</response>
+            <response code="404">Requested tournament was not found.</response>
+            <response code="409">Conflict due to an existing tournament with similar data (POST).</response>
+            <response code="422">Non-processable request due to validation or lack of changes (PUT/PATCH).</response>
+            <response code="500">Internal server error occurred during processing.</response>
+        </member>
+        <member name="M:Tournaments.Presentation.Controllers.Tournaments.TournamentDetailsController.#ctor(Service.Contracts.IServiceManager)">
+            <summary>
+            Handles HTTP API requests related to tournament details, including retrieval, creation,
+            updating, partial updates via JSON Patch, and deletion of tournament entities.
+            </summary>
+            <remarks>
+            This controller implements RESTful endpoints following standard HTTP semantics and status codes.
+            It uses dependency-injected services via <see cref="T:Service.Contracts.IServiceManager"/> to manage tournament operations,
+            applies DTO mapping, pagination metadata, custom error responses, and enforces JSON content-type constraints.
+            </remarks>
+            <response code="200">Successful request with data returned (GET, PUT, PATCH).</response>
+            <response code="201">Resource successfully created (POST).</response>
+            <response code="204">Resource successfully deleted (DELETE).</response>
+            <response code="400">Invalid input or malformed request.</response>
+            <response code="404">Requested tournament was not found.</response>
+            <response code="409">Conflict due to an existing tournament with similar data (POST).</response>
+            <response code="422">Non-processable request due to validation or lack of changes (PUT/PATCH).</response>
+            <response code="500">Internal server error occurred during processing.</response>
+        </member>
         <member name="M:Tournaments.Presentation.Controllers.Tournaments.TournamentDetailsController.GetTournamentDetails(Tournaments.Shared.Request.TournamentRequestParameters)">
             <summary>
             Retrieves a paginated list of tournament details based on the specified query parameters.
@@ -216,6 +254,30 @@
             <response code="201">Returns the created tournament with a location header.</response>
             <response code="409">If a tournament with the same title and start date already exists.</response>
             <response code="500">If an error occurs while saving the tournament.</response>
+        </member>
+        <member name="M:Tournaments.Presentation.Controllers.Tournaments.TournamentDetailsController.DeleteTournamentDetails(System.Int32)">
+            <summary>
+            Deletes an existing tournament identified by its ID.
+            </summary>
+            <param name="id">The ID of the tournament to delete.</param>
+            <returns>
+            An <see cref="T:Microsoft.AspNetCore.Mvc.ActionResult"/> indicating the result of the delete operation.
+            Returns <c>204 No Content</c> if the tournament is successfully deleted.
+            </returns>
+            <response code="204">The tournament was successfully deleted.</response>
+            <response code="400">The ID provided is invalid.</response>
+            <response code="404">The tournament with the specified ID was not found.</response>
+            <response code="500">An error occurred while deleting the tournament.</response>
+        </member>
+        <member name="M:Tournaments.Presentation.Controllers.Tournaments.TournamentDetailsController.InvalidId(System.Int32,System.String)">
+            <summary>
+            Generates a standardized <see cref="T:Domain.Models.Responses.ApiBadRequestResponse"/> for invalid tournament ID inputs.
+            </summary>
+            <param name="id">The invalid tournament ID that was provided.</param>
+            <param name="operation">The name of the operation (e.g., GET, DELETE) for which the ID was used.</param>
+            <returns>
+            An <see cref="T:Microsoft.AspNetCore.Mvc.ActionResult"/> containing a <see cref="T:Domain.Models.Responses.ApiBadRequestResponse"/> indicating the ID is invalid.
+            </returns>
         </member>
     </members>
 </doc>
