@@ -18,7 +18,7 @@ public class HomeController : Controller
     public async Task<IActionResult> Index()
     {
         IEnumerable<TournamentDto> result = await SimpleGetAsync();
-        IEnumerable<TournamentDto> result2 = await SimpleGetAsync();
+        IEnumerable<TournamentDto> result2 = await SimpleGetAsync2();
         return View();
     }
 
@@ -42,9 +42,7 @@ public class HomeController : Controller
         return tournaments!;
     }
 
-    private async Task<IEnumerable<TournamentDto>> SimpleGetAsync2()
-    {
-        return await httpClient.GetFromJsonAsync<IEnumerable<TournamentDto>>("api/tournamentDetails",
+    private async Task<IEnumerable<TournamentDto>> SimpleGetAsync2() => await httpClient.GetFromJsonAsync<IEnumerable<TournamentDto>>("api/tournamentDetails",
             new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
-    }
+
 }
