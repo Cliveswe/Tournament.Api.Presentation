@@ -1,6 +1,7 @@
-// Ignore Spelling: api
+// Ignore Spelling: api json Deserialize deserialization
 
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
 using Tournaments.Shared.Dto;
 
 namespace Tournaments.Client.Controllers;
@@ -27,6 +28,17 @@ public class HomeController : Controller
         response.EnsureSuccessStatusCode();
         var result = await response.Content.ReadAsStringAsync();//returns a string.
 
-        return null;
+        //Deserialize the string to json and make sure that we get Camel Case for a C# object.
+        //Note: the Api returns an ApiBaseResponse thus in this project the
+        //"PropertyNamingPolicy = JsonNamingPolicy.CamelCase" is not needed. However, add the 
+        //policy to guard the deserialization result.
+        IEnumerable<TournamentDto>? tournaments = JsonSerializer
+            .Deserialize<IEnumerable<TournamentDto>>(result,
+            new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            });
+
+        return tournaments!;
     }
 }
