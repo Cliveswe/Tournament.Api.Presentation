@@ -19,9 +19,10 @@ public class HomeController : Controller
 
     public async Task<IActionResult> Index()
     {
-        IEnumerable<TournamentDto> result = await SimpleGetAsync();
-        IEnumerable<TournamentDto> result2 = await SimpleGetAsync2();
-        IEnumerable<TournamentDto> result3 = await GetWithRequestMessage(HttpMethod.Get, "api/tournamentDetails");
+        IEnumerable<TournamentDto>? result = await SimpleGetAsync();
+        IEnumerable<TournamentDto>? result2 = await SimpleGetAsync2();
+        IEnumerable<TournamentDto>? result3 = await GetWithRequestMessage(HttpMethod.Get, "api/tournamentDetails");
+        TournamentDto? result4 = await PostWithRequestMessageAsync(HttpMethod.Post, "api/tournamentDetails");
         return View();
     }
 
@@ -32,7 +33,7 @@ public class HomeController : Controller
         var result = await response.Content.ReadAsStringAsync();//returns a string.
 
         //Deserialize the string to json.
-        IEnumerable<TournamentDto>? tournaments = DeserializeApiResponse(result);
+        IEnumerable<TournamentDto>? tournaments = DeserializeIEnumerableApiResponse(result);
 
         return tournaments!;
     }
@@ -45,7 +46,7 @@ public class HomeController : Controller
     /// </summary>
     /// <param name="result"></param>
     /// <returns></returns>
-    private static IEnumerable<TournamentDto>? DeserializeApiResponse(string result)
+    private static IEnumerable<TournamentDto>? DeserializeIEnumerableApiResponse(string result)
     {
         return JsonSerializer
             .Deserialize<IEnumerable<TournamentDto>>(result,
@@ -55,13 +56,12 @@ public class HomeController : Controller
             });
     }
 
-    private async Task<IEnumerable<TournamentDto>> SimpleGetAsync2() => await httpClient.GetFromJsonAsync<IEnumerable<TournamentDto>>("api/tournamentDetails",
+    private async Task<IEnumerable<TournamentDto>?> SimpleGetAsync2() => await httpClient.GetFromJsonAsync<IEnumerable<TournamentDto>>("api/tournamentDetails",
             new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
 
 
-    private async Task<IEnumerable<TournamentDto>> GetWithRequestMessage(HttpMethod httpMethod, string target)
+    private async Task<IEnumerable<TournamentDto>?> GetWithRequestMessage(HttpMethod httpMethod, string target)
     {
-
         //HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "api/Tournaments");
         HttpRequestMessage request = new HttpRequestMessage(httpMethod, target);
         request
@@ -71,7 +71,41 @@ public class HomeController : Controller
         HttpResponseMessage response = await httpClient.SendAsync(request);
         response.EnsureSuccessStatusCode();
         string result = await response.Content.ReadAsStringAsync();
-        IEnumerable<TournamentDto>? tournaments = DeserializeApiResponse(result);
+        IEnumerable<TournamentDto>? tournaments = DeserializeIEnumerableApiResponse(result);
         return tournaments!;
     }
+
+    private async Task<TournamentDto?> PostWithRequestMessageAsync(HttpMethod httpMethod, string target)
+    {
+        HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post,target);
+        request
+           .Headers
+           .Accept
+           .Add(new MediaTypeWithQualityHeaderValue(json));
+        TournamentDetailsCreateDto tournamentToCreate = new TournamentDetailsCreateDto
+        {
+            Title = "ABC httpClient",
+            StartDate = DateTime.Now
+        };
+        string jsonTournament = JsonSerializer.Serialize(tournamentToCreate);
+        request.Content = new StringContent(jsonTournament);
+        request.Content.Headers.ContentType = new MediaTypeHeaderValue(json);
+        HttpResponseMessage response = await httpClient.SendAsync(request);
+        response.EnsureSuccessStatusCode();
+
+        string result = await response.Content.ReadAsStringAsync();
+        TournamentDto tournamentDto = DeserializeApiResponse(result);
+        return tournamentDto;
+    }
+
+    private static TournamentDto? DeserializeApiResponse(string result)
+    {
+        return JsonSerializer
+           .Deserialize<TournamentDto>(result,
+           new JsonSerializerOptions
+           {
+               PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+           });
+    }
+
 }

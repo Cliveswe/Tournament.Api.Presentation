@@ -256,7 +256,7 @@ public class TournamentDetailsController(IServiceManager serviceManager) : ApiCo
 
         // Return 201 Created with the route to access the new resource.
         // This follows REST conventions by providing a location header pointing to the new resource.
-        return CreatedAtAction(nameof(GetTournamentDetails), new { id = id }, tournamentDto);
+        return CreatedAtAction(nameof(GetTournamentDetails), new { id = id }, tournamentDto.GetOkResult<TournamentDto>());
     }
 
     #endregion
