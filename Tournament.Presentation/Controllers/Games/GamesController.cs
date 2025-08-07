@@ -349,15 +349,12 @@ namespace Tournaments.Presentation.Controllers.Games
             gameCreateDto.Name = gameCreateDto.Name.Trim();
 
             // Validate tournamentEntity existence
-            //if(!await serviceManager.TournamentService.ExistsAsync(tournamentId)) {
             ApiBaseResponse entityExists = await serviceManager.DoesTournamentExist(tournamentId);
             if(!entityExists.Success) {
                 // Return 404 Not Found if the tournamentEntity does not exist
-                // return NotFound($"Tournament with ID {tournamentId} does not exist.");
                 return ProcessError(new ApiNotFoundResponse($"Tournament with ID {tournamentId} does not exist."));
             }
 
-            //(bool isSuccess, bool isDuplicate, GameDto? gameDto) = await serviceManager.GameService.AddAsync(gameCreateDto, tournamentId);
             ApiBaseResponse response = await serviceManager.GameService.AddGameAsync(gameCreateDto, tournamentId);
 
             return response.Success ?
