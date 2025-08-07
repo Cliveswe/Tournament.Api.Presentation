@@ -124,6 +124,28 @@
             <param name="patchDocument">The JSON Patch document with operations to apply.</param>
             <returns>A response indicating the result of the patch operation.</returns>
         </member>
+        <member name="M:Tournaments.Presentation.Controllers.Games.GamesController.TryValidatePatchedGame(Tournaments.Shared.Dto.GameDto)">
+            <summary>
+            Clears the current <see cref="!:ModelState"/> and attempts to validate the patched <see cref="T:Tournaments.Shared.Dto.GameDto"/> object.
+            </summary>
+            <param name="dto">The patched <see cref="T:Tournaments.Shared.Dto.GameDto"/> instance to validate.</param>
+            <returns>
+            <c>true</c> if the patched model is valid according to the data annotations and validation rules;
+            otherwise, <c>false</c>.
+            </returns>
+        </member>
+        <member name="M:Tournaments.Presentation.Controllers.Games.GamesController.ValidatePatchRequest(System.Int32,System.Int32,Microsoft.AspNetCore.JsonPatch.JsonPatchDocument{Tournaments.Shared.Dto.GameDto})">
+            <summary>
+            Validates the inputs for a JSON Patch request targeting a game within a tournament.
+            </summary>
+            <param name="tournamentId">The ID of the tournament that contains the game.</param>
+            <param name="id">The ID of the game to be patched.</param>
+            <param name="patchDocument">The JSON Patch document specifying the changes to apply.</param>
+            <returns>
+            Returns <see cref="T:Domain.Models.Responses.ApiBadGamePatchDocumentResponse"/> if validation fails due to null patch document,
+            empty operations, or invalid IDs; otherwise, returns <c>null</c> to indicate valid input.
+            </returns>
+        </member>
         <member name="M:Tournaments.Presentation.Controllers.Games.GamesController.PostGame(Tournaments.Shared.Dto.GameCreateDto,System.Int32)">
             <summary>
             Creates a new game within the specified tournament.
