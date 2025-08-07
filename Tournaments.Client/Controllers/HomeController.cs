@@ -1,4 +1,7 @@
+// Ignore Spelling: api
+
 using Microsoft.AspNetCore.Mvc;
+using Tournaments.Shared.Dto;
 
 namespace Tournaments.Client.Controllers;
 public class HomeController : Controller
@@ -18,8 +21,12 @@ public class HomeController : Controller
         return View();
     }
 
-    private async Task SimpleGetAsync()
+    private async Task<IEnumerable<TournamentDto>> SimpleGetAsync()
     {
-        var response = await HttpClient.GetAsync("api/tournaments");
+        HttpResponseMessage response = await HttpClient.GetAsync("api/tournamentDetails");
+        response.EnsureSuccessStatusCode();
+        var result = await response.Content.ReadAsStringAsync();//returns a string.
+
+        return null;
     }
 }
