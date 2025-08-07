@@ -179,14 +179,6 @@
             It uses dependency-injected services via <see cref="T:Service.Contracts.IServiceManager"/> to manage tournament operations,
             applies DTO mapping, pagination metadata, custom error responses, and enforces JSON content-type constraints.
             </remarks>
-            <response code="200">Successful request with data returned (GET, PUT, PATCH).</response>
-            <response code="201">Resource successfully created (POST).</response>
-            <response code="204">Resource successfully deleted (DELETE).</response>
-            <response code="400">Invalid input or malformed request.</response>
-            <response code="404">Requested tournament was not found.</response>
-            <response code="409">Conflict due to an existing tournament with similar data (POST).</response>
-            <response code="422">Non-processable request due to validation or lack of changes (PUT/PATCH).</response>
-            <response code="500">Internal server error occurred during processing.</response>
         </member>
         <member name="M:Tournaments.Presentation.Controllers.Tournaments.TournamentDetailsController.#ctor(Service.Contracts.IServiceManager)">
             <summary>
@@ -198,14 +190,6 @@
             It uses dependency-injected services via <see cref="T:Service.Contracts.IServiceManager"/> to manage tournament operations,
             applies DTO mapping, pagination metadata, custom error responses, and enforces JSON content-type constraints.
             </remarks>
-            <response code="200">Successful request with data returned (GET, PUT, PATCH).</response>
-            <response code="201">Resource successfully created (POST).</response>
-            <response code="204">Resource successfully deleted (DELETE).</response>
-            <response code="400">Invalid input or malformed request.</response>
-            <response code="404">Requested tournament was not found.</response>
-            <response code="409">Conflict due to an existing tournament with similar data (POST).</response>
-            <response code="422">Non-processable request due to validation or lack of changes (PUT/PATCH).</response>
-            <response code="500">Internal server error occurred during processing.</response>
         </member>
         <member name="M:Tournaments.Presentation.Controllers.Tournaments.TournamentDetailsController.GetTournamentDetails(Tournaments.Shared.Request.TournamentRequestParameters)">
             <summary>

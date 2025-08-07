@@ -24,22 +24,24 @@ using Tournaments.Shared.Request;
 namespace Tournaments.Presentation.Controllers.Tournaments;
 
 /// <summary>
-/// Handles HTTP API requests related to tournament details, including retrieval, creation,
-/// updating, partial updates via JSON Patch, and deletion of tournament entities.
+/// Provides endpoints for managing tournament data, including retrieval, creation, updates,
+/// partial modifications using JSON Patch, and deletion.
 /// </summary>
 /// <remarks>
-/// This controller implements RESTful endpoints following standard HTTP semantics and status codes.
-/// It uses dependency-injected services via <see cref="IServiceManager"/> to manage tournament operations,
-/// applies DTO mapping, pagination metadata, custom error responses, and enforces JSON content-type constraints.
+/// This controller follows RESTful conventions, using standard HTTP verbs and status codes.
+/// It leverages dependency injection for accessing business services via <see cref="IServiceManager"/>,
+/// supports pagination metadata, structured error responses, and enforces JSON-based communication.
 /// </remarks>
-/// <response code="200">Successful request with data returned (GET, PUT, PATCH).</response>
-/// <response code="201">Resource successfully created (POST).</response>
-/// <response code="204">Resource successfully deleted (DELETE).</response>
-/// <response code="400">Invalid input or malformed request.</response>
-/// <response code="404">Requested tournament was not found.</response>
-/// <response code="409">Conflict due to an existing tournament with similar data (POST).</response>
-/// <response code="422">Non-processable request due to validation or lack of changes (PUT/PATCH).</response>
-/// <response code="500">Internal server error occurred during processing.</response>
+/// <item><term>200 OK</term><description>The request was successful and the resource is returned (GET, PUT, PATCH).</description></item>
+/// <item><term>201 Created</term><description>The resource was successfully created (POST).</description></item>
+/// <item><term>204 No Content</term><description>The resource was successfully deleted (DELETE).</description></item>
+/// <item><term>400 Bad Request</term><description>The request could not be understood due to invalid syntax or parameters.</description></item>
+/// <item><term>404 Not Found</term><description>The requested resource does not exist.</description></item>
+/// <item><term>409 Conflict</term><description>The request could not be completed due to a conflict with the current state of the resource (e.g., duplicate).</description></item>
+/// <item><term>422 Unprocessable Entity</term><description>The request was syntactically correct but semantically invalid (e.g., validation errors or no changes detected).</description></item>
+/// <item><term>500 Internal Server Error</term><description>An unexpected error occurred on the server while processing the request.</description></item>
+
+
 [Route("api/tournamentDetails")]
 [ApiController]
 [Produces("application/json")] // Ensures all responses are documented as JSON
@@ -57,7 +59,7 @@ public class TournamentDetailsController(IServiceManager serviceManager) : ApiCo
     /// <response code="404">No tournaments found matching the query parameters.</response>
     /// <response code="500">Internal server error occurred while processing the request.</response>
     [HttpGet]
-    [ProducesResponseType(typeof(IEnumerable<TournamentDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(List<TournamentDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiBaseResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ApiBaseResponse), StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<IEnumerable<TournamentDto>>> GetTournamentDetails([FromQuery] TournamentRequestParameters requestParameters)
@@ -75,7 +77,8 @@ public class TournamentDetailsController(IServiceManager serviceManager) : ApiCo
         Response.Headers.Append("X-Pagination", JsonSerializer.Serialize(metaData));
 
         // Return the results with HTTP 200 OK
-        return Ok(tournamentResponse.GetOkResult<IEnumerable<TournamentDto>>());
+        //return Ok(tournamentResponse.GetOkResult<IEnumerable<TournamentDto>>());
+        return HandleResponse<IEnumerable<TournamentDto>>(tournamentResponse);
     }
 
     /// <summary>
