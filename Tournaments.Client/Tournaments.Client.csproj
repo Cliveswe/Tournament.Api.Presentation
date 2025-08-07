@@ -6,4 +6,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Tournament.Shared\Tournaments.Shared.csproj" />
+  </ItemGroup>
+
 </Project>
