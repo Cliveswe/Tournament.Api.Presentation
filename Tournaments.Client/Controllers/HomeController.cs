@@ -7,24 +7,24 @@ using Tournaments.Shared.Dto;
 namespace Tournaments.Client.Controllers;
 public class HomeController : Controller
 {
-    private HttpClient HttpClient;
+    private HttpClient httpClient;
 
     public HomeController()
     {
-        HttpClient = new HttpClient();
-        HttpClient.BaseAddress = new Uri("https://localhost:7225");
+        httpClient = new HttpClient();
+        httpClient.BaseAddress = new Uri("https://localhost:7225");
     }
-
 
     public async Task<IActionResult> Index()
     {
-        var result = await SimpleGetAsync();
+        IEnumerable<TournamentDto> result = await SimpleGetAsync();
+        IEnumerable<TournamentDto> result2 = await SimpleGetAsync();
         return View();
     }
 
     private async Task<IEnumerable<TournamentDto>> SimpleGetAsync()
     {
-        HttpResponseMessage response = await HttpClient.GetAsync("api/tournamentDetails");
+        HttpResponseMessage response = await httpClient.GetAsync("api/tournamentDetails");
         response.EnsureSuccessStatusCode();
         var result = await response.Content.ReadAsStringAsync();//returns a string.
 
@@ -40,5 +40,11 @@ public class HomeController : Controller
             });
 
         return tournaments!;
+    }
+
+    private async Task<IEnumerable<TournamentDto>> SimpleGetAsync2()
+    {
+        return await httpClient.GetFromJsonAsync<IEnumerable<TournamentDto>>("api/tournamentDetails",
+            new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
     }
 }
