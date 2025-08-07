@@ -332,13 +332,12 @@ namespace Tournaments.Presentation.Controllers.Games
         /// Otherwise, returns appropriate error responses for invalid input, conflicts, or failures.
         /// </returns>
         [HttpPost]
-        [Consumes("application/json")]
+        [Consumes("application/json")] // Correct MIME type for POSTing a DTO
         [ProducesResponseType(typeof(GameDto), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ApiBadRequestResponse), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiNotFoundResponse), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ApiAlreadyExistsResponse), StatusCodes.Status409Conflict)]
         [ProducesResponseType(typeof(ApiSaveFailedResponse), StatusCodes.Status500InternalServerError)]
-        [Consumes("application/json")] // Correct MIME type for POSTing a DTO
         public async Task<ActionResult<GameDto>> PostGame([FromBody] GameCreateDto gameCreateDto, int tournamentId)
         {
             //Validate input Parameters
