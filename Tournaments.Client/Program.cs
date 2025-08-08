@@ -1,5 +1,6 @@
 // Ignore Spelling: json
 using System.Net.Http.Headers;
+using Tournaments.Client.Clients;
 
 namespace Tournaments.Client;
 
@@ -23,7 +24,7 @@ public class Program
         });
 
         //Version 3
-        builder.Services.AddHttpClient<TournamentsClient>();
+        builder.Services.AddHttpClient<ITournamentsClient, TournamentsClient>();
 
         //Version 4
 

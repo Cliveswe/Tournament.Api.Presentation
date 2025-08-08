@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Http.Headers;
 using System.Text.Json;
+using Tournaments.Client.Clients;
 using Tournaments.Shared.Dto;
 
 namespace Tournaments.Client.Controllers;
@@ -11,14 +12,16 @@ public class HomeController : Controller
 {
     private const string json = "application/json";
     private const string jsonPatch = "application/json-patch+json";//NB, this is only used calling a PATCH endpoint.
+    private readonly ITournamentsClient tournamentsClient;
     private HttpClient httpClient;
 
-    public HomeController(IHttpClientFactory httpClientFactory)
+    public HomeController(IHttpClientFactory httpClientFactory, ITournamentsClient tournamentsClient)
     {
         //httpClient = httpClientFactory.CreateClient();//creates a single instance from the client factory.
         //httpClient.BaseAddress = new Uri("https://localhost:7225");
 
-        httpClient = httpClientFactory.CreateClient("TournamentClient");
+        httpClient = httpClientFactory.CreateClient("TournamentsClient");
+        this.tournamentsClient = tournamentsClient;
     }
 
     public async Task<IActionResult> Index()
@@ -56,6 +59,7 @@ public class HomeController : Controller
 
     private async Task<IEnumerable<TournamentDto>> SimpleGetAsync()
     {
+        var test = httpClient;
         HttpResponseMessage response = await httpClient.GetAsync("api/tournamentDetails");
         response.EnsureSuccessStatusCode();
         var result = await response.Content.ReadAsStringAsync();//returns a string.
@@ -64,6 +68,7 @@ public class HomeController : Controller
         IEnumerable<TournamentDto>? tournaments = DeserializeApiResponse<IEnumerable<TournamentDto>>(result);
 
         return tournaments!;
+
     }
 
     private async Task<T?> SimpleGetAsync2<T>() => await httpClient.GetFromJsonAsync<T>("api/tournamentDetails",
@@ -71,12 +76,13 @@ public class HomeController : Controller
 
     private async Task<IEnumerable<TournamentDto>?> GetWithRequestMessage(HttpMethod httpMethod, string target)
     {
-        HttpRequestMessage request = HttpHomeControllerRequestMessage(httpMethod, target);
-        HttpResponseMessage response = await httpClient.SendAsync(request);
-        response.EnsureSuccessStatusCode();
-        string result = await response.Content.ReadAsStringAsync();
-        IEnumerable<TournamentDto>? tournaments = DeserializeApiResponse<IEnumerable<TournamentDto>>(result);
-        return tournaments!;
+        //HttpRequestMessage request = HttpHomeControllerRequestMessage(httpMethod, target);
+        //HttpResponseMessage response = await httpClient.SendAsync(request);
+        //response.EnsureSuccessStatusCode();
+        //string result = await response.Content.ReadAsStringAsync();
+        //IEnumerable<TournamentDto>? tournaments = DeserializeApiResponse<IEnumerable<TournamentDto>>(result);
+        //return tournaments!;
+        return await tournamentsClient.GetAsync<IEnumerable<TournamentDto>>(target);
     }
 
     private async Task<TournamentDto?> PostWithRequestMessageAsync(HttpMethod httpMethod, string target)
