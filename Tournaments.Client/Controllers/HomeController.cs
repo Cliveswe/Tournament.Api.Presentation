@@ -1,4 +1,4 @@
-// Ignore Spelling: api json Deserialize deserialization
+// Ignore Spelling: api json Deserialize deserialization Deserializes
 
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Http.Headers;
@@ -20,7 +20,7 @@ public class HomeController : Controller
     public async Task<IActionResult> Index()
     {
         IEnumerable<TournamentDto>? result = await SimpleGetAsync();
-        IEnumerable<TournamentDto>? result2 = await SimpleGetAsync2();
+        IEnumerable<TournamentDto>? result2 = await SimpleGetAsync2<IEnumerable<TournamentDto>>();
         IEnumerable<TournamentDto>? result3 = await GetWithRequestMessage(HttpMethod.Get, "api/tournamentDetails");
         TournamentDto? result4 = await PostWithRequestMessageAsync(HttpMethod.Post, "api/tournamentDetails");
         return View();
@@ -33,66 +33,31 @@ public class HomeController : Controller
         var result = await response.Content.ReadAsStringAsync();//returns a string.
 
         //Deserialize the string to json.
-        IEnumerable<TournamentDto>? tournaments = DeserializeIEnumerableApiResponse<TournamentDto>(result);
+        IEnumerable<TournamentDto>? tournaments = DeserializeApiResponse<IEnumerable<TournamentDto>>(result);
 
         return tournaments!;
     }
 
-    /// <summary>
-    /// Deserialize the string to json and make sure that we get Camel Case for a C# object.
-    /// Note: the Api returns an ApiBaseResponse thus in this project the
-    /// "PropertyNamingPolicy = JsonNamingPolicy.CamelCase" is not needed. However, add the 
-    /// policy to guard the deserialization result.
-    /// </summary>
-    /// <param name="result"></param>
-    /// <returns></returns>
-    private static IEnumerable<T>? DeserializeIEnumerableApiResponse<T>(string result)
-    {
-        return JsonSerializer
-            .Deserialize<IEnumerable<T>>(result,
-            new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-            });
-    }
+    //private async Task<IEnumerable<TournamentDto>?> SimpleGetAsync2() => await httpClient.GetFromJsonAsync<IEnumerable<TournamentDto>>("api/tournamentDetails",
+    //        new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
 
-    private static T? DeserializeApiResponse<T>(string result)
-    {
-        return JsonSerializer
-           .Deserialize<T>(result,
-           new JsonSerializerOptions
-           {
-               PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-           });
-    }
-
-
-    private async Task<IEnumerable<TournamentDto>?> SimpleGetAsync2() => await httpClient.GetFromJsonAsync<IEnumerable<TournamentDto>>("api/tournamentDetails",
-            new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
-
+    private async Task<T?> SimpleGetAsync2<T>() => await httpClient.GetFromJsonAsync<T>("api/tournamentDetails",
+           new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
 
     private async Task<IEnumerable<TournamentDto>?> GetWithRequestMessage(HttpMethod httpMethod, string target)
     {
-        //HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "api/Tournaments");
-        HttpRequestMessage request = new HttpRequestMessage(httpMethod, target);
-        request
-            .Headers
-            .Accept
-            .Add(new MediaTypeWithQualityHeaderValue(json));
+        //HttpHomeControllerRequestMessage request = new HttpHomeControllerRequestMessage(HttpMethod.Get, "api/Tournaments");
+        HttpRequestMessage request = HttpHomeControllerRequestMessage(httpMethod, target);
         HttpResponseMessage response = await httpClient.SendAsync(request);
         response.EnsureSuccessStatusCode();
         string result = await response.Content.ReadAsStringAsync();
-        IEnumerable<TournamentDto>? tournaments = DeserializeIEnumerableApiResponse<TournamentDto>(result);
+        IEnumerable<TournamentDto>? tournaments = DeserializeApiResponse<IEnumerable<TournamentDto>>(result);
         return tournaments!;
     }
 
     private async Task<TournamentDto?> PostWithRequestMessageAsync(HttpMethod httpMethod, string target)
     {
-        HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post,target);
-        request
-           .Headers
-           .Accept
-           .Add(new MediaTypeWithQualityHeaderValue(json));
+        HttpRequestMessage request = HttpHomeControllerRequestMessage(httpMethod, target);
         TournamentDetailsCreateDto tournamentToCreate = new TournamentDetailsCreateDto
         {
             Title = "ABC httpClient",
@@ -118,6 +83,42 @@ public class HomeController : Controller
         }
     }
 
+    /// <summary>
+    /// Deserializes a JSON string into the specified .NET type using camelCase property naming.
+    /// </summary>
+    /// <typeparam name="TResult">
+    /// The target .NET type to deserialize the JSON into, such as a DTO or a collection of DTOs.
+    /// </typeparam>
+    /// <param name="result">The JSON string to deserialize.</param>
+    /// <returns>
+    /// An instance of <typeparamref name="TResult"/> if deserialization is successful; otherwise, <c>null</c>.
+    /// </returns>
+    private static TResult? DeserializeApiResponse<TResult>(string result)
+    {
+        return JsonSerializer
+            .Deserialize<TResult>(result,
+            new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            });
+    }
 
-
+    /// <summary>
+    /// Creates an <see cref="HttpRequestMessage"/> with the specified HTTP method and target URI, 
+    /// and sets the "Accept" header to "application/json".
+    /// </summary>
+    /// <param name="httpMethod">The HTTP method to use (e.g., GET, POST).</param>
+    /// <param name="target">The target URI for the HTTP request.</param>
+    /// <returns>
+    /// A configured <see cref="HttpRequestMessage"/> ready to be sent using <see cref="HttpClient"/>.
+    /// </returns>
+    private static HttpRequestMessage HttpHomeControllerRequestMessage(HttpMethod httpMethod, string target)
+    {
+        HttpRequestMessage request = new HttpRequestMessage(httpMethod,target);
+        request
+           .Headers
+           .Accept
+           .Add(new MediaTypeWithQualityHeaderValue(json));
+        return request;
+    }
 }
