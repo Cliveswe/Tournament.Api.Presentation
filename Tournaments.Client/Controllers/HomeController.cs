@@ -33,7 +33,7 @@ public class HomeController : Controller
         var result = await response.Content.ReadAsStringAsync();//returns a string.
 
         //Deserialize the string to json.
-        IEnumerable<TournamentDto>? tournaments = DeserializeIEnumerableApiResponse(result);
+        IEnumerable<TournamentDto>? tournaments = DeserializeIEnumerableApiResponse<TournamentDto>(result);
 
         return tournaments!;
     }
@@ -46,15 +46,26 @@ public class HomeController : Controller
     /// </summary>
     /// <param name="result"></param>
     /// <returns></returns>
-    private static IEnumerable<TournamentDto>? DeserializeIEnumerableApiResponse(string result)
+    private static IEnumerable<T>? DeserializeIEnumerableApiResponse<T>(string result)
     {
         return JsonSerializer
-            .Deserialize<IEnumerable<TournamentDto>>(result,
+            .Deserialize<IEnumerable<T>>(result,
             new JsonSerializerOptions
             {
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase
             });
     }
+
+    private static T? DeserializeApiResponse<T>(string result)
+    {
+        return JsonSerializer
+           .Deserialize<T>(result,
+           new JsonSerializerOptions
+           {
+               PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+           });
+    }
+
 
     private async Task<IEnumerable<TournamentDto>?> SimpleGetAsync2() => await httpClient.GetFromJsonAsync<IEnumerable<TournamentDto>>("api/tournamentDetails",
             new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
@@ -71,7 +82,7 @@ public class HomeController : Controller
         HttpResponseMessage response = await httpClient.SendAsync(request);
         response.EnsureSuccessStatusCode();
         string result = await response.Content.ReadAsStringAsync();
-        IEnumerable<TournamentDto>? tournaments = DeserializeIEnumerableApiResponse(result);
+        IEnumerable<TournamentDto>? tournaments = DeserializeIEnumerableApiResponse<TournamentDto>(result);
         return tournaments!;
     }
 
@@ -97,22 +108,16 @@ public class HomeController : Controller
             response.EnsureSuccessStatusCode();
 
             string result = await response.Content.ReadAsStringAsync();
-            TournamentDto tournamentDto = DeserializeApiResponse(result);
+            TournamentDto? tournamentDto = DeserializeApiResponse<TournamentDto>(result);
+            Uri? location = response.Headers.Location;//get the uri for the newly created tournament.
             return tournamentDto;
 
         } catch(Exception ex) {
+            _ = ex;//keep the compiler quite!!
             return null;
         }
     }
 
-    private static TournamentDto? DeserializeApiResponse(string result)
-    {
-        return JsonSerializer
-           .Deserialize<TournamentDto>(result,
-           new JsonSerializerOptions
-           {
-               PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-           });
-    }
+
 
 }
