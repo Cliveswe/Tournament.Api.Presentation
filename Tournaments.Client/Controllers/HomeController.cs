@@ -91,11 +91,18 @@ public class HomeController : Controller
         request.Content = new StringContent(jsonTournament);
         request.Content.Headers.ContentType = new MediaTypeHeaderValue(json);
         HttpResponseMessage response = await httpClient.SendAsync(request);
-        response.EnsureSuccessStatusCode();
 
-        string result = await response.Content.ReadAsStringAsync();
-        TournamentDto tournamentDto = DeserializeApiResponse(result);
-        return tournamentDto;
+        try {
+            //Throws an exception if the HTTP response is false.
+            response.EnsureSuccessStatusCode();
+
+            string result = await response.Content.ReadAsStringAsync();
+            TournamentDto tournamentDto = DeserializeApiResponse(result);
+            return tournamentDto;
+
+        } catch(Exception ex) {
+            return null;
+        }
     }
 
     private static TournamentDto? DeserializeApiResponse(string result)
