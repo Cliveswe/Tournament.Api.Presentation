@@ -1,5 +1,6 @@
 // Ignore Spelling: api json Deserialize deserialization Deserializes
 
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Http.Headers;
 using System.Text.Json;
@@ -9,6 +10,7 @@ namespace Tournaments.Client.Controllers;
 public class HomeController : Controller
 {
     private const string json = "application/json";
+    private const string jsonPatch = "application/json-patch+json";//NB, this is only used calling a PATCH endpoint.
     private HttpClient httpClient;
 
     public HomeController()
@@ -23,7 +25,31 @@ public class HomeController : Controller
         IEnumerable<TournamentDto>? result2 = await SimpleGetAsync2<IEnumerable<TournamentDto>>();
         IEnumerable<TournamentDto>? result3 = await GetWithRequestMessage(HttpMethod.Get, "api/tournamentDetails");
         TournamentDto? result4 = await PostWithRequestMessageAsync(HttpMethod.Post, "api/tournamentDetails");
+        await PatchWithReqestMessageAsync(HttpMethod.Patch, "api/tournamentDetails/1/games/51");
         return View();
+    }
+
+    private async Task PatchWithReqestMessageAsync(HttpMethod httpMethod, string target)
+    {
+        JsonPatchDocument<GameUpdateDto> patchDocument = new JsonPatchDocument<GameUpdateDto>();
+
+        patchDocument.Replace(g => g.Title, "Test patch from \"homecontroller\"");
+
+        string serializedPatchDoc = Newtonsoft.Json.JsonConvert.SerializeObject(patchDocument);
+
+        HttpRequestMessage request = new HttpRequestMessage(httpMethod, target);
+
+        // Accept JSON response
+        request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue(json));
+
+        // Set correct content with proper Content-Type for JSON Patch
+        request.Content = new StringContent(serializedPatchDoc);
+        request.Content.Headers.ContentType = new MediaTypeHeaderValue(jsonPatch);
+
+        HttpResponseMessage response = await httpClient.SendAsync(request);
+
+        response.EnsureSuccessStatusCode();
+
     }
 
     private async Task<IEnumerable<TournamentDto>> SimpleGetAsync()
@@ -38,15 +64,11 @@ public class HomeController : Controller
         return tournaments!;
     }
 
-    //private async Task<IEnumerable<TournamentDto>?> SimpleGetAsync2() => await httpClient.GetFromJsonAsync<IEnumerable<TournamentDto>>("api/tournamentDetails",
-    //        new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
-
     private async Task<T?> SimpleGetAsync2<T>() => await httpClient.GetFromJsonAsync<T>("api/tournamentDetails",
            new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
 
     private async Task<IEnumerable<TournamentDto>?> GetWithRequestMessage(HttpMethod httpMethod, string target)
     {
-        //HttpHomeControllerRequestMessage request = new HttpHomeControllerRequestMessage(HttpMethod.Get, "api/Tournaments");
         HttpRequestMessage request = HttpHomeControllerRequestMessage(httpMethod, target);
         HttpResponseMessage response = await httpClient.SendAsync(request);
         response.EnsureSuccessStatusCode();
