@@ -1,3 +1,6 @@
+// Ignore Spelling: json
+using System.Net.Http.Headers;
+
 namespace Tournaments.Client;
 
 public class Program
@@ -8,6 +11,21 @@ public class Program
 
         // Add services to the container.
         builder.Services.AddControllersWithViews();
+
+        //Version 1:
+        builder.Services.AddHttpClient();
+
+        //Version 2:
+        builder.Services.AddHttpClient("TournamentsClient", client =>
+        {
+            client.BaseAddress = new Uri("https://localhost:7225");
+            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+        });
+
+        //Version 3
+        builder.Services.AddHttpClient<TournamentsClient>();
+
+        //Version 4
 
         var app = builder.Build();
 

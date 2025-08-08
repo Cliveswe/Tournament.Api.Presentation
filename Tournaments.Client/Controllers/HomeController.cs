@@ -13,10 +13,12 @@ public class HomeController : Controller
     private const string jsonPatch = "application/json-patch+json";//NB, this is only used calling a PATCH endpoint.
     private HttpClient httpClient;
 
-    public HomeController()
+    public HomeController(IHttpClientFactory httpClientFactory)
     {
-        httpClient = new HttpClient();
-        httpClient.BaseAddress = new Uri("https://localhost:7225");
+        //httpClient = httpClientFactory.CreateClient();//creates a single instance from the client factory.
+        //httpClient.BaseAddress = new Uri("https://localhost:7225");
+
+        httpClient = httpClientFactory.CreateClient("TournamentClient");
     }
 
     public async Task<IActionResult> Index()
