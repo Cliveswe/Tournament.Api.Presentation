@@ -57,6 +57,35 @@ public class HomeController : Controller
 
     }
 
+    private async Task<TournamentDto?> PostWithRequestMessageAsync(HttpMethod httpMethod, string target)
+    {
+        HttpRequestMessage request = HttpHomeControllerRequestMessage(httpMethod, target);
+        TournamentDetailsCreateDto tournamentToCreate = new TournamentDetailsCreateDto
+        {
+            Title = "ABC httpClient",
+            StartDate = DateTime.Now
+        };
+        string jsonTournament = JsonSerializer.Serialize(tournamentToCreate);
+        request.Content = new StringContent(jsonTournament);
+        request.Content.Headers.ContentType = new MediaTypeHeaderValue(json);
+        HttpResponseMessage response = await httpClient.SendAsync(request);
+
+        try {
+            //Throws an exception if the HTTP response is false.
+            response.EnsureSuccessStatusCode();
+
+            string result = await response.Content.ReadAsStringAsync();
+            TournamentDto? tournamentDto = DeserializeApiResponse<TournamentDto>(result);
+            Uri? location = response.Headers.Location;//get the uri for the newly created tournament.
+            return tournamentDto;
+
+        } catch(Exception ex) {
+            _ = ex;//keep the compiler quite!!
+            return null;
+        }
+    }
+
+    #region GET 
     private async Task<IEnumerable<TournamentDto>> SimpleGetAsync()
     {
         var test = httpClient;
@@ -85,33 +114,7 @@ public class HomeController : Controller
         return await tournamentsClient.GetAsync<IEnumerable<TournamentDto>>(target);
     }
 
-    private async Task<TournamentDto?> PostWithRequestMessageAsync(HttpMethod httpMethod, string target)
-    {
-        HttpRequestMessage request = HttpHomeControllerRequestMessage(httpMethod, target);
-        TournamentDetailsCreateDto tournamentToCreate = new TournamentDetailsCreateDto
-        {
-            Title = "ABC httpClient",
-            StartDate = DateTime.Now
-        };
-        string jsonTournament = JsonSerializer.Serialize(tournamentToCreate);
-        request.Content = new StringContent(jsonTournament);
-        request.Content.Headers.ContentType = new MediaTypeHeaderValue(json);
-        HttpResponseMessage response = await httpClient.SendAsync(request);
-
-        try {
-            //Throws an exception if the HTTP response is false.
-            response.EnsureSuccessStatusCode();
-
-            string result = await response.Content.ReadAsStringAsync();
-            TournamentDto? tournamentDto = DeserializeApiResponse<TournamentDto>(result);
-            Uri? location = response.Headers.Location;//get the uri for the newly created tournament.
-            return tournamentDto;
-
-        } catch(Exception ex) {
-            _ = ex;//keep the compiler quite!!
-            return null;
-        }
-    }
+    #endregion
 
     /// <summary>
     /// Deserializes a JSON string into the specified .NET type using camelCase property naming.

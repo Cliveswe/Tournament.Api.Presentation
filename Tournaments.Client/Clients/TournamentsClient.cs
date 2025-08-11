@@ -9,6 +9,16 @@ public class TournamentsClient : ITournamentsClient
     private const string json = "application/json";
     private HttpClient client;
 
+    /// <summary>
+    /// Unify both serialization and deserialization so they share the same JsonSerializerOptions,
+    /// which prevents mismatches.
+    /// </summary>
+    private static readonly JsonSerializerOptions CamelCaseOptions = new JsonSerializerOptions
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+    };
+
+
     public TournamentsClient(HttpClient httpClient)
     {
         client = httpClient;
@@ -23,8 +33,37 @@ public class TournamentsClient : ITournamentsClient
         HttpResponseMessage response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
         response.EnsureSuccessStatusCode();
         string stream = await response.Content.ReadAsStringAsync();
-        T? result = DeserializeApiResponse<T>(stream);
+        T? result = DeserializeFromJson<T>(stream);
         return result!;
+    }
+
+    public async Task<TResult?> PostAsync<TCreate, TResult>(string path, Func<TCreate> payloadFactory, string contentType = json)
+    {
+        if(payloadFactory == null)
+            throw new ArgumentNullException(nameof(payloadFactory), "Payload factory cannot be null.");
+
+        // Create request
+        using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, path);
+
+        // Build payload using factory delegate
+        TCreate payload = payloadFactory();
+        string jsonPayload = SerializeToJson(payload);
+
+        request.Content = new StringContent(jsonPayload);
+        request.Content.Headers.ContentType = new MediaTypeHeaderValue(contentType);
+
+        using HttpResponseMessage response = await client.SendAsync(request);
+
+        try {
+
+            response.EnsureSuccessStatusCode();
+            string result = await response.Content.ReadAsStringAsync();
+            return DeserializeFromJson<TResult>(result);
+
+        } catch(Exception ex) {
+            _ = ex;// silence compiler if unused
+            return default;
+        }
     }
 
     /// <summary>
@@ -37,14 +76,30 @@ public class TournamentsClient : ITournamentsClient
     /// <returns>
     /// An instance of <typeparamref name="TResult"/> if deserialization is successful; otherwise, <c>null</c>.
     /// </returns>
-    private static TResult? DeserializeApiResponse<TResult>(string result)
-    {
-        return JsonSerializer
-            .Deserialize<TResult>(result,
-            new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-            });
-    }
+    //private static TResult? DeserializeApiResponse<TResult>(string result)
+    //{
+    //    return JsonSerializer
+    //        .Deserialize<TResult>(result,
+    //        new JsonSerializerOptions
+    //        {
+    //            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+    //        });
+    //}
+
+    private static TResult? DeserializeFromJson<TResult>(string jsonString) =>
+        JsonSerializer.Deserialize<TResult>(jsonString, CamelCaseOptions);
+
+
+    private static string SerializeToJson<T>(T payload) =>
+        JsonSerializer.Serialize(payload, CamelCaseOptions);
+
+
+    //private static string SerializeToJson<T>(T payload)
+    //{
+    //    return JsonSerializer.Serialize(payload, new JsonSerializerOptions
+    //    {
+    //        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+    //    });
+    //}
 
 }
