@@ -6,8 +6,8 @@ public interface ITournamentsClient
     Task<T> GetAsync<T>(string path, string contentType = MediaTypes.Json);
 
     Task<TResult?> SendAsync<TCreate, TResult>(
-        HttpMethod httpMethod,
-        string path,
-        Func<TCreate> payloadFactory,
-        string contentType = MediaTypes.Json);
+      HttpMethod httpMethod,
+      string path,
+      TCreate payload,
+      string contentType = MediaTypes.Json);
 }

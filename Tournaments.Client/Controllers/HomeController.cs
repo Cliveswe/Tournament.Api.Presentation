@@ -57,7 +57,7 @@ public class HomeController : Controller
 
         await tournamentsClient.SendAsync<JsonPatchDocument<GameUpdateDto>, object>(httpMethod,
             target,
-            () => patchDocument,
+            patchDocument,
             MediaTypes.JsonPatch);
 
     }
@@ -90,9 +90,9 @@ public class HomeController : Controller
         //}
         return await tournamentsClient.SendAsync<TournamentDetailsCreateDto, TournamentDto>(httpMethod,
             target,
-            () => new TournamentDetailsCreateDto
+            new TournamentDetailsCreateDto
             {
-                Title = "New generic SendAsync",
+                Title = "ABC httpClient",
                 StartDate = DateTime.Now
             });
     }

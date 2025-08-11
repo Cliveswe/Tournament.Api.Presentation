@@ -39,34 +39,61 @@ public class TournamentsClient : ITournamentsClient
         return result!;
     }
 
-    public async Task<TResult?> SendAsync<TCreate, TResult>(HttpMethod httpMethod, string path, Func<TCreate> payloadFactory, string contentType = MediaTypes.Json)
+    public async Task<TResult?> SendAsync<TCreate, TResult>(
+    HttpMethod httpMethod,
+    string path,
+    TCreate payload,
+    string contentType = MediaTypes.Json)
     {
-        if(payloadFactory == null)
-            throw new ArgumentNullException(nameof(payloadFactory), "Payload factory cannot be null.");
+        if(payload == null)
+            throw new ArgumentNullException(nameof(payload));
+        if(string.IsNullOrWhiteSpace(path))
+            throw new ArgumentException("Path cannot be null or empty.", nameof(path));
+
+        // Serialize payload with correct serializer
+        string serializedPayload;
+        if(IsJsonPatchDocument(payload)) {
+            serializedPayload = Newtonsoft.Json.JsonConvert.SerializeObject(payload);
+        } else {
+            serializedPayload = JsonSerializer.Serialize(payload, CamelCaseOptions);
+        }
 
         // Create request
-        using HttpRequestMessage request = new HttpRequestMessage(httpMethod, path);
-
-        // Build payload using factory delegate
-        TCreate payload = payloadFactory();
-        string jsonPayload = SerializeToJson(payload);
-
-        request.Content = new StringContent(jsonPayload);
+        using HttpRequestMessage request = new HttpRequestMessage(httpMethod, path)
+        {
+            Content = new StringContent(serializedPayload)
+        };
         request.Content.Headers.ContentType = new MediaTypeHeaderValue(contentType);
 
         using HttpResponseMessage response = await client.SendAsync(request);
 
         try {
-
             response.EnsureSuccessStatusCode();
             string result = await response.Content.ReadAsStringAsync();
-            return DeserializeFromJson<TResult>(result);
 
-        } catch(Exception ex) {
-            _ = ex;// silence compiler if unused
+            // For void responses (e.g. Patch returning no content), handle accordingly
+            if(typeof(TResult) == typeof(object) || string.IsNullOrWhiteSpace(result)) {
+                return default;
+            }
+
+            return JsonSerializer.Deserialize<TResult>(result, CamelCaseOptions);
+        } catch {
+            // Optionally log or handle exceptions here
             return default;
         }
     }
+
+    private static bool IsJsonPatchDocument(object payload)
+    {
+        if(payload == null)
+            return false;
+        var type = payload.GetType();
+        if(!type.IsGenericType)
+            return false;
+        return type.GetGenericTypeDefinition() == typeof(Microsoft.AspNetCore.JsonPatch.JsonPatchDocument<>);
+    }
+
+
 
     /*
      * Examples of using SendAsync
@@ -101,14 +128,26 @@ public class TournamentsClient : ITournamentsClient
 
     private static string SerializeToJson<T>(T payload)
     {
+        if(payload == null)
+            throw new ArgumentNullException(nameof(payload));
+
         if(payload is Microsoft.AspNetCore.JsonPatch.JsonPatchDocument) {
-            // Use Newtonsoft.Json for JsonPatchDocument serialization
-            return Newtonsoft.Json.JsonConvert.SerializeObject(payload);
+            return Newtonsoft.Json.JsonConvert.SerializeObject(
+                payload,
+                new Newtonsoft.Json.JsonSerializerSettings
+                {
+                    ContractResolver = new Newtonsoft.Json.Serialization.DefaultContractResolver
+                    {
+                        NamingStrategy = new Newtonsoft.Json.Serialization.CamelCaseNamingStrategy()
+                    }
+                });
         } else {
-            // Use System.Text.Json for everything else
             return JsonSerializer.Serialize(payload, CamelCaseOptions);
         }
     }
+
+
+
 
     //private static string SerializeToJson<T>(T payload)
     //{
