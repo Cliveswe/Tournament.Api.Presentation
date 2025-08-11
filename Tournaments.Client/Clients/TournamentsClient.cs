@@ -1,4 +1,4 @@
-﻿// Ignore Spelling: json
+﻿// Ignore Spelling: json Deserializes deserialize deserialization
 using System.Net.Http.Headers;
 using System.Text.Json;
 
