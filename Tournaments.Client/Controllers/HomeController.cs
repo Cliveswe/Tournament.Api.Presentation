@@ -38,51 +38,63 @@ public class HomeController : Controller
     {
         JsonPatchDocument<GameUpdateDto> patchDocument = new JsonPatchDocument<GameUpdateDto>();
 
-        patchDocument.Replace(g => g.Title, "Test patch from \"homecontroller\"");
+        patchDocument.Replace(g => g.Title, "Test patch-post-put from \"homecontroller\"");
 
-        string serializedPatchDoc = Newtonsoft.Json.JsonConvert.SerializeObject(patchDocument);
+        //string serializedPatchDoc = Newtonsoft.Json.JsonConvert.SerializeObject(patchDocument);
 
-        HttpRequestMessage request = new HttpRequestMessage(httpMethod, target);
+        //HttpRequestMessage request = new HttpRequestMessage(httpMethod, target);
 
-        // Accept JSON response
-        request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue(json));
+        //// Accept JSON response
+        //request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue(json));
 
-        // Set correct content with proper Content-Type for JSON Patch
-        request.Content = new StringContent(serializedPatchDoc);
-        request.Content.Headers.ContentType = new MediaTypeHeaderValue(jsonPatch);
+        //// Set correct content with proper Content-Type for JSON Patch
+        //request.Content = new StringContent(serializedPatchDoc);
+        //request.Content.Headers.ContentType = new MediaTypeHeaderValue(jsonPatch);
 
-        HttpResponseMessage response = await httpClient.SendAsync(request);
+        //HttpResponseMessage response = await httpClient.SendAsync(request);
 
-        response.EnsureSuccessStatusCode();
+        //response.EnsureSuccessStatusCode();
+
+        await tournamentsClient.SendAsync<JsonPatchDocument<GameUpdateDto>, object>(httpMethod,
+            target,
+            () => patchDocument,
+            MediaTypes.JsonPatch);
 
     }
 
     private async Task<TournamentDto?> PostWithRequestMessageAsync(HttpMethod httpMethod, string target)
     {
-        HttpRequestMessage request = HttpHomeControllerRequestMessage(httpMethod, target);
-        TournamentDetailsCreateDto tournamentToCreate = new TournamentDetailsCreateDto
-        {
-            Title = "ABC httpClient",
-            StartDate = DateTime.Now
-        };
-        string jsonTournament = JsonSerializer.Serialize(tournamentToCreate);
-        request.Content = new StringContent(jsonTournament);
-        request.Content.Headers.ContentType = new MediaTypeHeaderValue(json);
-        HttpResponseMessage response = await httpClient.SendAsync(request);
+        //HttpRequestMessage request = HttpHomeControllerRequestMessage(httpMethod, target);
+        //TournamentDetailsCreateDto tournamentToCreate = new TournamentDetailsCreateDto
+        //{
+        //    Title = "ABC httpClient",
+        //    StartDate = DateTime.Now
+        //};
+        //string jsonTournament = JsonSerializer.Serialize(tournamentToCreate);
+        //request.Content = new StringContent(jsonTournament);
+        //request.Content.Headers.ContentType = new MediaTypeHeaderValue(json);
+        //HttpResponseMessage response = await httpClient.SendAsync(request);
 
-        try {
-            //Throws an exception if the HTTP response is false.
-            response.EnsureSuccessStatusCode();
+        //try {
+        //    //Throws an exception if the HTTP response is false.
+        //    response.EnsureSuccessStatusCode();
 
-            string result = await response.Content.ReadAsStringAsync();
-            TournamentDto? tournamentDto = DeserializeApiResponse<TournamentDto>(result);
-            Uri? location = response.Headers.Location;//get the uri for the newly created tournament.
-            return tournamentDto;
+        //    string result = await response.Content.ReadAsStringAsync();
+        //    TournamentDto? tournamentDto = DeserializeApiResponse<TournamentDto>(result);
+        //    Uri? location = response.Headers.Location;//get the uri for the newly created tournament.
+        //    return tournamentDto;
 
-        } catch(Exception ex) {
-            _ = ex;//keep the compiler quite!!
-            return null;
-        }
+        //} catch(Exception ex) {
+        //    _ = ex;//keep the compiler quite!!
+        //    return null;
+        //}
+        return await tournamentsClient.SendAsync<TournamentDetailsCreateDto, TournamentDto>(httpMethod,
+            target,
+            () => new TournamentDetailsCreateDto
+            {
+                Title = "New generic SendAsync",
+                StartDate = DateTime.Now
+            });
     }
 
     #region GET 

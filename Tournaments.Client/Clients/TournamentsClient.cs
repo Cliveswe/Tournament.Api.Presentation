@@ -6,7 +6,7 @@ namespace Tournaments.Client.Clients;
 
 public class TournamentsClient : ITournamentsClient
 {
-    private const string json = "application/json";
+
     private HttpClient client;
 
     /// <summary>
@@ -23,13 +23,15 @@ public class TournamentsClient : ITournamentsClient
     {
         client = httpClient;
         client.BaseAddress = new Uri("https://localhost:7225");
-        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(json));
+        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(MediaTypes.Json));
         client.Timeout = new TimeSpan(0, 0, 5);//Timeout in 5 seconds.
     }
 
-    public async Task<T> GetAsync<T>(string path, string contentType = json)
+    public async Task<T> GetAsync<T>(string path, string contentType = MediaTypes.Json)
     {
-        HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get,path);
+        using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get,path);
+        request.Headers.Accept.Clear();
+        request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue(contentType));
         HttpResponseMessage response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
         response.EnsureSuccessStatusCode();
         string stream = await response.Content.ReadAsStringAsync();
@@ -37,13 +39,13 @@ public class TournamentsClient : ITournamentsClient
         return result!;
     }
 
-    public async Task<TResult?> PostAsync<TCreate, TResult>(string path, Func<TCreate> payloadFactory, string contentType = json)
+    public async Task<TResult?> SendAsync<TCreate, TResult>(HttpMethod httpMethod, string path, Func<TCreate> payloadFactory, string contentType = MediaTypes.Json)
     {
         if(payloadFactory == null)
             throw new ArgumentNullException(nameof(payloadFactory), "Payload factory cannot be null.");
 
         // Create request
-        using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, path);
+        using HttpRequestMessage request = new HttpRequestMessage(httpMethod, path);
 
         // Build payload using factory delegate
         TCreate payload = payloadFactory();
@@ -65,6 +67,13 @@ public class TournamentsClient : ITournamentsClient
             return default;
         }
     }
+
+    /*
+     * Examples of using SendAsync
+     * await SendAsync(HttpMethod.Post, "api/path", () => new MyCreateDto());
+     * await SendAsync(HttpMethod.Put, "api/path/123", () => new MyUpdateDto());
+     * await SendAsync(new HttpMethod("PATCH"), "api/path/123", () => new MyPatchDto());
+     */
 
     /// <summary>
     /// Deserializes a JSON string into the specified .NET type using camelCase property naming.
@@ -90,9 +99,16 @@ public class TournamentsClient : ITournamentsClient
         JsonSerializer.Deserialize<TResult>(jsonString, CamelCaseOptions);
 
 
-    private static string SerializeToJson<T>(T payload) =>
-        JsonSerializer.Serialize(payload, CamelCaseOptions);
-
+    private static string SerializeToJson<T>(T payload)
+    {
+        if(payload is Microsoft.AspNetCore.JsonPatch.JsonPatchDocument) {
+            // Use Newtonsoft.Json for JsonPatchDocument serialization
+            return Newtonsoft.Json.JsonConvert.SerializeObject(payload);
+        } else {
+            // Use System.Text.Json for everything else
+            return JsonSerializer.Serialize(payload, CamelCaseOptions);
+        }
+    }
 
     //private static string SerializeToJson<T>(T payload)
     //{
