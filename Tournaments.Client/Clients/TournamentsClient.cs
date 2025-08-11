@@ -85,8 +85,6 @@ public class TournamentsClient : ITournamentsClient
 
     private static bool IsJsonPatchDocument(object payload)
     {
-        if(payload == null)
-            return false;
         var type = payload.GetType();
         if(!type.IsGenericType)
             return false;
