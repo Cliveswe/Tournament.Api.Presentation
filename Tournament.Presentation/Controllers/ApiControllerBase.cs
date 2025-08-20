@@ -66,6 +66,9 @@ public class ApiControllerBase : ControllerBase
     [NonAction]
     public ActionResult ProcessError(ApiBaseResponse baseResponse)
     {
+        /*
+          NB: Kräver Microsoft.AspNetCore.Mvc.NewtonsoftJson
+         */
         ProblemDetails problem = baseResponse switch
         {
             ApiNotFoundResponse notFound => CreateProblemResult(
