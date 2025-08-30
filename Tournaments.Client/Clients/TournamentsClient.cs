@@ -29,7 +29,7 @@ public class TournamentsClient : ITournamentsClient
 
     public async Task<T> GetAsync<T>(string path, string contentType = MediaTypes.Json)
     {
-        using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get,path);
+        using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, path);
         request.Headers.Accept.Clear();
         request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue(contentType));
         HttpResponseMessage response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
@@ -45,16 +45,19 @@ public class TournamentsClient : ITournamentsClient
     TCreate payload,
     string contentType = MediaTypes.Json)
     {
-        if(payload == null)
+        if (payload == null)
             throw new ArgumentNullException(nameof(payload));
-        if(string.IsNullOrWhiteSpace(path))
+        if (string.IsNullOrWhiteSpace(path))
             throw new ArgumentException("Path cannot be null or empty.", nameof(path));
 
-        // Serialize payload with correct serializer
+        // Serialize payload with correct serialize method
         string serializedPayload;
-        if(IsJsonPatchDocument(payload)) {
+        if (IsJsonPatchDocument(payload))
+        {
             serializedPayload = Newtonsoft.Json.JsonConvert.SerializeObject(payload);
-        } else {
+        }
+        else
+        {
             serializedPayload = JsonSerializer.Serialize(payload, CamelCaseOptions);
         }
 
@@ -67,17 +70,21 @@ public class TournamentsClient : ITournamentsClient
 
         using HttpResponseMessage response = await client.SendAsync(request);
 
-        try {
+        try
+        {
             response.EnsureSuccessStatusCode();
             string result = await response.Content.ReadAsStringAsync();
 
             // For void responses (e.g. Patch returning no content), handle accordingly
-            if(typeof(TResult) == typeof(object) || string.IsNullOrWhiteSpace(result)) {
+            if (typeof(TResult) == typeof(object) || string.IsNullOrWhiteSpace(result))
+            {
                 return default;
             }
 
             return JsonSerializer.Deserialize<TResult>(result, CamelCaseOptions);
-        } catch {
+        }
+        catch
+        {
             // Optionally log or handle exceptions here
             return default;
         }
@@ -86,7 +93,7 @@ public class TournamentsClient : ITournamentsClient
     private static bool IsJsonPatchDocument(object payload)
     {
         var type = payload.GetType();
-        if(!type.IsGenericType)
+        if (!type.IsGenericType)
             return false;
         return type.GetGenericTypeDefinition() == typeof(Microsoft.AspNetCore.JsonPatch.JsonPatchDocument<>);
     }
@@ -126,10 +133,11 @@ public class TournamentsClient : ITournamentsClient
 
     private static string SerializeToJson<T>(T payload)
     {
-        if(payload == null)
+        if (payload == null)
             throw new ArgumentNullException(nameof(payload));
 
-        if(payload is Microsoft.AspNetCore.JsonPatch.JsonPatchDocument) {
+        if (payload is Microsoft.AspNetCore.JsonPatch.JsonPatchDocument)
+        {
             return Newtonsoft.Json.JsonConvert.SerializeObject(
                 payload,
                 new Newtonsoft.Json.JsonSerializerSettings
@@ -139,7 +147,9 @@ public class TournamentsClient : ITournamentsClient
                         NamingStrategy = new Newtonsoft.Json.Serialization.CamelCaseNamingStrategy()
                     }
                 });
-        } else {
+        }
+        else
+        {
             return JsonSerializer.Serialize(payload, CamelCaseOptions);
         }
     }
