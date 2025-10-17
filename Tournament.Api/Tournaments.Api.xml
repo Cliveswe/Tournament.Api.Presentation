@@ -17,6 +17,17 @@
             <param name="builder">The application builder instance.</param>
             <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the asynchronous seed operation.</returns>
         </member>
+        <member name="M:Tournaments.Api.Extensions.ApplicationBuilderExtensions.HealthChecksMiddlewareExtensions(Microsoft.AspNetCore.Builder.WebApplication)">
+            <summary>
+            Provides extension methods for adding health check middleware to the application's request pipeline.
+            In other words, registers the health check endpoint.
+            </summary>
+            <remarks>This middleware enables the application to expose a health check endpoint, which can be used to
+            monitor the application's health status. By default, the health check endpoint is configured at the path
+            "/health", "/health/live" or "/health/ready".
+            Note: Health checks has no swagger integration by default. You need to add it manually if required.
+            </remarks>
+        </member>
         <member name="T:Tournaments.Api.Extensions.ExceptionMiddleware">
             <summary>
             Provides extension methods to configure global exception handling middleware
@@ -107,6 +118,14 @@
             This method checks for the existence of XML files in the output directory before including them.
             This prevents runtime failures in environments where certain projects or XML files may not be present.
             </remarks>
+        </member>
+        <member name="T:Tournaments.Api.Extensions.HealthChecksExtensions">
+            <summary>
+            Provides extension methods for configuring health checks in an application.
+            In other words, this class is the registration point for health check services.
+            </summary>
+            <remarks>This class contains methods to simplify the registration of health checks in the application's
+            dependency injection container.</remarks>
         </member>
     </members>
 </doc>

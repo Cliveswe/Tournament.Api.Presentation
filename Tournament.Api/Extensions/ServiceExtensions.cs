@@ -12,6 +12,8 @@
 
 
 using Domain.Contracts;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Service.Contracts;
 using Tournaments.Infrastructure.Repositories;
 using Tournaments.Services.Services;
@@ -132,7 +134,8 @@ public static class SwaggerServiceExtensions
             // that the .xml is required.
             var xmlDocs = Directory.GetFiles(AppContext.BaseDirectory, "*.xml", SearchOption.TopDirectoryOnly);
 
-            foreach(var xmlDoc in xmlDocs) {
+            foreach (var xmlDoc in xmlDocs)
+            {
                 options.IncludeXmlComments(xmlDoc);
             }
 
@@ -144,3 +147,36 @@ public static class SwaggerServiceExtensions
 }
 
 #endregion
+
+
+#region HealthChecksExtension
+
+/// <summary>
+/// Provides extension methods for configuring health checks in an application.
+/// In other words, this class is the registration point for health check services.
+/// </summary>
+/// <remarks>This class contains methods to simplify the registration of health checks in the application's
+/// dependency injection container.</remarks>
+public static class HealthChecksExtensions
+{
+
+    public static void HealthChecksServiceExtensions(this IServiceCollection services, string contextDBConnection)
+    {
+        // Register what you want to check.
+        services.AddHealthChecks()
+            // Liveness check
+            .AddCheck("self", () => HealthCheckResult.Healthy(), 
+            tags: new[] { "liveness" })
+
+            // Readiness check - check SQL Server connectivity
+            .AddSqlServer(contextDBConnection,
+            name: "sql",
+            healthQuery: "SELECT 1;",
+            timeout: TimeSpan.FromSeconds(3),
+            failureStatus: HealthStatus.Unhealthy,
+            tags: new[] { "readiness" });
+
+    }
+}// End of Class HealthChecksExtensions.
+#endregion
+

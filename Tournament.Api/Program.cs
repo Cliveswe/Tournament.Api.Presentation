@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Tournaments.Api.Extensions;
 using Tournaments.Infrastructure.Data;
 
@@ -68,6 +69,15 @@ namespace Tournaments.Api
             builder.Services.ConfigureRepositories();
 
             builder.Services.AddAutoMapper(typeof(TournamentMappings));
+
+            //Health Checks
+            // Get the connection key name from config
+            var connectionKey = builder
+                .Configuration["HealthChecks:ConnectionStringKey"] ?? "TournamentApiContext";
+            builder
+                .Services
+                .HealthChecksServiceExtensions(builder.Configuration.GetConnectionString(connectionKey));
+
             var app = builder.Build();
 
             app.ConfigureExceptionHandler();
@@ -75,7 +85,8 @@ namespace Tournaments.Api
             await app.SeedDataAsync();
 
             // Configure the HTTP request pipeline.
-            if(app.Environment.IsDevelopment()) {
+            if (app.Environment.IsDevelopment())
+            {
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
@@ -84,8 +95,10 @@ namespace Tournaments.Api
 
             app.UseAuthorization();
 
-
             app.MapControllers();
+
+            //Health Checks
+            app.HealthChecksMiddlewareExtensions();
 
             app.Run();
         }
