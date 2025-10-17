@@ -9,7 +9,12 @@
 
 using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
+using System.Text.Json;
 using Tournaments.Infrastructure.Data;
+using HealthExt = Tournaments.Shared.HealthChecks.HealthCheckJsonWriter;
+using Microsoft.AspNetCore.Http;
+
 
 namespace Tournaments.Api.Extensions;
 
@@ -45,6 +50,7 @@ public static class ApplicationBuilderExtensions
     /// </remarks>
     public static void HealthChecksMiddlewareExtensions(this WebApplication app)
     {
+        
         // Add Health Check endpoints at the *end* of routing
         // Define routes "/health/"
         app.MapHealthChecks("/health");
@@ -59,9 +65,9 @@ public static class ApplicationBuilderExtensions
         app.MapHealthChecks("/health/ready", new HealthCheckOptions
         {
             Predicate = check => check.Tags.Contains("readiness"),
-            ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+            ResponseWriter = HealthExt.WriteJsonResponseAsync
         });
     }
     #endregion
-
+    
 }

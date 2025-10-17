@@ -169,6 +169,41 @@
             Returns 404 Not Found if the tournament or game is not found.
             </returns>
         </member>
+        <member name="T:Tournaments.Presentation.Controllers.HealthChecksController">
+            <summary>
+            Provides endpoints to check the health status of the API.
+            </summary>
+            <remarks>
+            This controller exposes readiness and liveness health checks for monitoring purposes.
+            The <c>GetHealthDetails</c> endpoint returns the readiness status including details
+            of all registered health checks in JSON format.
+            </remarks>
+        </member>
+        <member name="M:Tournaments.Presentation.Controllers.HealthChecksController.#ctor(Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckService)">
+            <summary>
+            Provides endpoints to check the health status of the API.
+            </summary>
+            <remarks>
+            This controller exposes readiness and liveness health checks for monitoring purposes.
+            The <c>GetHealthDetails</c> endpoint returns the readiness status including details
+            of all registered health checks in JSON format.
+            </remarks>
+        </member>
+        <member name="M:Tournaments.Presentation.Controllers.HealthChecksController.GetHealthDetails">
+            <summary>
+            Retrieves the readiness health status of the application.
+            </summary>
+            <returns>
+            A JSON object containing the overall status and detailed results of each health check.
+            </returns>
+            <remarks>
+            This endpoint queries all health checks tagged with "readiness" and returns a structured
+            JSON response similar to the built-in "/health/ready" endpoint. It is intended for use
+            in monitoring dashboards or automated health probes.
+            </remarks>
+            <response code="200">The application is healthy and all checks passed. Returns JSON with health details.</response>
+            <response code="503">One or more health checks failed. Returns JSON with failing health check details.</response>
+        </member>
         <member name="T:Tournaments.Presentation.Controllers.Tournaments.TournamentDetailsController">
             <summary>
             Provides endpoints for managing tournament data, including retrieval, creation, updates,

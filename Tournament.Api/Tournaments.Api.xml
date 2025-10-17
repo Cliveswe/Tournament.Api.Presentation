@@ -121,11 +121,27 @@
         </member>
         <member name="T:Tournaments.Api.Extensions.HealthChecksExtensions">
             <summary>
-            Provides extension methods for configuring health checks in an application.
-            In other words, this class is the registration point for health check services.
+            Provides extension methods for configuring health checks in the application.
             </summary>
-            <remarks>This class contains methods to simplify the registration of health checks in the application's
-            dependency injection container.</remarks>
+            <remarks>
+            This static class simplifies the registration of health check services in the application's
+            dependency injection container. It supports both liveness and readiness checks, including
+            SQL Server connectivity verification.
+            </remarks>
+        </member>
+        <member name="M:Tournaments.Api.Extensions.HealthChecksExtensions.HealthChecksServiceExtensions(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.String,System.String)">
+            <summary>
+            Registers health check services in the <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection"/>, including
+            a liveness check and a SQL Server readiness check.
+            </summary>
+            <param name="services">The service collection to add health checks to.</param>
+            <param name="contextDBConnection">The connection string used for SQL Server readiness checks.</param>
+            <remarks>
+            - Liveness check ("self") always reports healthy.
+            - Readiness check verifies SQL Server connectivity using a simple query.
+            This method ensures that health checks are tagged appropriately for liveness
+            ("liveness") and readiness ("readiness") endpoints.
+            </remarks>
         </member>
     </members>
 </doc>

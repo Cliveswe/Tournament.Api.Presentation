@@ -12,7 +12,6 @@
 
 
 using Domain.Contracts;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Service.Contracts;
 using Tournaments.Infrastructure.Repositories;
@@ -152,20 +151,37 @@ public static class SwaggerServiceExtensions
 #region HealthChecksExtension
 
 /// <summary>
-/// Provides extension methods for configuring health checks in an application.
-/// In other words, this class is the registration point for health check services.
+/// Provides extension methods for configuring health checks in the application.
 /// </summary>
-/// <remarks>This class contains methods to simplify the registration of health checks in the application's
-/// dependency injection container.</remarks>
+/// <remarks>
+/// This static class simplifies the registration of health check services in the application's
+/// dependency injection container. It supports both liveness and readiness checks, including
+/// SQL Server connectivity verification.
+/// </remarks>
 public static class HealthChecksExtensions
 {
-
-    public static void HealthChecksServiceExtensions(this IServiceCollection services, string contextDBConnection)
+    /// <summary>
+    /// Registers health check services in the <see cref="IServiceCollection"/>, including
+    /// a liveness check and a SQL Server readiness check.
+    /// </summary>
+    /// <param name="services">The service collection to add health checks to.</param>
+    /// <param name="contextDBConnection">The connection string used for SQL Server readiness checks.</param>
+    /// <remarks>
+    /// - Liveness check ("self") always reports healthy.
+    /// - Readiness check verifies SQL Server connectivity using a simple query.
+    /// This method ensures that health checks are tagged appropriately for liveness
+    /// ("liveness") and readiness ("readiness") endpoints.
+    /// </remarks>
+    public static void HealthChecksServiceExtensions(
+        this IServiceCollection services,
+        string contextDBConnection,
+        string? urlToCheck = null)
     {
-        // Register what you want to check.
-        services.AddHealthChecks()
+        IHealthChecksBuilder healthChecksBuilder = services.AddHealthChecks()
+
+            // Register what you want to check.
             // Liveness check
-            .AddCheck("self", () => HealthCheckResult.Healthy(), 
+            .AddCheck("self", () => HealthCheckResult.Healthy(),
             tags: new[] { "liveness" })
 
             // Readiness check - check SQL Server connectivity
@@ -176,6 +192,15 @@ public static class HealthChecksExtensions
             failureStatus: HealthStatus.Unhealthy,
             tags: new[] { "readiness" });
 
+        
+        if (!string.IsNullOrWhiteSpace(urlToCheck))
+        {
+            healthChecksBuilder.AddUrlGroup(
+                      new Uri(urlToCheck),
+                      name: "external_url",
+                      failureStatus: HealthStatus.Unhealthy,
+                      tags: new[] { "readiness" });
+        }
     }
 }// End of Class HealthChecksExtensions.
 #endregion
