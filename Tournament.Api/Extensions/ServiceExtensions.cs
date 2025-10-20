@@ -205,7 +205,9 @@ public static class HealthChecksExtensions
             //
             // Liveness check - simple self check.
             //
-            .AddCheck("self", () => HealthCheckResult.Healthy(),
+            .AddCheck(
+            name: "self", 
+            check: () => HealthCheckResult.Healthy(),
             tags: new[] { "liveness" })
 
             //
