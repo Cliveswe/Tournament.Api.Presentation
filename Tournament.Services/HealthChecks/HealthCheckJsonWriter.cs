@@ -15,7 +15,7 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
-namespace Tournaments.Shared.HealthChecks;
+namespace Tournaments.Services.HealthChecks;
 
 /// <summary>
 /// Provides helper methods for serializing <see cref="HealthReport"/> objects

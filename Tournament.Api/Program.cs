@@ -1,7 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Service.Contracts;
 using Tournaments.Api.Extensions;
 using Tournaments.Infrastructure.Data;
+using Tournaments.Services.HealthChecks;
 
 
 // Ignore Spelling: Api xml
@@ -74,6 +76,7 @@ namespace Tournaments.Api
             // Get the connection key name from config
             var connectionKey = builder
                 .Configuration["HealthChecks:ConnectionStringKey"];// ?? "TournamentApiContext";
+            
             builder
                 .Services
                 .HealthChecksServiceExtensions(builder.Configuration.GetConnectionString(connectionKey));

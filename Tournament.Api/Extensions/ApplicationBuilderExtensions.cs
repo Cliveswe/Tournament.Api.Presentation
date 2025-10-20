@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using System.Text.Json;
 using Tournaments.Infrastructure.Data;
-using HealthExt = Tournaments.Shared.HealthChecks.HealthCheckJsonWriter;
+using HealthExt = Tournaments.Services.HealthChecks.HealthCheckJsonWriter;
 using Microsoft.AspNetCore.Http;
 
 

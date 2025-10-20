@@ -201,26 +201,6 @@
             This field is required and cannot exceed 100 characters.
             </summary>
         </member>
-        <member name="T:Tournaments.Shared.HealthChecks.HealthCheckJsonWriter">
-            <summary>
-            Provides helper methods for serializing <see cref="T:Microsoft.Extensions.Diagnostics.HealthChecks.HealthReport"/> objects
-            into JSON responses that can be returned from HTTP endpoints.
-            </summary>
-        </member>
-        <member name="M:Tournaments.Shared.HealthChecks.HealthCheckJsonWriter.WriteJsonResponseAsync(Microsoft.AspNetCore.Http.HttpContext,Microsoft.Extensions.Diagnostics.HealthChecks.HealthReport)">
-            <summary>
-            Writes a <see cref="T:Microsoft.Extensions.Diagnostics.HealthChecks.HealthReport"/> to the HTTP response body as an indented JSON object.
-            </summary>
-            <param name="context">The <see cref="T:Microsoft.AspNetCore.Http.HttpContext"/> of the current request.</param>
-            <param name="report">The <see cref="T:Microsoft.Extensions.Diagnostics.HealthChecks.HealthReport"/> containing health check results.</param>
-            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the asynchronous operation.</returns>
-            <remarks>
-            This method produces a JSON object with the overall status and an array of individual
-            health check results, including their status, description, and optional data.
-            It is intended for use in readiness and liveness endpoints and can be called from
-            controllers or middleware.
-            </remarks>
-        </member>
         <member name="T:Tournaments.Shared.Request.MetaData">
             <summary>
             Represents pagination metadata returned alongside paged API results.

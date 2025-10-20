@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Diagnostics.HealthChecks;
 
-namespace Tournaments.Shared.HealthChecks
+namespace Service.Contracts
 {
     public interface IWebDependencyHealthCheck
     {

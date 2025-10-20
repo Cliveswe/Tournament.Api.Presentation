@@ -14,7 +14,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Swashbuckle.AspNetCore.Annotations;
-using HealthExt = Tournaments.Shared.HealthChecks.HealthCheckJsonWriter;
+using HealthExt = Tournaments.Services.HealthChecks.HealthCheckJsonWriter;
 
 namespace Tournaments.Presentation.Controllers;
 

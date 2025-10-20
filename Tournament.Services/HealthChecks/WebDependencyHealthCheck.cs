@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Service.Contracts;
 
-namespace Tournaments.Shared.HealthChecks
+namespace Tournaments.Services.HealthChecks
 {
     public class WebDependencyHealthCheck : IHealthCheck, IWebDependencyHealthCheck
     {
@@ -17,11 +18,11 @@ namespace Tournaments.Shared.HealthChecks
         public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(urlToCheck)) {
-                return HealthCheckResult.Degraded("No URL probvided for web dependency check.");
+                return HealthCheckResult.Unhealthy("No URL probvided for web dependency check.");
             }
             try
             {
-                HttpResponseMessage response = await httpClient.GetAsync(urlToCheck, cancellationToken);
+                using HttpResponseMessage response = await httpClient.GetAsync(urlToCheck, cancellationToken);
                 if (response.IsSuccessStatusCode)
                     return HealthCheckResult.Healthy($"Web dependency {urlToCheck} is healthy!");
 
@@ -30,11 +31,14 @@ namespace Tournaments.Shared.HealthChecks
                 return HealthCheckResult.Unhealthy($"Web dependency {urlToCheck} returned an error status code: {response.StatusCode}!");
 
             }
-            catch 
+            catch (HttpRequestException) {
+                return HealthCheckResult.Unhealthy($"Network error while checking {urlToCheck} web dependency! Please try again later.");
+            }
+            catch (Exception)
             {
                 // Valid but unreachable.
                 // Malformed URL.
-                return HealthCheckResult.Unhealthy($"Exception while checking {urlToCheck} web dependency!");
+                return HealthCheckResult.Unhealthy($"Exception while checking {urlToCheck} web dependency! Please try again later.");
             }
         }
     }

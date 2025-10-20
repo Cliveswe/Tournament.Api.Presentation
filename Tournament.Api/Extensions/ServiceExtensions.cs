@@ -12,11 +12,12 @@
 
 
 using Domain.Contracts;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Service.Contracts;
 using Tournaments.Infrastructure.Repositories;
+using Tournaments.Services.HealthChecks;
 using Tournaments.Services.Services;
-using Tournaments.Shared.HealthChecks;
 
 namespace Tournaments.Api.Extensions;
 
@@ -66,15 +67,16 @@ public static class ServiceExtensions
         services.AddScoped<ITournamentService, TournamentService>();
         services.AddScoped<IGameService, GameService>();
 
-        //Health check service 
-        services.AddScoped<IWebDependencyHealthCheck, WebDependencyHealthCheck>();
-
         // Register individual services with lazy loading.
         services.AddLazy<ITournamentService>();
         services.AddLazy<IGameService>();
         services.AddLazy<IAuthService>();
 
+
+        //Health checks
+        services.AddScoped<IWebDependencyHealthCheck, WebDependencyHealthCheck>();
         services.AddLazy<IWebDependencyHealthCheck>();
+        
     }
 
 }// End of Class ServiceExtensions.
@@ -172,6 +174,7 @@ public static class HealthChecksExtensions
     /// </summary>
     /// <param name="services">The service collection to add health checks to.</param>
     /// <param name="contextDBConnection">The connection string used for SQL Server readiness checks.</param>
+    /// <param name="urlToCheck"></param>
     /// <remarks>
     /// - Liveness check ("self") always reports healthy.
     /// - Readiness check verifies SQL Server connectivity using a simple query.
@@ -206,14 +209,14 @@ public static class HealthChecksExtensions
             // Liveness check - simple self check.
             //
             .AddCheck(
-            name: "self", 
+            name: "self",
             check: () => HealthCheckResult.Healthy(),
             tags: new[] { "liveness" })
 
             //
             // Readiness check
             //
-            
+
             // Check SQL Server connectivity.
             .AddSqlServer(contextDBConnection,
             name: "sql-name",
@@ -221,15 +224,23 @@ public static class HealthChecksExtensions
             timeout: TimeSpan.FromSeconds(3),
             failureStatus: HealthStatus.Unhealthy,
             tags: new[] { "readiness" })
-        
+
+            .AddCheck<SqlConnectionHealthCheck>(
+            name: "OrderingDB",
+            timeout: TimeSpan.FromSeconds(3),
+            failureStatus: HealthStatus.Unhealthy,
+            tags: new[] { "readiness" }
+            )            
+
             // Check a web dependency.
             // Register an instance of health check to check dynamically web dependency, use a facroty method.
             .AddCheck<WebDependencyHealthCheck>(
                 name: "Web Dependency Check", //name that identifies the health check.
                 failureStatus: HealthStatus.Unhealthy, // status returned when the health check fails.
                 timeout: TimeSpan.FromSeconds(5), // The maximum duration the health check is allow to run.
-                tags: new[] {"readiness" } // An array of tags for the health check, cn be helpful for filtering.
+                tags: new[] { "readiness" } // An array of tags for the health check, cn be helpful for filtering.
                 );
+            
 
     }
 }// End of Class HealthChecksExtensions.
