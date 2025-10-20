@@ -16,12 +16,7 @@ public class DatabaseConnectionHealthCheck : IHealthCheck, ISqlConnectionHealthC
 
     public string TestQuery { get; }
 
-    //public DatabaseConnectionHealthCheck(string connectionString)
-    //    : this(connectionString, testQuery: DefaultTestQuery)
-    //{
-    //}
-
-    public DatabaseConnectionHealthCheck(string connectionString, string testQuery= DefaultTestQuery)
+    public DatabaseConnectionHealthCheck(string connectionString, string testQuery = DefaultTestQuery)
     {
         ConnectionString = connectionString ?? throw new ArgumentNullException(nameof(connectionString));
         TestQuery = testQuery;
@@ -29,26 +24,47 @@ public class DatabaseConnectionHealthCheck : IHealthCheck, ISqlConnectionHealthC
 
     public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default(CancellationToken))
     {
-        using (var connection = new SqlConnection(ConnectionString))
+        DateTime startTimeStamp = DateTime.UtcNow;
+        try
         {
-            try
-            {
-                await connection.OpenAsync(cancellationToken);
 
-                if (TestQuery != null)
+            await using SqlConnection connection = new SqlConnection(ConnectionString);
+            await connection.OpenAsync(cancellationToken);
+
+
+            if (!string.IsNullOrWhiteSpace(TestQuery))
+            {
+                await using SqlCommand command = connection.CreateCommand();
+                command.CommandText = TestQuery;
+
+                await command.ExecuteNonQueryAsync(cancellationToken);
+            }
+
+            TimeSpan duration = DateTime.UtcNow - startTimeStamp;
+            return HealthCheckResult.Healthy(
+                description: $"Database connection '{ConnectionString}' is healthy.",
+                data: new Dictionary<string, object>
                 {
-                    var command = connection.CreateCommand();
-                    command.CommandText = TestQuery;
-
-                    await command.ExecuteNonQueryAsync(cancellationToken);
-                }
-            }
-            catch (DbException ex)
-            {
-                return new HealthCheckResult(status: context.Registration.FailureStatus, exception: ex);
-            }
+                    ["connectionString"] = ConnectionString,
+                    ["statusCode"] = 0,// 0 indicates success
+                    ["responseTimeMs"] = duration.TotalMilliseconds
+                });
         }
-
-        return HealthCheckResult.Healthy();
+        catch (DbException ex)
+        {
+            TimeSpan duration = DateTime.UtcNow - startTimeStamp;
+            return HealthCheckResult.Unhealthy(
+                description: $"Database connection '{ConnectionString}' failed.",
+                exception: ex,
+                data: new Dictionary<string, object>
+                {
+                    ["connectionString"] = ConnectionString,
+                    ["responseTimeMs"] = duration.TotalMilliseconds,
+                    // check if ex is of type SqlException, if so cast it to SqlException and assign it to sqlEx.
+                    // if it is SqlException it uses the Number property from SqlException. Number is the
+                    // SQL Server error code. Otherwise, it assigns -1 to indicate an unknown error code. 
+                    ["errorCode"] = ex is SqlException sqlEx ? sqlEx.Number : -1
+                });
+        }
     }
 }

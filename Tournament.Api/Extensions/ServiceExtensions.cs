@@ -74,9 +74,9 @@ public static class ServiceExtensions
 
 
         //Health checks
-        services.AddScoped<IWebDependencyHealthCheck, WebDependencyHealthCheck>();
-        services.AddLazy<IWebDependencyHealthCheck>();
-        
+        // services.AddScoped<IWebDependencyHealthCheck, WebDependencyHealthCheck>();
+        // services.AddLazy<IWebDependencyHealthCheck>();
+
     }
 
 }// End of Class ServiceExtensions.
@@ -189,11 +189,16 @@ public static class HealthChecksExtensions
         // Add HttpClient factory to the services collection.
         // This is required for health checks that depend on HttpClient.
         services.AddHttpClient();
-        // Use a fallback URL if urlToCheck is not provided, i.e. https://www.umea.se
-        string finalUrlToCheck = null;
-        //string finalUrlToCheck = string.IsNullOrWhiteSpace(urlToCheck) ? "https://www.umea.se" : urlToCheck;
-        // Register WedDependencyHealthCheck with a URL to check.
-        _ = services.AddTransient(provider => new WebDependencyHealthCheck(provider.GetRequiredService<HttpClient>(), finalUrlToCheck));
+
+        //Use a fallback URL if urlToCheck is not provided, i.e. https://www.umea.se
+        // string finalUrlToCheck = null;
+        string finalUrlToCheck = string.IsNullOrWhiteSpace(urlToCheck) ? "https://www.umea.se" : urlToCheck;
+
+        // Important: Register Dependency Injection for "controllers" or other services!
+        _ = services.AddTransient(provider =>
+        new WebDependencyHealthCheck(provider.GetRequiredService<HttpClient>(), finalUrlToCheck));
+        _ = services.AddTransient<DatabaseConnectionHealthCheck>(_ =>
+           new DatabaseConnectionHealthCheck(contextDBConnection));
 
         // Reisters required health checks services. AddHealthChecks method configures a basic HTTP check that returns a 
         // 200 Ok status code with "Healty" response when requested.
@@ -211,36 +216,38 @@ public static class HealthChecksExtensions
             .AddCheck(
             name: "self",
             check: () => HealthCheckResult.Healthy(),
+            timeout: TimeSpan.FromSeconds(3),
             tags: new[] { "liveness" })
 
             //
             // Readiness check
             //
 
-            // Check SQL Server connectivity.
+            // Check SQL Server connectivity. This uses nuget package Microsoft.Extensions.Diagnostics.HealthChecks.SqlServer
+            // thus remove it.
             .AddSqlServer(contextDBConnection,
             name: "sql-name",
             healthQuery: "SELECT 1;",
-            timeout: TimeSpan.FromSeconds(3),
+            timeout: TimeSpan.FromSeconds(5),
             failureStatus: HealthStatus.Unhealthy,
             tags: new[] { "readiness" })
 
-            //.AddCheck<DatabaseConnectionHealthCheck>(
-            //name: "OrderingDB",
-            //timeout: TimeSpan.FromSeconds(3),
-            //failureStatus: HealthStatus.Unhealthy,
-            //tags: new[] { "readiness" }
-            //)            
+            .AddCheck<DatabaseConnectionHealthCheck>(
+            name: "OrderingDB",
+            timeout: TimeSpan.FromSeconds(5),
+            failureStatus: HealthStatus.Unhealthy,
+            tags: new[] { "readiness" }
+            )
 
             // Check a web dependency.
             // Register an instance of health check to check dynamically web dependency, use a facroty method.
             .AddCheck<WebDependencyHealthCheck>(
-                name: "Web Dependency Check", //name that identifies the health check.
-                failureStatus: HealthStatus.Degraded, // status returned when the health check fails.
-                timeout: TimeSpan.FromSeconds(5), // The maximum duration the health check is allow to run.
-                tags: new[] { "readiness" } // An array of tags for the health check, cn be helpful for filtering.
-                );
-            
+            name: "Web Dependency Check", //name that identifies the health check.
+            timeout: TimeSpan.FromSeconds(5), // The maximum duration the health check is allow to run.
+            failureStatus: HealthStatus.Degraded, // status returned when the health check fails.
+            tags: new[] { "readiness" } // An array of tags for the health check, cn be helpful for filtering.
+            );
+
 
     }
 }// End of Class HealthChecksExtensions.
