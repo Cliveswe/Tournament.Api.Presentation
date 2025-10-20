@@ -16,6 +16,7 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Service.Contracts;
 using Tournaments.Infrastructure.Repositories;
 using Tournaments.Services.Services;
+using Tournaments.Shared.HealthChecks;
 
 namespace Tournaments.Api.Extensions;
 
@@ -65,10 +66,15 @@ public static class ServiceExtensions
         services.AddScoped<ITournamentService, TournamentService>();
         services.AddScoped<IGameService, GameService>();
 
+        //Health check service 
+        services.AddScoped<IWebDependencyHealthCheck, WebDependencyHealthCheck>();
+
         // Register individual services with lazy loading.
         services.AddLazy<ITournamentService>();
         services.AddLazy<IGameService>();
         services.AddLazy<IAuthService>();
+
+        services.AddLazy<IWebDependencyHealthCheck>();
     }
 
 }// End of Class ServiceExtensions.
@@ -177,31 +183,52 @@ public static class HealthChecksExtensions
         string contextDBConnection,
         string? urlToCheck = null)
     {
+        // Add HttpClient factory to the services collection.
+        // This is required for health checks that depend on HttpClient.
+        services.AddHttpClient();
+        // Use a fallback URL if urlToCheck is not provided, i.e. https://www.umea.se
+        //string finalUrlToCheck = null;
+        string finalUrlToCheck = string.IsNullOrWhiteSpace(urlToCheck) ? "https://www.umea.se" : urlToCheck;
+        // Register WedDependencyHealthCheck with a URL to check.
+        _ = services.AddTransient(provider => new WebDependencyHealthCheck(provider.GetRequiredService<HttpClient>(), finalUrlToCheck));
+
+        // Reisters required health checks services. AddHealthChecks method configures a basic HTTP check that returns a 
+        // 200 Ok status code with "Healty" response when requested.
         IHealthChecksBuilder healthChecksBuilder = services.AddHealthChecks()
 
-            // Register what you want to check.
-            // Liveness check
+            // N.B. To begin with, define what consitutes a healthy status for each microservice.
+            // To take full advantage of health checks, use tags to group or filter health checks.
+            // To use tags, you will need to specify register them in app.MapHeathChecks middleware.
+
+            // Register what you want to check. Each AddCheck extension method configures a custom health check.
+
+            //
+            // Liveness check - simple self check.
+            //
             .AddCheck("self", () => HealthCheckResult.Healthy(),
             tags: new[] { "liveness" })
 
-            // Readiness check - check SQL Server connectivity
+            //
+            // Readiness check
+            //
+            
+            // Check SQL Server connectivity.
             .AddSqlServer(contextDBConnection,
-            name: "sql",
+            name: "sql-name",
             healthQuery: "SELECT 1;",
             timeout: TimeSpan.FromSeconds(3),
             failureStatus: HealthStatus.Unhealthy,
-            tags: new[] { "readiness" });
-
+            tags: new[] { "readiness" })
         
-        if (!string.IsNullOrWhiteSpace(urlToCheck))
-        {
-            healthChecksBuilder.AddUrlGroup(
-                      new Uri(urlToCheck),
-                      name: "external_url",
-                      failureStatus: HealthStatus.Unhealthy,
-                      tags: new[] { "readiness" });
-        }
+            // Check a web dependency.
+            // Register an instance of health check to check dynamically web dependency, use a facroty method.
+            .AddCheck<WebDependencyHealthCheck>(
+                name: "Web Dependency Check", //name that identifies the health check.
+                failureStatus: HealthStatus.Unhealthy, // status returned when the health check fails.
+                timeout: TimeSpan.FromSeconds(5), // The maximum duration the health check is allow to run.
+                tags: new[] {"readiness" } // An array of tags for the health check, cn be helpful for filtering.
+                );
+
     }
 }// End of Class HealthChecksExtensions.
 #endregion
-

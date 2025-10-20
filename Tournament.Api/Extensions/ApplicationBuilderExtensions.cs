@@ -56,6 +56,11 @@ public static class ApplicationBuilderExtensions
         app.MapHealthChecks("/health");
 
         // Define liveness and readiness endpoints "/health/live" 
+        app.MapHealthChecks("/health/ping", new HealthCheckOptions
+        {
+            Predicate = check => check.Tags.Contains("liveness")
+        });
+
         app.MapHealthChecks("/health/live", new HealthCheckOptions
         {
             Predicate = check => check.Tags.Contains("liveness")

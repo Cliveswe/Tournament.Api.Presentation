@@ -76,7 +76,7 @@ namespace Tournaments.Api
                 .Configuration["HealthChecks:ConnectionStringKey"];// ?? "TournamentApiContext";
             builder
                 .Services
-                .HealthChecksServiceExtensions(builder.Configuration.GetConnectionString(connectionKey), "https://www.umea.se/");
+                .HealthChecksServiceExtensions(builder.Configuration.GetConnectionString(connectionKey));
 
             var app = builder.Build();
 
