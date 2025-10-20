@@ -29,7 +29,8 @@ public class WebDependencyHealthCheck : IHealthCheck, IWebDependencyHealthCheck
             TimeSpan duration = DateTime.UtcNow - startTimeStamp;
 
             return !response.IsSuccessStatusCode
-                ? HealthCheckResult.Healthy($"Web dependency {urlToCheck} is healthy!",
+                ? HealthCheckResult.Healthy(
+                description: $"Web dependency {urlToCheck} is healthy!",
                 data: new Dictionary<string, object>
                 {
                     ["url"] = urlToCheck,
