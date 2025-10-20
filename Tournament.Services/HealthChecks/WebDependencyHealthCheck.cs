@@ -18,7 +18,7 @@ namespace Tournaments.Services.HealthChecks
         public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(urlToCheck)) {
-                return HealthCheckResult.Unhealthy("No URL probvided for web dependency check.");
+                return HealthCheckResult.Degraded("No URL probvided for web dependency check.");
             }
             try
             {

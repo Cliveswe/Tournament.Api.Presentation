@@ -190,8 +190,8 @@ public static class HealthChecksExtensions
         // This is required for health checks that depend on HttpClient.
         services.AddHttpClient();
         // Use a fallback URL if urlToCheck is not provided, i.e. https://www.umea.se
-        //string finalUrlToCheck = null;
-        string finalUrlToCheck = string.IsNullOrWhiteSpace(urlToCheck) ? "https://www.umea.se" : urlToCheck;
+        string finalUrlToCheck = null;
+        //string finalUrlToCheck = string.IsNullOrWhiteSpace(urlToCheck) ? "https://www.umea.se" : urlToCheck;
         // Register WedDependencyHealthCheck with a URL to check.
         _ = services.AddTransient(provider => new WebDependencyHealthCheck(provider.GetRequiredService<HttpClient>(), finalUrlToCheck));
 
@@ -225,18 +225,18 @@ public static class HealthChecksExtensions
             failureStatus: HealthStatus.Unhealthy,
             tags: new[] { "readiness" })
 
-            .AddCheck<SqlConnectionHealthCheck>(
-            name: "OrderingDB",
-            timeout: TimeSpan.FromSeconds(3),
-            failureStatus: HealthStatus.Unhealthy,
-            tags: new[] { "readiness" }
-            )            
+            //.AddCheck<DatabaseConnectionHealthCheck>(
+            //name: "OrderingDB",
+            //timeout: TimeSpan.FromSeconds(3),
+            //failureStatus: HealthStatus.Unhealthy,
+            //tags: new[] { "readiness" }
+            //)            
 
             // Check a web dependency.
             // Register an instance of health check to check dynamically web dependency, use a facroty method.
             .AddCheck<WebDependencyHealthCheck>(
                 name: "Web Dependency Check", //name that identifies the health check.
-                failureStatus: HealthStatus.Unhealthy, // status returned when the health check fails.
+                failureStatus: HealthStatus.Degraded, // status returned when the health check fails.
                 timeout: TimeSpan.FromSeconds(5), // The maximum duration the health check is allow to run.
                 tags: new[] { "readiness" } // An array of tags for the health check, cn be helpful for filtering.
                 );

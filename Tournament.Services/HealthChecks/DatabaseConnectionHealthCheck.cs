@@ -8,7 +8,7 @@ using System.Data.Common;
 namespace Tournaments.Services.HealthChecks;
 
 // Sample SQL Connection Health Check
-public class SqlConnectionHealthCheck : IHealthCheck, ISqlConnectionHealthCheck
+public class DatabaseConnectionHealthCheck : IHealthCheck, ISqlConnectionHealthCheck
 {
     private const string DefaultTestQuery = "Select 1";
 
@@ -16,12 +16,12 @@ public class SqlConnectionHealthCheck : IHealthCheck, ISqlConnectionHealthCheck
 
     public string TestQuery { get; }
 
-    //public SqlConnectionHealthCheck(string connectionString)
+    //public DatabaseConnectionHealthCheck(string connectionString)
     //    : this(connectionString, testQuery: DefaultTestQuery)
     //{
     //}
 
-    public SqlConnectionHealthCheck(string connectionString, string testQuery= DefaultTestQuery)
+    public DatabaseConnectionHealthCheck(string connectionString, string testQuery= DefaultTestQuery)
     {
         ConnectionString = connectionString ?? throw new ArgumentNullException(nameof(connectionString));
         TestQuery = testQuery;
