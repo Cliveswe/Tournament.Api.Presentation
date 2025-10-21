@@ -48,26 +48,31 @@ public static class ApplicationBuilderExtensions
     /// "/health", "/health/live" or "/health/ready".
     /// Note: Health checks has no swagger integration by default. You need to add it manually if required.
     /// </remarks>
-    public static void HealthChecksMiddlewareExtensions(this WebApplication app)
+    public static async Task HealthChecksMiddlewareExtensions(this WebApplication app)
     {
         
         // Add Health Check endpoints at the *end* of routing
         // Define routes "/health/"
-        app.MapHealthChecks("/health");
+        app.MapHealthChecks("/health",new HealthCheckOptions {
+            ResponseWriter = HealthExt.WriteJsonResponseAsync
+        });
 
         // Define liveness and readiness endpoints "/health/live" 
         app.MapHealthChecks("/health/ping", new HealthCheckOptions
         {
-            Predicate = check => check.Tags.Contains("liveness")
+            Predicate = check => check.Tags.Contains("liveness"),
+            ResponseWriter = HealthExt.WriteJsonResponseAsync
+
         });
 
         app.MapHealthChecks("/health/live", new HealthCheckOptions
         {
-            Predicate = check => check.Tags.Contains("liveness")
+            Predicate = check => check.Tags.Contains("liveness"),
+            ResponseWriter = HealthExt.WriteJsonResponseAsync
         });
 
         // Define readiness endpoint "/health/ready"
-        app.MapHealthChecks("/health/ready", new HealthCheckOptions
+        _ = app.MapHealthChecks("/health/ready", new HealthCheckOptions
         {
             Predicate = check => check.Tags.Contains("readiness"),
             ResponseWriter = HealthExt.WriteJsonResponseAsync

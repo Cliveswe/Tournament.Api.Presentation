@@ -28,7 +28,7 @@ public class WebDependencyHealthCheck : IHealthCheck, IWebDependencyHealthCheck
             using HttpResponseMessage response = await httpClient.GetAsync(urlToCheck, cancellationToken);
             TimeSpan duration = DateTime.UtcNow - startTimeStamp;
 
-            return !response.IsSuccessStatusCode
+            return response.IsSuccessStatusCode
                 ? HealthCheckResult.Healthy(
                 description: $"Web dependency {urlToCheck} is healthy!",
                 data: new Dictionary<string, object>

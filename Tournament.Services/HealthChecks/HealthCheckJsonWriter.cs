@@ -11,6 +11,8 @@
 //        monitoring dashboards and automated health probes.
 //
 
+using System.Reflection.Metadata.Ecma335;
+using System.Text;
 using System.Text.Json;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
@@ -39,43 +41,37 @@ public static class HealthCheckJsonWriter
     {
         context.Response.ContentType = "application/json; charset=utf-8";
 
-        await using var ms = new MemoryStream();
-        await using (var writer = new Utf8JsonWriter(ms, new JsonWriterOptions { Indented = true }))
+        using MemoryStream memoryStream = new MemoryStream();
+         await using (Utf8JsonWriter writer = new Utf8JsonWriter(memoryStream, new JsonWriterOptions { Indented = true }))
         {
             writer.WriteStartObject();
             writer.WriteString("status", report.Status.ToString());
 
             if (report.Entries.Count > 0)
             {
+                // Create an array of "results"
                 writer.WriteStartArray("results");
-
+                
                 foreach (var (key, value) in report.Entries)
                 {
-                    writer.WriteStartObject();
+                    writer.WriteStartObject();// Start of each health check object.
+                    // A number of records per health check object.
                     writer.WriteString("key", key);
                     writer.WriteString("status", value.Status.ToString());
                     writer.WriteString("description", value.Description);
 
-                    writer.WriteStartArray("data");
-                    foreach (var (dataKey, dataValue) in value.Data.Where(d => d.Value != null))
-                    {
-                        writer.WriteStartObject();
-                        writer.WritePropertyName(dataKey);
-                        JsonSerializer.Serialize(writer, dataValue, dataValue.GetType());
-                        writer.WriteEndObject();
-                    }
-                    writer.WriteEndArray();
-
-                    writer.WriteEndObject();
+                    writer.WriteEndObject();// End of each health check object.
                 }
 
                 writer.WriteEndArray();
             }
-
+            
             writer.WriteEndObject();
         }
 
-        ms.Position = 0;
-        await ms.CopyToAsync(context.Response.Body);
+        memoryStream.Position = 0;
+        await memoryStream.CopyToAsync(context.Response.Body);
+
     }
+    
 }
