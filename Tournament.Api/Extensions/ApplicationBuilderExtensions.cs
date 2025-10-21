@@ -66,7 +66,8 @@ public static class ApplicationBuilderExtensions
         });
 
         // Define liveness and readiness endpoints "/health/ping" 
-        app.MapHealthChecks("/health/ping", BuildLivenessHealthCheckOptions());
+        //app.MapHealthChecks("/health/ping", BuildLivenessHealthCheckOptions());
+        app.MapHealthChecks("/health/ping");
 
         // Define liveness and readiness endpoints "/health/live" 
         app.MapHealthChecks("/health/live", BuildLivenessHealthCheckOptions());

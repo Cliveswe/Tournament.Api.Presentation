@@ -129,14 +129,13 @@
             SQL Server connectivity verification.
             </remarks>
         </member>
-        <member name="M:Tournaments.Api.Extensions.HealthChecksExtensions.HealthChecksServiceExtensions(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.String,System.String)">
+        <member name="M:Tournaments.Api.Extensions.HealthChecksExtensions.HealthChecksServiceExtensions(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.String)">
             <summary>
             Registers health check services in the <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection"/>, including
             a liveness check and a SQL Server readiness check.
             </summary>
             <param name="services">The service collection to add health checks to.</param>
             <param name="contextDBConnection">The connection string used for SQL Server readiness checks.</param>
-            <param name="urlToCheck"></param>
             <remarks>
             - Liveness check ("self") always reports healthy.
             - Readiness check verifies SQL Server connectivity using a simple query.

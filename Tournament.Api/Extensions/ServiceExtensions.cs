@@ -75,8 +75,8 @@ public static class ServiceExtensions
 
 
         //Health checks
-        // services.AddScoped<IWebDependencyHealthCheck, WebDependencyHealthCheck>();
-        // services.AddLazy<IWebDependencyHealthCheck>();
+         services.AddScoped<IWebDependencyHealthCheck, WebDependencyHealthCheck>();
+         services.AddLazy<IWebDependencyHealthCheck>();
         services.AddScoped<IDatabaseConnectionHealthCheck, DatabaseConnectionHealthCheck>();
         services.AddLazy<IDatabaseConnectionHealthCheck>();
 
@@ -177,7 +177,6 @@ public static class HealthChecksExtensions
     /// </summary>
     /// <param name="services">The service collection to add health checks to.</param>
     /// <param name="contextDBConnection">The connection string used for SQL Server readiness checks.</param>
-    /// <param name="urlToCheck"></param>
     /// <remarks>
     /// - Liveness check ("self") always reports healthy.
     /// - Readiness check verifies SQL Server connectivity using a simple query.
