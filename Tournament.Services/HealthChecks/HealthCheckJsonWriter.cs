@@ -42,16 +42,16 @@ public static class HealthCheckJsonWriter
         context.Response.ContentType = "application/json; charset=utf-8";
 
         using MemoryStream memoryStream = new MemoryStream();
-         await using (Utf8JsonWriter writer = new Utf8JsonWriter(memoryStream, new JsonWriterOptions { Indented = true }))
+        await using (Utf8JsonWriter writer = new Utf8JsonWriter(memoryStream, new JsonWriterOptions { Indented = true }))
         {
-            writer.WriteStartObject();
+            writer.WriteStartObject();// Start of root object.
             writer.WriteString("status", report.Status.ToString());
 
             if (report.Entries.Count > 0)
             {
                 // Create an array of "results"
-                writer.WriteStartArray("results");
-                
+                writer.WriteStartArray("results");// Start of results array.
+
                 foreach (var (key, value) in report.Entries)
                 {
                     writer.WriteStartObject();// Start of each health check object.
@@ -59,14 +59,21 @@ public static class HealthCheckJsonWriter
                     writer.WriteString("key", key);
                     writer.WriteString("status", value.Status.ToString());
                     writer.WriteString("description", value.Description);
+                    
+                    // Write additional data if any.
+                    if (value.Data.Count > 0) {
+                        foreach (var (dataKey, dataValue) in value.Data) {
+                            writer.WriteString(dataKey, dataValue?.ToString() ?? string.Empty);
+                        }
+                    }
 
                     writer.WriteEndObject();// End of each health check object.
                 }
 
-                writer.WriteEndArray();
+                writer.WriteEndArray(); // End of results array.
             }
             
-            writer.WriteEndObject();
+            writer.WriteEndObject();// End of root object.
         }
 
         memoryStream.Position = 0;

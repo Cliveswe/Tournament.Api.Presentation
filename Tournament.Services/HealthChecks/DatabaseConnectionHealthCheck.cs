@@ -41,11 +41,13 @@ public class DatabaseConnectionHealthCheck : IHealthCheck, ISqlConnectionHealthC
             }
 
             TimeSpan duration = DateTime.UtcNow - startTimeStamp;
+            
             return HealthCheckResult.Healthy(
-                description: $"Database connection '{ConnectionString}' is healthy.",
+                description: $"Database connection is healthy.",
                 data: new Dictionary<string, object>
                 {
-                    ["connectionString"] = ConnectionString,
+                    //Safety first: extract the database name from the connection string.
+                    ["database"] = new SqlConnectionStringBuilder(ConnectionString).InitialCatalog,
                     ["statusCode"] = 0,// 0 indicates success
                     ["responseTimeMs"] = duration.TotalMilliseconds
                 });
@@ -54,11 +56,12 @@ public class DatabaseConnectionHealthCheck : IHealthCheck, ISqlConnectionHealthC
         {
             TimeSpan duration = DateTime.UtcNow - startTimeStamp;
             return HealthCheckResult.Unhealthy(
-                description: $"Database connection '{ConnectionString}' failed.",
+                description: $"Database connection failed.",
                 exception: ex,
                 data: new Dictionary<string, object>
                 {
-                    ["connectionString"] = ConnectionString,
+                    //Safety first: extract the database name from the connection string.
+                    ["database"] = new SqlConnectionStringBuilder(ConnectionString).InitialCatalog,
                     ["responseTimeMs"] = duration.TotalMilliseconds,
                     // check if ex is of type SqlException, if so cast it to SqlException and assign it to sqlEx.
                     // if it is SqlException it uses the Number property from SqlException. Number is the

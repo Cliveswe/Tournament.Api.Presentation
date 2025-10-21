@@ -57,14 +57,13 @@ public static class ApplicationBuilderExtensions
             ResponseWriter = HealthExt.WriteJsonResponseAsync
         });
 
-        // Define liveness and readiness endpoints "/health/live" 
+        // Define liveness and readiness endpoints "/health/ping" 
         app.MapHealthChecks("/health/ping", new HealthCheckOptions
         {
             Predicate = check => check.Tags.Contains("liveness"),
-            ResponseWriter = HealthExt.WriteJsonResponseAsync
-
         });
 
+        // Define liveness and readiness endpoints "/health/live" 
         app.MapHealthChecks("/health/live", new HealthCheckOptions
         {
             Predicate = check => check.Tags.Contains("liveness"),

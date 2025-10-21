@@ -214,7 +214,7 @@ public static class HealthChecksExtensions
             // Liveness check - simple self check.
             //
             .AddCheck(
-            name: "self",
+            name: "Api Self Check.",
             check: () => HealthCheckResult.Healthy(),
             timeout: TimeSpan.FromSeconds(3),
             tags: new[] { "liveness" })
@@ -222,18 +222,8 @@ public static class HealthChecksExtensions
             //
             // Readiness check
             //
-
-            // Check SQL Server connectivity. This uses nuget package Microsoft.Extensions.Diagnostics.HealthChecks.SqlServer
-            // thus remove it.
-            .AddSqlServer(contextDBConnection,
-            name: "sql-name",
-            healthQuery: "SELECT 1;",
-            timeout: TimeSpan.FromSeconds(5),
-            failureStatus: HealthStatus.Unhealthy,
-            tags: new[] { "readiness" })
-
             .AddCheck<DatabaseConnectionHealthCheck>(
-            name: "OrderingDB",
+            name: "Database Dependency Check.",
             timeout: TimeSpan.FromSeconds(5),
             failureStatus: HealthStatus.Unhealthy,
             tags: new[] { "readiness" }
@@ -242,7 +232,7 @@ public static class HealthChecksExtensions
             // Check a web dependency.
             // Register an instance of health check to check dynamically web dependency, use a facroty method.
             .AddCheck<WebDependencyHealthCheck>(
-            name: "Web Dependency Check", //name that identifies the health check.
+            name: "Web Dependency Check.", //name that identifies the health check.
             timeout: TimeSpan.FromSeconds(5), // The maximum duration the health check is allow to run.
             failureStatus: HealthStatus.Degraded, // status returned when the health check fails.
             tags: new[] { "readiness" } // An array of tags for the health check, cn be helpful for filtering.

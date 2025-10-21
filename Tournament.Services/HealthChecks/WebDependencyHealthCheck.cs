@@ -30,14 +30,14 @@ public class WebDependencyHealthCheck : IHealthCheck, IWebDependencyHealthCheck
 
             return response.IsSuccessStatusCode
                 ? HealthCheckResult.Healthy(
-                description: $"Web dependency {urlToCheck} is healthy!",
+                description: $"Web dependency is healthy!",
                 data: new Dictionary<string, object>
                 {
                     ["url"] = urlToCheck,
                     ["statusCode"] = (int)response.StatusCode,
                     ["responseTimeMs"] = duration.TotalMilliseconds
                 })
-                : HealthCheckResult.Unhealthy($"Web dependency {urlToCheck} returned an error status code: {(int)response.StatusCode}!",
+                : HealthCheckResult.Unhealthy($"Web dependency returned an error status code: {(int)response.StatusCode}!",
                 // Valid but returns error status code.
                 //If the url is valid and reachable, but it respondes with an HTTP status code indicating an error (400, 500, etc). Return unhealthy status.
                 data: new Dictionary<string, object>
@@ -49,13 +49,13 @@ public class WebDependencyHealthCheck : IHealthCheck, IWebDependencyHealthCheck
         }
         catch (HttpRequestException)
         {
-            return HealthCheckResult.Unhealthy($"Network error while checking {urlToCheck} web dependency! Please try again later.");
+            return HealthCheckResult.Unhealthy($"Network error while checking web dependency! Please try again later.");
         }
         catch (Exception)
         {
             // Valid but unreachable.
             // Malformed URL.
-            return HealthCheckResult.Unhealthy($"Exception while checking {urlToCheck} web dependency! Please try again later.");
+            return HealthCheckResult.Unhealthy($"Exception while checking web dependency! Please try again later.");
         }
     }
 }
