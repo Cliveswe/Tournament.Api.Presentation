@@ -1,17 +1,28 @@
-﻿using Microsoft.Extensions.Diagnostics.HealthChecks;
+﻿// Ignore Spelling:
+
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Service.Contracts;
+using System.Net.Http.Headers;
 
 namespace Tournaments.Services.HealthChecks;
 
 public class WebDependencyHealthCheck : IHealthCheck, IWebDependencyHealthCheck
 {
     private readonly HttpClient httpClient;
-    private readonly string? urlToCheck;
+    private readonly string urlToCheck;
 
-    public WebDependencyHealthCheck(HttpClient httpClient, string? urlToCheck = null)
+    public WebDependencyHealthCheck(HttpClient httpClient, IConfiguration configuration)
     {
-        this.httpClient = httpClient;
-        this.urlToCheck = urlToCheck;
+        this.httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
+
+        // Get the URL from configuration appsettings.json of fallback to default.
+        urlToCheck = configuration["HealthChecks:WebDependencyUrl"] ?? "https://www.umea.se/";
+
+        if(string.IsNullOrWhiteSpace(urlToCheck))
+        {
+            throw new ArgumentNullException("URL for WebDependencyHealthCheck cannot be null or empty.", nameof(urlToCheck));
+        }
     }
 
     // Created a custom health check to check the web dependency.
@@ -19,10 +30,10 @@ public class WebDependencyHealthCheck : IHealthCheck, IWebDependencyHealthCheck
     {
         DateTime startTimeStamp = DateTime.UtcNow;
 
-        if (string.IsNullOrWhiteSpace(urlToCheck))
-        {
-            return HealthCheckResult.Degraded("No URL probvided for web dependency check.");
-        }
+        //if (string.IsNullOrWhiteSpace(urlToCheck))
+        //{
+        //    return HealthCheckResult.Degraded("No URL provided for web dependency check.");
+        //}
         try
         {
             using HttpResponseMessage response = await httpClient.GetAsync(urlToCheck, cancellationToken);
@@ -39,7 +50,7 @@ public class WebDependencyHealthCheck : IHealthCheck, IWebDependencyHealthCheck
                 })
                 : HealthCheckResult.Unhealthy($"Web dependency returned an error status code: {(int)response.StatusCode}!",
                 // Valid but returns error status code.
-                //If the url is valid and reachable, but it respondes with an HTTP status code indicating an error (400, 500, etc). Return unhealthy status.
+                //If the url is valid and reachable, but it responses with an HTTP status code indicating an error (400, 500, etc). Return unhealthy status.
                 data: new Dictionary<string, object>
                 {
                     ["url"] = urlToCheck,
