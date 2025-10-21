@@ -1,4 +1,5 @@
-﻿// -----------------------------------------------------------------------------
+﻿//Ignore Spelling: leddy middleware
+// -----------------------------------------------------------------------------
 // File: ApplicationBuilderExtensions.cs
 // Summary: Provides extension methods for IApplicationBuilder to support
 //          database seeding during application startup.
@@ -48,7 +49,7 @@ public static class ApplicationBuilderExtensions
     /// "/health", "/health/live" or "/health/ready".
     /// Note: Health checks has no swagger integration by default. You need to add it manually if required.
     /// </remarks>
-    public static async Task HealthChecksMiddlewareExtensions(this WebApplication app)
+    public static void HealthChecksMiddlewareExtensions(this WebApplication app)
     {
 
         // Add Health Check endpoints at the *end* of routing
