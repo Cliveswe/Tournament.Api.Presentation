@@ -50,33 +50,46 @@ public static class ApplicationBuilderExtensions
     /// </remarks>
     public static async Task HealthChecksMiddlewareExtensions(this WebApplication app)
     {
-        
+
         // Add Health Check endpoints at the *end* of routing
         // Define routes "/health/"
-        app.MapHealthChecks("/health",new HealthCheckOptions {
-            ResponseWriter = HealthExt.WriteJsonResponseAsync
+        app.MapHealthChecks("/health", new HealthCheckOptions
+        {
+            ResponseWriter = HealthExt.WriteJsonResponseAsync,
+            ResultStatusCodes =
+            {
+                [HealthStatus.Healthy] = StatusCodes.Status200OK,
+                [HealthStatus.Degraded] = StatusCodes.Status200OK,
+                [HealthStatus.Unhealthy] = StatusCodes.Status500InternalServerError
+            }
+
         });
 
         // Define liveness and readiness endpoints "/health/ping" 
-        app.MapHealthChecks("/health/ping", new HealthCheckOptions
-        {
-            Predicate = check => check.Tags.Contains("liveness"),
-        });
+        app.MapHealthChecks("/health/ping", BuildLivenessHealthCheckOptions());
 
         // Define liveness and readiness endpoints "/health/live" 
-        app.MapHealthChecks("/health/live", new HealthCheckOptions
-        {
-            Predicate = check => check.Tags.Contains("liveness"),
-            ResponseWriter = HealthExt.WriteJsonResponseAsync
-        });
+        app.MapHealthChecks("/health/live", BuildLivenessHealthCheckOptions());
 
         // Define readiness endpoint "/health/ready"
-        _ = app.MapHealthChecks("/health/ready", new HealthCheckOptions
-        {
-            Predicate = check => check.Tags.Contains("readiness"),
-            ResponseWriter = HealthExt.WriteJsonResponseAsync
-        });
+        _ = app.MapHealthChecks("/health/ready", BuildLivenessHealthCheckOptions("readiness"));
     }
+
+    private static HealthCheckOptions BuildLivenessHealthCheckOptions(string tagString = "liveness")
+    {
+        return new HealthCheckOptions
+        {
+            Predicate = check => check.Tags.Contains(tagString),
+            ResponseWriter = HealthExt.WriteJsonResponseAsync,
+            ResultStatusCodes =
+            {
+                [HealthStatus.Healthy] = StatusCodes.Status200OK,
+                [HealthStatus.Degraded] = StatusCodes.Status200OK,
+                [HealthStatus.Unhealthy] = StatusCodes.Status500InternalServerError
+            }
+        };
+    }
+   
     #endregion
-    
+
 }

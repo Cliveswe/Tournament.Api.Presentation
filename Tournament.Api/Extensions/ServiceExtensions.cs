@@ -191,7 +191,7 @@ public static class HealthChecksExtensions
         services.AddHttpClient();
 
         //Use a fallback URL if urlToCheck is not provided, i.e. https://www.umea.se
-        // string finalUrlToCheck = null;
+         //string finalUrlToCheck = null;
         string finalUrlToCheck = string.IsNullOrWhiteSpace(urlToCheck) ? "https://www.umea.se" : urlToCheck;
 
         // Important: Register Dependency Injection for "controllers" or other services!
@@ -225,7 +225,7 @@ public static class HealthChecksExtensions
             .AddCheck<DatabaseConnectionHealthCheck>(
             name: "Database Dependency Check.",
             timeout: TimeSpan.FromSeconds(5),
-            failureStatus: HealthStatus.Unhealthy,
+            failureStatus: HealthStatus.Degraded,
             tags: new[] { "readiness" }
             )
 
