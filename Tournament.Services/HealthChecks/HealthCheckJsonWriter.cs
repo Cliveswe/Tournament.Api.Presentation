@@ -1,4 +1,5 @@
-﻿// -------------------------------------------------------------------------------------
+﻿//Ignore Spelling: leddy middleware json charset utf
+// -------------------------------------------------------------------------------------
 // File: HealthCheckJsonWriter.cs
 // Summary: Provides a shared utility to serialize ASP.NET Core health check results
 //          into structured JSON format suitable for HTTP responses. Supports both

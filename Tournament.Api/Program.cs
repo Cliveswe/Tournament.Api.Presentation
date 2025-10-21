@@ -1,9 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
-using Service.Contracts;
 using Tournaments.Api.Extensions;
 using Tournaments.Infrastructure.Data;
-using Tournaments.Services.HealthChecks;
 
 
 // Ignore Spelling: Api xml
@@ -73,13 +70,7 @@ namespace Tournaments.Api
             builder.Services.AddAutoMapper(typeof(TournamentMappings));
 
             //Health Checks
-            // Get the connection key name from config
-            var connectionKey = builder
-                .Configuration["HealthChecks:ConnectionStringKey"];// ?? "TournamentApiContext";
-
-            builder
-                .Services
-                .HealthChecksServiceExtensions(builder.Configuration.GetConnectionString(connectionKey));
+            builder.Services.HealthChecksServiceExtensions();
 
             var app = builder.Build();
 
@@ -93,7 +84,7 @@ namespace Tournaments.Api
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
-            
+
             app.UseHttpsRedirection();
 
             app.UseAuthorization();
@@ -102,7 +93,7 @@ namespace Tournaments.Api
 
             //Health Checks
             app.HealthChecksMiddlewareExtensions();
-            
+
             app.Run();
         }
     }

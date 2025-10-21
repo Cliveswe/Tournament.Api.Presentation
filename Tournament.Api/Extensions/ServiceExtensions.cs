@@ -75,8 +75,8 @@ public static class ServiceExtensions
 
 
         //Health checks
-         services.AddScoped<IWebDependencyHealthCheck, WebDependencyHealthCheck>();
-         services.AddLazy<IWebDependencyHealthCheck>();
+        services.AddScoped<IWebDependencyHealthCheck, WebDependencyHealthCheck>();
+        services.AddLazy<IWebDependencyHealthCheck>();
         services.AddScoped<IDatabaseConnectionHealthCheck, DatabaseConnectionHealthCheck>();
         services.AddLazy<IDatabaseConnectionHealthCheck>();
 
@@ -176,16 +176,13 @@ public static class HealthChecksExtensions
     /// a liveness check and a SQL Server readiness check.
     /// </summary>
     /// <param name="services">The service collection to add health checks to.</param>
-    /// <param name="contextDBConnection">The connection string used for SQL Server readiness checks.</param>
     /// <remarks>
     /// - Liveness check ("self") always reports healthy.
     /// - Readiness check verifies SQL Server connectivity using a simple query.
     /// This method ensures that health checks are tagged appropriately for liveness
     /// ("liveness") and readiness ("readiness") endpoints.
     /// </remarks>
-    public static void HealthChecksServiceExtensions(
-        this IServiceCollection services,
-        string contextDBConnection)
+    public static void HealthChecksServiceExtensions(this IServiceCollection services)
     {
         // Add HttpClient factory to the services collection.
         // This is required for health checks that depend on HttpClient.
