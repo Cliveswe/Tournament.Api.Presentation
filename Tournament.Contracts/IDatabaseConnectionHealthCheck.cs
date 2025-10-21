@@ -2,7 +2,7 @@
 
 namespace Service.Contracts
 {
-    public interface ISqlConnectionHealthCheck
+    public interface IDatabaseConnectionHealthCheck
     {
         string ConnectionString { get; }
         string TestQuery { get; }

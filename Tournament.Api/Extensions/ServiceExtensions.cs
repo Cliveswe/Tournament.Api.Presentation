@@ -1,4 +1,5 @@
-﻿// -----------------------------------------------------------------------------
+﻿//Ignore spelling: api ok leddy middleware xml
+// -----------------------------------------------------------------------------
 // File: DependencyInjectionExtensions.cs
 // Summary: Provides extension methods to configure repositories, service layers,
 //          lazy-loading, and Swagger XML comment integration for the Tournament API.
@@ -76,6 +77,8 @@ public static class ServiceExtensions
         //Health checks
         // services.AddScoped<IWebDependencyHealthCheck, WebDependencyHealthCheck>();
         // services.AddLazy<IWebDependencyHealthCheck>();
+        services.AddScoped<IDatabaseConnectionHealthCheck, DatabaseConnectionHealthCheck>();
+        services.AddLazy<IDatabaseConnectionHealthCheck>();
 
     }
 
@@ -197,14 +200,14 @@ public static class HealthChecksExtensions
         // Important: Register Dependency Injection for "controllers" or other services!
         _ = services.AddTransient(provider =>
         new WebDependencyHealthCheck(provider.GetRequiredService<HttpClient>(), finalUrlToCheck));
-        _ = services.AddTransient<DatabaseConnectionHealthCheck>(_ =>
-           new DatabaseConnectionHealthCheck(contextDBConnection));
+        //_ = services.AddTransient<DatabaseConnectionHealthCheck>(_ =>
+        //  new DatabaseConnectionHealthCheck(contextDBConnection));
 
-        // Reisters required health checks services. AddHealthChecks method configures a basic HTTP check that returns a 
-        // 200 Ok status code with "Healty" response when requested.
+        // Registers required health checks services. AddHealthChecks method configures a basic HTTP check that returns a 
+        // 200 Ok status code with "Healthy" response when requested.
         IHealthChecksBuilder healthChecksBuilder = services.AddHealthChecks()
 
-            // N.B. To begin with, define what consitutes a healthy status for each microservice.
+            // N.B. To begin with, define what constitutes a healthy status for each microservice.
             // To take full advantage of health checks, use tags to group or filter health checks.
             // To use tags, you will need to specify register them in app.MapHeathChecks middleware.
 
@@ -222,20 +225,21 @@ public static class HealthChecksExtensions
             //
             // Readiness check
             //
+            //sp => new DatabaseConnectionHealthCheck(sp.GetRequiredService<IConfiguration>()),
             .AddCheck<DatabaseConnectionHealthCheck>(
             name: "Database Dependency Check.",
+             failureStatus: HealthStatus.Degraded,
             timeout: TimeSpan.FromSeconds(5),
-            failureStatus: HealthStatus.Degraded,
             tags: new[] { "readiness" }
             )
 
             // Check a web dependency.
-            // Register an instance of health check to check dynamically web dependency, use a facroty method.
+            // Register an instance of health check to check dynamically web dependency, use a factory method.
             .AddCheck<WebDependencyHealthCheck>(
             name: "Web Dependency Check.", //name that identifies the health check.
             timeout: TimeSpan.FromSeconds(5), // The maximum duration the health check is allow to run.
             failureStatus: HealthStatus.Degraded, // status returned when the health check fails.
-            tags: new[] { "readiness" } // An array of tags for the health check, cn be helpful for filtering.
+            tags: new[] { "readiness" } // An array of tags for the health check, can be helpful for filtering.
             );
 
 

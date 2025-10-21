@@ -1,6 +1,7 @@
 ﻿
 
 using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Service.Contracts;
 using System.Data.Common;
@@ -8,7 +9,7 @@ using System.Data.Common;
 namespace Tournaments.Services.HealthChecks;
 
 // Sample SQL Connection Health Check
-public class DatabaseConnectionHealthCheck : IHealthCheck, ISqlConnectionHealthCheck
+public class DatabaseConnectionHealthCheck : IHealthCheck, IDatabaseConnectionHealthCheck
 {
     private const string DefaultTestQuery = "Select 1";
 
@@ -16,19 +17,34 @@ public class DatabaseConnectionHealthCheck : IHealthCheck, ISqlConnectionHealthC
 
     public string TestQuery { get; }
 
-    public DatabaseConnectionHealthCheck(string connectionString, string testQuery = DefaultTestQuery)
+    public DatabaseConnectionHealthCheck(IConfiguration configurationManager)
     {
-        ConnectionString = connectionString ?? throw new ArgumentNullException(nameof(connectionString));
-        TestQuery = testQuery;
-    }
+        //IConfiguration is injected automatically by asp.net core dependency injection (DI)
+        // It gives one access to all configuration values for example: appsettings.json environment variables etc.
+        // Important -> This parameter lets health check read from configuration directly.
 
+        // Get the key name of the connection string from appsettings.json. This ensures that the configuration is valid early!
+        string connKey = configurationManager["HealthChecks:ConnectionStringKey"]
+            ?? throw new ArgumentException($"HealthChecks:ConnectionStringKey not found in configuration.");
+
+        // Retrieve the actual database connection string. This looks up the named connection string from the ConnectionStrings in appsettings.json.
+        string connectionString = configurationManager.GetConnectionString(connKey)
+            ?? throw new ArgumentException($"Connection string '{connKey}' not found.");
+        
+        // Assign the final connection string.
+        ConnectionString = connectionString; 
+        
+        // Read a (default) SQL test query.
+        TestQuery = configurationManager["HealthChecks:TestQuery"]
+            ?? "SELECT 1";
+    }
     public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default(CancellationToken))
     {
         DateTime startTimeStamp = DateTime.UtcNow;
         try
         {
 
-            await using SqlConnection connection = new SqlConnection(ConnectionString);
+            await using SqlConnection connection = new(ConnectionString);
             await connection.OpenAsync(cancellationToken);
 
 
@@ -41,7 +57,7 @@ public class DatabaseConnectionHealthCheck : IHealthCheck, ISqlConnectionHealthC
             }
 
             TimeSpan duration = DateTime.UtcNow - startTimeStamp;
-            
+
             return HealthCheckResult.Healthy(
                 description: $"Database connection is healthy.",
                 data: new Dictionary<string, object>

@@ -76,7 +76,7 @@ namespace Tournaments.Api
             // Get the connection key name from config
             var connectionKey = builder
                 .Configuration["HealthChecks:ConnectionStringKey"];// ?? "TournamentApiContext";
-            
+
             builder
                 .Services
                 .HealthChecksServiceExtensions(builder.Configuration.GetConnectionString(connectionKey));
