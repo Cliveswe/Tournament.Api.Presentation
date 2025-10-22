@@ -57,7 +57,7 @@ public static class HealthCheckJsonWriter
                 {
                     writer.WriteStartObject();// Start of each health check object.
                     // A number of records per health check object.
-                    writer.WriteString("key", key);
+                    writer.WriteString("service", key);
                     writer.WriteString("status", value.Status.ToString());
                     writer.WriteString("description", value.Description);
                     

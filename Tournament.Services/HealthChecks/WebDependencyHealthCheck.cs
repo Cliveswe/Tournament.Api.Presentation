@@ -3,7 +3,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Service.Contracts;
-using System.Net.Http.Headers;
 
 namespace Tournaments.Services.HealthChecks;
 

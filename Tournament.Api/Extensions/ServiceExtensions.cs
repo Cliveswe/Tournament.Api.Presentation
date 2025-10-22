@@ -1,4 +1,4 @@
-﻿//Ignore spelling: api ok leddy middleware xml
+﻿//Ignore spelling: api ok leddy middleware xml liveness readiness microservice
 // -----------------------------------------------------------------------------
 // File: DependencyInjectionExtensions.cs
 // Summary: Provides extension methods to configure repositories, service layers,
@@ -182,12 +182,15 @@ public static class HealthChecksExtensions
     /// This method ensures that health checks are tagged appropriately for liveness
     /// ("liveness") and readiness ("readiness") endpoints.
     /// </remarks>
-    public static void HealthChecksServiceExtensions(this IServiceCollection services)
+    public static void HealthChecksServiceExtensions(
+        this IServiceCollection services)
     {
         // Add HttpClient factory to the services collection.
         // This is required for health checks that depend on HttpClient.
         services.AddHttpClient();
 
+        // Ensure that the required health check services are registered with dependency injection container.
+        // Use the AddHealthChecks extension method to register endpoints to the IServiceCollection inside the configureServices.
         // Registers required health checks services. AddHealthChecks method configures a basic HTTP check that returns a 
         // 200 Ok status code with "Healthy" response when requested.
         IHealthChecksBuilder healthChecksBuilder = services.AddHealthChecks()
@@ -197,36 +200,59 @@ public static class HealthChecksExtensions
             // To use tags, you will need to specify register them in app.MapHeathChecks middleware.
 
             // Register what you want to check. Each AddCheck extension method configures a custom health check.
+            //
+            // Healthy:   Indicates the application is operating correctly.
+            // Degraded:  Indicates the service is live, but some functionality may be unavailable.
+            // Unhealthy: Indicates that the application may be unable to operate of is not ready.
+            //
+            // As long as the application can handle HTTP basic requests/responses then the application
+            // is fundamentally live!
+            // if this fails usually indicates a service issue such as a hung or crashed application.
+            // A failing instance suggests that restarting the application usually fixes the problem.
+            //
+            // name:          Identifies the health check.
+            // timeout:       Maximum duration the health check is allow to run.
+            // failureStatus: Returned status when the health check fails.
+            // tags:          An array of tags for the health check, can be helpful for filtering.
+            //
 
             //
-            // Liveness check - simple self check.
+            // Add health check to confirm the availability of a dependency through the Entity Framework
+            // context.
             //
+
+            //
+            // Liveness check - the basic health prob is a self check.
+            //
+            // Health check prob as a self check.
             .AddCheck(
             name: "Api Self Check.",
             check: () => HealthCheckResult.Healthy(),
             timeout: TimeSpan.FromSeconds(3),
             tags: new[] { "liveness" })
 
-            //
-            // Readiness check
-            //
-            //sp => new DatabaseConnectionHealthCheck(sp.GetRequiredService<IConfiguration>()),
-            .AddCheck<DatabaseConnectionHealthCheck>(
-            name: "Database Dependency Check.",
-             failureStatus: HealthStatus.Degraded,
-            timeout: TimeSpan.FromSeconds(5),
-            tags: new[] { "readiness" }
-            )
-
             // Check a web dependency.
             // Register an instance of health check to check dynamically web dependency, use a factory method.
             .AddCheck<WebDependencyHealthCheck>(
-            name: "Web Dependency Check.", //name that identifies the health check.
-            timeout: TimeSpan.FromSeconds(5), // The maximum duration the health check is allow to run.
+            name: "ArchiveService  Web Dependency Check.", //name that identifies the health check.
+            timeout: TimeSpan.FromSeconds(3), // The maximum duration the health check is allow to run.
             failureStatus: HealthStatus.Degraded, // status returned when the health check fails.
-            tags: new[] { "readiness" } // An array of tags for the health check, can be helpful for filtering.
-            );
+            tags: new[] { "liveness" } // An array of tags for the health check, can be helpful for filtering.
+            )
 
+            //
+            // Readiness check - test more than just the ability to respond to HTTP liveness requests.
+            //
+            // May take longer to return as healthy. Thus readiness probes are performed periodically during the life
+            // of the service.
+            //
+            //sp => new DatabaseConnectionHealthCheck(sp.GetRequiredService<IConfiguration>()),
+            .AddCheck<DatabaseConnectionHealthCheck>(
+            name: "ArchiveService Database Dependency Check.",
+            failureStatus: HealthStatus.Degraded,
+            timeout: TimeSpan.FromSeconds(5),
+            tags: new[] { "readiness" }
+            );
 
     }
 }// End of Class HealthChecksExtensions.

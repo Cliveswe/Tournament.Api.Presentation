@@ -1,4 +1,4 @@
-﻿//Ignore Spelling: leddy middleware
+﻿//Ignore Spelling: leddy middleware liveness
 // -----------------------------------------------------------------------------
 // File: ApplicationBuilderExtensions.cs
 // Summary: Provides extension methods for IApplicationBuilder to support
@@ -52,8 +52,16 @@ public static class ApplicationBuilderExtensions
     public static void HealthChecksMiddlewareExtensions(this WebApplication app)
     {
 
-        // Add Health Check endpoints at the *end* of routing
-        // Define routes "/health/"
+        // Add Health Check endpoints at the *end* of routing.
+        // Register the endpoint route using the MapHealthChecks extension method.
+        // This requires to define the route pattern(s) that we want to use for our health check endpoint(s) i.e. "/health/..."
+        // Important: The route pattern "must" be prefixed with a "/". 
+        //
+
+        //
+        // Define liveness and readiness endpoints.
+        //
+        // Endpoint "/health/ready"
         app.MapHealthChecks("/health", new HealthCheckOptions
         {
             ResponseWriter = HealthExt.WriteJsonResponseAsync,
@@ -66,14 +74,14 @@ public static class ApplicationBuilderExtensions
 
         });
 
-        // Define liveness and readiness endpoints "/health/ping" 
+        // Endpoint "/health/ping" 
         app.MapHealthChecks("/health/ping");
 
-        // Define liveness and readiness endpoints "/health/live" 
+        // Endpoint "/health/live" 
         app.MapHealthChecks("/health/live", BuildLivenessHealthCheckOptions());
 
-        // Define readiness endpoint "/health/ready"
-        _ = app.MapHealthChecks("/health/ready", BuildLivenessHealthCheckOptions("readiness"));
+        // Endpoint "/health/ready"
+        app.MapHealthChecks("/health/ready", BuildLivenessHealthCheckOptions("readiness"));
     }
 
     private static HealthCheckOptions BuildLivenessHealthCheckOptions(string tagString = "liveness")

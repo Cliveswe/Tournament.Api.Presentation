@@ -3,7 +3,7 @@ using Tournaments.Api.Extensions;
 using Tournaments.Infrastructure.Data;
 
 
-// Ignore Spelling: Api xml
+// Ignore Spelling: Api xml liveness
 
 namespace Tournaments.Api
 {
@@ -69,7 +69,12 @@ namespace Tournaments.Api
 
             builder.Services.AddAutoMapper(typeof(TournamentMappings));
 
+            //
             //Health Checks
+            //
+            // Ensure that the required health check services are registered with dependency injection container.
+            // Here is a custom Service extension that uses the AddHealthChecks extension method.
+            //
             builder.Services.HealthChecksServiceExtensions();
 
             var app = builder.Build();
@@ -91,7 +96,13 @@ namespace Tournaments.Api
 
             app.MapControllers();
 
-            //Health Checks
+            //
+            // Health Checks
+            //
+            // Map endpoints to expose our liveness and readiness health checks.
+            // Here we add a custom WebApplication extension that registers routes to respond to our liveness 
+            // and readiness health checks.
+            //
             app.HealthChecksMiddlewareExtensions();
 
             app.Run();
