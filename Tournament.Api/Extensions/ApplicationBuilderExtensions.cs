@@ -1,4 +1,4 @@
-﻿//Ignore Spelling: leddy middleware liveness
+﻿//Ignore Spelling: leddy middleware liveness hc
 // -----------------------------------------------------------------------------
 // File: ApplicationBuilderExtensions.cs
 // Summary: Provides extension methods for IApplicationBuilder to support
@@ -57,6 +57,9 @@ public static class ApplicationBuilderExtensions
         // This requires to define the route pattern(s) that we want to use for our health check endpoint(s) i.e. "/health/..."
         // Important: The route pattern "must" be prefixed with a "/". 
         //
+        // We can provide some health check options to control the health check as a second argument to the MapHealthChecks
+        // method called HealthCheckOptions.
+        // 
 
         //
         // Define liveness and readiness endpoints.
@@ -84,11 +87,22 @@ public static class ApplicationBuilderExtensions
         app.MapHealthChecks("/health/ready", BuildLivenessHealthCheckOptions("readiness"));
     }
 
+    //
+    // Health check options to control the health check.
+    // The Predicate property can be used to filter the set of health checks which will be executed. In this
+    // case the array of tags used for filtering. This now allows relatively fine-grain control over which health
+    // check should be allowed to run for each mapped health check endpoint.
+    // "services.AddHealthChecks().AddCheck<SomeDIClass>(
+    // name: ...
+    // timeout: ...
+    // failureStatus: ...
+    // tags:...)"
+    //
     private static HealthCheckOptions BuildLivenessHealthCheckOptions(string tagString = "liveness")
     {
         return new HealthCheckOptions
         {
-            Predicate = check => check.Tags.Contains(tagString),
+            Predicate = hc => hc.Tags.Contains(tagString), // Control what health check (hc) to run.
             ResponseWriter = HealthExt.WriteJsonResponseAsync,
             ResultStatusCodes =
             {

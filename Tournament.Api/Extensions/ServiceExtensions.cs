@@ -203,12 +203,24 @@ public static class HealthChecksExtensions
             //
             // Healthy:   Indicates the application is operating correctly.
             // Degraded:  Indicates the service is live, but some functionality may be unavailable.
-            // Unhealthy: Indicates that the application may be unable to operate of is not ready.
+            // Unhealthy: Indicates that the application may be unable to operate or is not ready. By default
+            // if for example a database is down or unreachable then the service is likely unable to function.
+            // We can customize the health status to opt to use the degraded status instead. This may be useful
+            // if the service can still operate without the database.
+            //
+            // liveness check 
             //
             // As long as the application can handle HTTP basic requests/responses then the application
             // is fundamentally live!
             // if this fails usually indicates a service issue such as a hung or crashed application.
             // A failing instance suggests that restarting the application usually fixes the problem.
+            //
+            // Readiness check.
+            //
+            // Tests more than just the ability to respond to HTTP liveness requests. May take longer to return
+            // as healthy. Thus readiness probes are performed periodically during the life of the service.
+            // Readiness health check failures signal that the service cannot handle requests, but does not force
+            // a restart of the service.
             //
             // name:          Identifies the health check.
             // timeout:       Maximum duration the health check is allow to run.
@@ -244,7 +256,8 @@ public static class HealthChecksExtensions
             // Readiness check - test more than just the ability to respond to HTTP liveness requests.
             //
             // May take longer to return as healthy. Thus readiness probes are performed periodically during the life
-            // of the service.
+            // of the service. Readiness health check failures signal that the service cannot handle requests, but
+            // does not force a restart of the service.
             //
             //sp => new DatabaseConnectionHealthCheck(sp.GetRequiredService<IConfiguration>()),
             .AddCheck<DatabaseConnectionHealthCheck>(
