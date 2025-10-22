@@ -55,6 +55,6 @@ public class HealthChecksController(HealthCheckService healthCheckService) : Api
         var report = await healthCheckService.CheckHealthAsync(
             check => check.Tags.Contains("readiness"));
 
-        await HealthExt.WriteJsonResponseAsync(HttpContext, report);
+        await HealthExt.WriteJsonResponse(HttpContext, report);
     }
 }

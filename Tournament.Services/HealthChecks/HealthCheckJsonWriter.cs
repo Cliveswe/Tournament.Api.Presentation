@@ -1,4 +1,4 @@
-﻿//Ignore Spelling: leddy middleware json charset utf
+﻿//Ignore Spelling: leddy middleware json charset utf liveness
 // -------------------------------------------------------------------------------------
 // File: HealthCheckJsonWriter.cs
 // Summary: Provides a shared utility to serialize ASP.NET Core health check results
@@ -12,8 +12,6 @@
 //        monitoring dashboards and automated health probes.
 //
 
-using System.Reflection.Metadata.Ecma335;
-using System.Text;
 using System.Text.Json;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
@@ -38,12 +36,18 @@ public static class HealthCheckJsonWriter
     /// It is intended for use in readiness and liveness endpoints and can be called from
     /// controllers or middleware.
     /// </remarks>
-    public static async Task WriteJsonResponseAsync(HttpContext context, HealthReport report)
+    public static Task WriteJsonResponse(HttpContext context, HealthReport report)
     {
-        context.Response.ContentType = "application/json; charset=utf-8";
+        context.Response.ContentType = "application/json; charset=utf-8";// Set the Json content type.
 
         using MemoryStream memoryStream = new MemoryStream();
-        await using (Utf8JsonWriter writer = new Utf8JsonWriter(memoryStream, new JsonWriterOptions { Indented = true }))
+
+        // Writing to Json using a low-level type named Utf8JsonWriter. Supports high-performance Json serialization and de-serialization.
+        using (
+            Utf8JsonWriter writer = new Utf8JsonWriter(
+                memoryStream,
+                new JsonWriterOptions { Indented = true }//pretty-print style (easy for humans to read)
+                ))
         {
             writer.WriteStartObject();// Start of root object.
             writer.WriteString("status", report.Status.ToString());
@@ -53,17 +57,19 @@ public static class HealthCheckJsonWriter
                 // Create an array of "results"
                 writer.WriteStartArray("results");// Start of results array.
 
-                foreach (var (key, value) in report.Entries)
+                foreach ((string key, HealthReportEntry value) in report.Entries)
                 {
                     writer.WriteStartObject();// Start of each health check object.
                     // A number of records per health check object.
                     writer.WriteString("service", key);
                     writer.WriteString("status", value.Status.ToString());
                     writer.WriteString("description", value.Description);
-                    
+
                     // Write additional data if any.
-                    if (value.Data.Count > 0) {
-                        foreach (var (dataKey, dataValue) in value.Data) {
+                    if (value.Data.Count > 0)
+                    {
+                        foreach ((string dataKey, object dataValue) in value.Data)
+                        {
                             writer.WriteString(dataKey, dataValue?.ToString() ?? string.Empty);
                         }
                     }
@@ -73,13 +79,13 @@ public static class HealthCheckJsonWriter
 
                 writer.WriteEndArray(); // End of results array.
             }
-            
+
             writer.WriteEndObject();// End of root object.
         }
 
         memoryStream.Position = 0;
-        await memoryStream.CopyToAsync(context.Response.Body);
-
+        memoryStream.CopyToAsync(context.Response.Body);
+        return Task.CompletedTask;
     }
-    
+
 }

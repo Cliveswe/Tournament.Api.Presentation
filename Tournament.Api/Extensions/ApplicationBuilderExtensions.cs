@@ -67,7 +67,9 @@ public static class ApplicationBuilderExtensions
         // Endpoint "/health/ready"
         app.MapHealthChecks("/health", new HealthCheckOptions
         {
-            ResponseWriter = HealthExt.WriteJsonResponseAsync,
+            // A method that writes a response onto the HTTP context using data from the health check report.
+            ResponseWriter = HealthExt.WriteJsonResponse,
+
             ResultStatusCodes =
             {
                 [HealthStatus.Healthy] = StatusCodes.Status200OK,
@@ -102,8 +104,12 @@ public static class ApplicationBuilderExtensions
     {
         return new HealthCheckOptions
         {
-            Predicate = hc => hc.Tags.Contains(tagString), // Control what health check (hc) to run.
-            ResponseWriter = HealthExt.WriteJsonResponseAsync,
+            // Control what health check (hc) to run.
+            Predicate = hc => hc.Tags.Contains(tagString), 
+
+            // A method that writes a response onto the HTTP context using data from the health check report.
+            ResponseWriter = HealthExt.WriteJsonResponse, 
+            
             ResultStatusCodes =
             {
                 [HealthStatus.Healthy] = StatusCodes.Status200OK,
