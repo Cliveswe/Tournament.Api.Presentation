@@ -11,6 +11,7 @@ namespace Tournaments.Services.HealthChecks;
 // Sample SQL Connection Health Check
 public class DatabaseConnectionHealthCheck : IHealthCheck, IDatabaseConnectionHealthCheck
 {
+    //TODO Re-factor this class to a abstract base class.
     private const string DefaultTestQuery = "Select 1";
 
     public string ConnectionString { get; }
@@ -38,12 +39,12 @@ public class DatabaseConnectionHealthCheck : IHealthCheck, IDatabaseConnectionHe
         TestQuery = configurationManager["HealthChecks:TestQuery"]
             ?? "SELECT 1";
     }
-    public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default(CancellationToken))
+    public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
     {
         DateTime startTimeStamp = DateTime.UtcNow;
         try
         {
-
+            // TODO DB check health move this to its on class. The class must take context cancellationToken and DateTime startTimeStamp. It should return a HealthCheck.Healthy or a HealthCheck.Unhealthy result.
             await using SqlConnection connection = new(ConnectionString);
             await connection.OpenAsync(cancellationToken);
 
@@ -70,6 +71,7 @@ public class DatabaseConnectionHealthCheck : IHealthCheck, IDatabaseConnectionHe
         }
         catch (DbException ex)
         {
+            //TODO Decide on what to catch and what errors to display.
             TimeSpan duration = DateTime.UtcNow - startTimeStamp;
             return HealthCheckResult.Unhealthy(
                 description: $"Database connection failed.",

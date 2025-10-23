@@ -35,6 +35,8 @@ public class WebDependencyHealthCheck : IHealthCheck, IWebDependencyHealthCheck
         //}
         try
         {
+            //TODO web check health move this to its on class. The class must take context cancellationToken and DateTime startTimeStamp. It should return a HealthCheck.Healthy or a HealthCheck.Unhealthy result.
+            
             using HttpResponseMessage response = await httpClient.GetAsync(urlToCheck, cancellationToken);
             TimeSpan duration = DateTime.UtcNow - startTimeStamp;
 
@@ -59,10 +61,12 @@ public class WebDependencyHealthCheck : IHealthCheck, IWebDependencyHealthCheck
         }
         catch (HttpRequestException)
         {
+            //TODO Decide on what to catch and what errors to display.
             return HealthCheckResult.Unhealthy($"Network error while checking web dependency! Please try again later.");
         }
         catch (Exception)
         {
+            //TODO Decide on what to catch and what errors to display.
             // Valid but unreachable.
             // Malformed URL.
             return HealthCheckResult.Unhealthy($"Exception while checking web dependency! Please try again later.");
