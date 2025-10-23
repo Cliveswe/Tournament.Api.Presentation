@@ -3,6 +3,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Service.Contracts;
+using System.Diagnostics;
 
 namespace Tournaments.Services.HealthChecks;
 
@@ -27,37 +28,17 @@ public class WebDependencyHealthCheck : IHealthCheck, IWebDependencyHealthCheck
     // Created a custom health check to check the web dependency.
     public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
     {
-        DateTime startTimeStamp = DateTime.UtcNow;
+        Stopwatch stopwatch = Stopwatch.StartNew();
 
-        //if (string.IsNullOrWhiteSpace(urlToCheck))
-        //{
-        //    return HealthCheckResult.Degraded("No URL provided for web dependency check.");
-        //}
+        if (string.IsNullOrWhiteSpace(urlToCheck))
+        {
+            return HealthCheckResult.Degraded("No URL provided for web dependency check.");
+        }
         try
         {
             //TODO web check health move this to its on class. The class must take context cancellationToken and DateTime startTimeStamp. It should return a HealthCheck.Healthy or a HealthCheck.Unhealthy result.
-            
-            using HttpResponseMessage response = await httpClient.GetAsync(urlToCheck, cancellationToken);
-            TimeSpan duration = DateTime.UtcNow - startTimeStamp;
 
-            return response.IsSuccessStatusCode
-                ? HealthCheckResult.Healthy(
-                description: $"Web dependency is healthy!",
-                data: new Dictionary<string, object>
-                {
-                    ["url"] = urlToCheck,
-                    ["statusCode"] = (int)response.StatusCode,
-                    ["responseTimeMs"] = duration.TotalMilliseconds
-                })
-                : HealthCheckResult.Unhealthy($"Web dependency returned an error status code: {(int)response.StatusCode}!",
-                // Valid but returns error status code.
-                //If the url is valid and reachable, but it responses with an HTTP status code indicating an error (400, 500, etc). Return unhealthy status.
-                data: new Dictionary<string, object>
-                {
-                    ["url"] = urlToCheck,
-                    ["statusCode"] = (int)response.StatusCode
-                }
-                );
+            return await GetHealtCheckResultAsync(stopwatch, cancellationToken);
         }
         catch (HttpRequestException)
         {
@@ -71,5 +52,33 @@ public class WebDependencyHealthCheck : IHealthCheck, IWebDependencyHealthCheck
             // Malformed URL.
             return HealthCheckResult.Unhealthy($"Exception while checking web dependency! Please try again later.");
         }
+    }
+
+    private async Task<HealthCheckResult> GetHealtCheckResultAsync(Stopwatch stopwatch, CancellationToken cancellationToken)
+    {
+        stopwatch.Start();
+
+        using HttpResponseMessage response = await httpClient.GetAsync(urlToCheck, cancellationToken);
+
+        stopwatch.Stop();
+
+        return response.IsSuccessStatusCode
+            ? HealthCheckResult.Healthy(
+            description: $"Web dependency is healthy!",
+            data: new Dictionary<string, object>
+            {
+                ["url"] = urlToCheck,
+                ["statusCode"] = (int)response.StatusCode,
+                ["responseTimeMs"] = stopwatch.ElapsedMilliseconds
+            })
+            : HealthCheckResult.Unhealthy($"Web dependency returned an error status code: {(int)response.StatusCode}!",
+            // Valid but returns error status code.
+            //If the url is valid and reachable, but it responses with an HTTP status code indicating an error (400, 500, etc). Return unhealthy status.
+            data: new Dictionary<string, object>
+            {
+                ["url"] = urlToCheck,
+                ["statusCode"] = (int)response.StatusCode
+            }
+            );
     }
 }

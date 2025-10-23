@@ -1,4 +1,4 @@
-﻿// Ignore Spelling: app Middleware unhandled
+﻿// Ignore Spelling: app Middleware unhandled leddy dev
 
 // -----------------------------------------------------------------------------
 // File: ExceptionMiddleware.cs
