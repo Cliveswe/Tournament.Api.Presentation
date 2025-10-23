@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Diagnostics.HealthChecks;
+﻿//Ignore Spelling:
+
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using System.Diagnostics;
 
 namespace Tournaments.Services.HealthChecks;
@@ -14,7 +16,8 @@ public abstract class BaseHealthCheck : IHealthCheck
 
         } catch (Exception ex) {
             
-            return HealthCheckResult.Unhealthy();
+            //TODO create a relevant unhealthy message.
+            return HealthCheckResult.Unhealthy($"Health check failed {ex.Message}");
         } 
     }
 
