@@ -16,6 +16,8 @@ using Domain.Contracts;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Service.Contracts;
+using System.Diagnostics;
+using System.Net.NetworkInformation;
 using Tournaments.Infrastructure.Repositories;
 using Tournaments.Services.HealthChecks;
 using Tournaments.Services.Services;
@@ -241,18 +243,43 @@ public static class HealthChecksExtensions
             //
             // Health check prob as a self check.
             .AddCheck(
+            // Here the health check executes a lambda function, the health check "always" returns a Healthy result.
+            // The lambda function contains a dummy stopwatch for demonstration purpose only.
+            check: () => {
+                Stopwatch stopwatch = Stopwatch.StartNew();
+                stopwatch.Start();
+                stopwatch.Stop();
+                return HealthCheckResult.Healthy(description: $"A Healthy Api. duration: {stopwatch.ElapsedMilliseconds}");
+            },
+                // HealthCheckResult.Healthy(description: $"A Healthy Api."
             name: "Api Self Check.",
-            check: () => HealthCheckResult.Healthy(),
-            timeout: TimeSpan.FromSeconds(3),
-            tags: new[] { "liveness" })
+            tags: new[] { "liveness" },
+            timeout: TimeSpan.FromSeconds(3)
+            )
+
+            // 
+            // Note:
+            // Using ".AddCheck<WebDependencyHealthCheck>()", in this example, we are using dependency injection (DI)
+            // to simplify adding a health check by leveraging a generic method.
+            //
+            // Instance Managed by DI:
+            // Thus, if WebDependencyHealthCheck has dependencies the framework automatically resolves the dependencies
+            // using the dependency injection container.
+            //
+            // Cleaner Code:
+            // Thus the code is cleaner and easier to maintain as we are relying on DI to handle instantiation.
+            //
+            // Convenience: 
+            // You don't need to worry about how the "WebDependencyHealthCheck" gets constructed just register it in the 
+            // DI container.
 
             // Check a web dependency.
-            // Register an instance of health check to check dynamically web dependency, use a factory method.
+            // Register an instance of health check to check dynamically web dependency. 
             .AddCheck<WebDependencyHealthCheck>(
             name: "ArchiveService  Web Dependency Check.", //name that identifies the health check.
-            timeout: TimeSpan.FromSeconds(3), // The maximum duration the health check is allow to run.
             failureStatus: HealthStatus.Degraded, // status returned when the health check fails.
-            tags: new[] { "liveness" } // An array of tags for the health check, can be helpful for filtering.
+            tags: new[] { "liveness" }, // An array of tags for the health check, can be helpful for filtering.
+            timeout: TimeSpan.FromSeconds(3) // The maximum duration the health check is allow to run.
             )
 
             //
@@ -266,8 +293,8 @@ public static class HealthChecksExtensions
             .AddCheck<DatabaseConnectionHealthCheck>(
             name: "ArchiveService Database Dependency Check.",
             failureStatus: HealthStatus.Degraded,
-            timeout: TimeSpan.FromSeconds(5),
-            tags: new[] { "readiness" }
+            tags: new[] { "readiness" },
+            timeout: TimeSpan.FromSeconds(5)
             );
 
     }

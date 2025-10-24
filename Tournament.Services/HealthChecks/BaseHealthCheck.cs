@@ -30,7 +30,8 @@ public abstract class BaseHealthCheck : IHealthCheck
         {
 
             //TODO create a relevant unhealthy message.
-            return HealthCheckResult.Unhealthy($"Health check failed {ex.Message}");
+            return HealthCheckResult.Unhealthy(
+                description: $"Health check failed {ex.Message}");
         }
     }
 

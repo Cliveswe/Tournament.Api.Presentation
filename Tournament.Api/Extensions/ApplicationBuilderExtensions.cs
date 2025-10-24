@@ -108,7 +108,10 @@ public static class ApplicationBuilderExtensions
     {
         return new HealthCheckOptions
         {
-            // Control what health check (hc) to run.
+            // Control what health check (hc) to run. In other words, to run a subset of health checks,
+            // provide a function that returns a boolean to the Predicate option. The predicate is use
+            // to filter the set of heath checks executed. Note: if the Predicate is null the "HealthCheckMiddleware" 
+            // will run all registered health checks, this is also the default behavior.
             Predicate = hc => hc.Tags.Contains(tagString), 
 
             // A method that writes a response onto the HTTP context using data from the health check report.
