@@ -48,7 +48,8 @@ public class WebDependencyHealthCheck : BaseHealthCheck, IWebDependencyHealthChe
             });
 
     protected override HealthCheckResult UnHealthyReport(Stopwatch stopwatch, string response) => 
-        HealthCheckResult.Unhealthy($"Web dependency returned an error status code: {response}!",
+        HealthCheckResult.Unhealthy(
+            description: $"Web dependency returned an error status code: {response}!",
             // Valid but returns error status code.
             //If the url is valid and reachable, but it responses with an HTTP status code indicating an error (400, 500, etc). Return unhealthy status.
             data: new Dictionary<string, object>

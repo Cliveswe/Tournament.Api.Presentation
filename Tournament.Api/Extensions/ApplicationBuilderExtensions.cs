@@ -60,6 +60,10 @@ public static class ApplicationBuilderExtensions
         // We can provide some health check options to control the health check as a second argument to the MapHealthChecks
         // method called HealthCheckOptions.
         // 
+        // HealthStatus is an enum with "HealthStatus.Unhealthy" considered as the default status. Unhealthy = 0, Degraded = 1 and 
+        // Healthy = 2. However, HealthStatus has been overridden with StatusCodes that, in this scenario, are relevant for this 
+        // particular use case.
+        //
 
         //
         // Define liveness and readiness endpoints.
@@ -72,9 +76,9 @@ public static class ApplicationBuilderExtensions
 
             ResultStatusCodes =
             {
-                [HealthStatus.Healthy] = StatusCodes.Status200OK,
+                [HealthStatus.Unhealthy] = StatusCodes.Status500InternalServerError,
                 [HealthStatus.Degraded] = StatusCodes.Status200OK,
-                [HealthStatus.Unhealthy] = StatusCodes.Status500InternalServerError
+                [HealthStatus.Healthy] = StatusCodes.Status200OK
             }
 
         });
@@ -90,7 +94,7 @@ public static class ApplicationBuilderExtensions
     }
 
     //
-    // Health check options to control the health check.
+    // Health check options to control the health check, provides opportunity to customize health check behavior.
     // The Predicate property can be used to filter the set of health checks which will be executed. In this
     // case the array of tags used for filtering. This now allows relatively fine-grain control over which health
     // check should be allowed to run for each mapped health check endpoint.
@@ -112,9 +116,9 @@ public static class ApplicationBuilderExtensions
             
             ResultStatusCodes =
             {
-                [HealthStatus.Healthy] = StatusCodes.Status200OK,
+                [HealthStatus.Unhealthy] = StatusCodes.Status500InternalServerError,
                 [HealthStatus.Degraded] = StatusCodes.Status200OK,
-                [HealthStatus.Unhealthy] = StatusCodes.Status500InternalServerError
+                [HealthStatus.Healthy] = StatusCodes.Status200OK
             }
         };
     }

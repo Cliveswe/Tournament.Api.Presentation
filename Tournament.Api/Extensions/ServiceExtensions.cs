@@ -192,7 +192,10 @@ public static class HealthChecksExtensions
         // Ensure that the required health check services are registered with dependency injection container.
         // Use the AddHealthChecks extension method to register endpoints to the IServiceCollection inside the configureServices.
         // Registers required health checks services. AddHealthChecks method configures a basic HTTP check that returns a 
-        // 200 Ok status code with "Healthy" response when requested.
+        // 200 Ok status code with "Healthy" response when requested. Note: multiple invocations of AddHealthChecks will still
+        // only result in a "single" HealthCheckService instance. This gives the flexibility of invoking AddHealtChecks multiple
+        // times in order to get access to IHealthChecksBuilder in multiple places. This is unnecessary in a clean architecture
+        // approach and is not DRY.
         IHealthChecksBuilder healthChecksBuilder = services.AddHealthChecks()
 
             // N.B. To begin with, define what constitutes a healthy status for each microservice.

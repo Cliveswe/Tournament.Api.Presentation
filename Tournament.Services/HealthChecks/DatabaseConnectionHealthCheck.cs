@@ -70,7 +70,7 @@ public class DatabaseConnectionHealthCheck : BaseHealthCheck, IDatabaseConnectio
                 ["responseTimeMs"] = stopwatch.ElapsedMilliseconds
             });
 
-    protected override HealthCheckResult UnHealthyReport(Stopwatch stopwatch, string response)
+    protected override HealthCheckResult UnHealthyReport(Stopwatch stopwatch, string response = "0")
     {
         throw new NotImplementedException();
     }
