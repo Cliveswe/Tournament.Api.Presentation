@@ -61,8 +61,10 @@ public class DatabaseConnectionHealthCheck : BaseHealthCheck, IDatabaseConnectio
         }
 
         stopwatch.Stop();
+        return HealthyReport(stopwatch, response);
+    }
 
-        return HealthCheckResult.Healthy(
+    protected override HealthCheckResult HealthyReport(Stopwatch stopwatch, int response) => HealthCheckResult.Healthy(
             description: $"XDatabase connection is healthy.",
             data: new Dictionary<string, object>
             {
@@ -71,5 +73,14 @@ public class DatabaseConnectionHealthCheck : BaseHealthCheck, IDatabaseConnectio
                 ["statusCode"] = response,// 0 indicates success, -1 the command executed was a DDL rather than a DML!!!
                 ["responseTimeMs"] = stopwatch.ElapsedMilliseconds
             });
+
+    protected override HealthCheckResult UnHealthyReport(Stopwatch stopwatch, int response)
+    {
+        throw new NotImplementedException();
+    }
+
+    protected override HealthCheckResult DegradedReport(Stopwatch stopwatch, int response)
+    {
+        throw new NotImplementedException();
     }
 }

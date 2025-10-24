@@ -22,4 +22,7 @@ public abstract class BaseHealthCheck : IHealthCheck
     }
 
     protected abstract Task<HealthCheckResult> GetHealthCheckResultAsync(Stopwatch stopwatch, CancellationToken cancellationToken);
+    protected abstract HealthCheckResult HealthyReport(Stopwatch stopwatch, int response);
+    protected abstract HealthCheckResult UnHealthyReport(Stopwatch stopwatch, int response);
+    protected abstract HealthCheckResult DegradedReport(Stopwatch stopwatch, int response);
 }
