@@ -7,7 +7,7 @@ using System.Diagnostics;
 
 namespace Tournaments.Services.HealthChecks;
 
-public class WebDependencyHealthCheck : IHealthCheck, IWebDependencyHealthCheck
+public class WebDependencyHealthCheck : BaseHealthCheck, IWebDependencyHealthCheck
 {
     private readonly HttpClient httpClient;
     private readonly string urlToCheck;
@@ -19,42 +19,44 @@ public class WebDependencyHealthCheck : IHealthCheck, IWebDependencyHealthCheck
         // Get the URL from configuration appsettings.json of fallback to default.
         urlToCheck = configuration["HealthChecks:WebDependencyUrl"] ?? "https://www.umea.se/";
 
-        if(string.IsNullOrWhiteSpace(urlToCheck))
+        if (string.IsNullOrWhiteSpace(urlToCheck))
         {
             throw new ArgumentNullException("URL for WebDependencyHealthCheck cannot be null or empty.", nameof(urlToCheck));
         }
     }
 
     // Created a custom health check to check the web dependency.
-    public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
-    {
-        Stopwatch stopwatch = Stopwatch.StartNew();
+    //public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
+    //{
+    //    Stopwatch stopwatch = Stopwatch.StartNew();
 
-        if (string.IsNullOrWhiteSpace(urlToCheck))
-        {
-            return HealthCheckResult.Degraded("No URL provided for web dependency check.");
-        }
-        try
-        {
-            //TODO web check health move this to its on class. The class must take context cancellationToken and DateTime startTimeStamp. It should return a HealthCheck.Healthy or a HealthCheck.Unhealthy result.
+    //    if (string.IsNullOrWhiteSpace(urlToCheck))
+    //    {
+    //        return HealthCheckResult.Degraded("No URL provided for web dependency check.");
+    //    }
+    //    try
+    //    {
+    //        //TODO web check health move this to its on class. The class must take context cancellationToken and DateTime startTimeStamp. It should return a HealthCheck.Healthy or a HealthCheck.Unhealthy result.
 
-            return await GetHealtCheckResultAsync(stopwatch, cancellationToken);
-        }
-        catch (HttpRequestException)
-        {
-            //TODO Decide on what to catch and what errors to display.
-            return HealthCheckResult.Unhealthy($"Network error while checking web dependency! Please try again later.");
-        }
-        catch (Exception)
-        {
-            //TODO Decide on what to catch and what errors to display.
-            // Valid but unreachable.
-            // Malformed URL.
-            return HealthCheckResult.Unhealthy($"Exception while checking web dependency! Please try again later.");
-        }
-    }
+    //        return await GetHealthCheckResultAsync(stopwatch, cancellationToken);
+    //    }
+    //    catch (HttpRequestException)
+    //    {
+    //        //TODO Decide on what to catch and what errors to display.
+    //        return HealthCheckResult.Unhealthy($"Network error while checking web dependency! Please try again later.");
+    //    }
+    //    catch (Exception)
+    //    {
+    //        //TODO Decide on what to catch and what errors to display.
+    //        // Valid but unreachable.
+    //        // Malformed URL.
+    //        return HealthCheckResult.Unhealthy($"Exception while checking web dependency! Please try again later.");
+    //    }
+    //}
 
-    private async Task<HealthCheckResult> GetHealtCheckResultAsync(Stopwatch stopwatch, CancellationToken cancellationToken)
+
+
+    protected override async Task<HealthCheckResult> GetHealthCheckResultAsync(Stopwatch stopwatch, CancellationToken cancellationToken)
     {
         stopwatch.Start();
 
@@ -63,14 +65,7 @@ public class WebDependencyHealthCheck : IHealthCheck, IWebDependencyHealthCheck
         stopwatch.Stop();
 
         return response.IsSuccessStatusCode
-            ? HealthCheckResult.Healthy(
-            description: $"Web dependency is healthy!",
-            data: new Dictionary<string, object>
-            {
-                ["url"] = urlToCheck,
-                ["statusCode"] = (int)response.StatusCode,
-                ["responseTimeMs"] = stopwatch.ElapsedMilliseconds
-            })
+            ? HealthyReport(stopwatch, response.StatusCode.ToString())
             : HealthCheckResult.Unhealthy($"Web dependency returned an error status code: {(int)response.StatusCode}!",
             // Valid but returns error status code.
             //If the url is valid and reachable, but it responses with an HTTP status code indicating an error (400, 500, etc). Return unhealthy status.
@@ -80,5 +75,24 @@ public class WebDependencyHealthCheck : IHealthCheck, IWebDependencyHealthCheck
                 ["statusCode"] = (int)response.StatusCode
             }
             );
+    }
+
+    protected override HealthCheckResult HealthyReport(Stopwatch stopwatch, string response) => HealthCheckResult.Healthy(
+            description: $"Web dependency is healthy!",
+            data: new Dictionary<string, object>
+            {
+                ["url"] = urlToCheck,
+                ["statusCode"] = response, //(int)response.StatusCode,
+                ["responseTimeMs"] = stopwatch.ElapsedMilliseconds
+            });
+
+
+    protected override HealthCheckResult UnHealthyReport(Stopwatch stopwatch, int response)
+    {
+        throw new NotImplementedException();
+    }
+    protected override HealthCheckResult DegradedReport(Stopwatch stopwatch, int response)
+    {
+        throw new NotImplementedException();
     }
 }

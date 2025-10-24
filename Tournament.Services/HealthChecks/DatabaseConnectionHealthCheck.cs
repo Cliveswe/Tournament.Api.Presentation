@@ -1,11 +1,7 @@
-﻿
-
-using Azure;
-using Microsoft.Data.SqlClient;
+﻿using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Service.Contracts;
-using System.Data.Common;
 using System.Diagnostics;
 
 namespace Tournaments.Services.HealthChecks;
@@ -61,10 +57,10 @@ public class DatabaseConnectionHealthCheck : BaseHealthCheck, IDatabaseConnectio
         }
 
         stopwatch.Stop();
-        return HealthyReport(stopwatch, response);
+        return HealthyReport(stopwatch, response.ToString());
     }
 
-    protected override HealthCheckResult HealthyReport(Stopwatch stopwatch, int response) => HealthCheckResult.Healthy(
+    protected override HealthCheckResult HealthyReport(Stopwatch stopwatch, string response) => HealthCheckResult.Healthy(
             description: $"XDatabase connection is healthy.",
             data: new Dictionary<string, object>
             {

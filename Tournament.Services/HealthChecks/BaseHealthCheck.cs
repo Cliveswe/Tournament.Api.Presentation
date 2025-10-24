@@ -22,7 +22,18 @@ public abstract class BaseHealthCheck : IHealthCheck
     }
 
     protected abstract Task<HealthCheckResult> GetHealthCheckResultAsync(Stopwatch stopwatch, CancellationToken cancellationToken);
-    protected abstract HealthCheckResult HealthyReport(Stopwatch stopwatch, int response);
+    
+    protected virtual HealthCheckResult HealthyReport(Stopwatch stopwatch, string response = "0") => HealthCheckResult.Healthy(
+            description: "Database connection is healthy.",
+            data: new Dictionary<string, object>
+            {
+                //Safety first: extract the database name from the connection string.
+                ["database"] = "some database ",// TODO new SqlConnectionStringBuilder(ConnectionString).InitialCatalog,
+                ["statusCode"] = response,// 0 indicates success, -1 the command executed was a DDL rather than a DML!!!
+                ["responseTimeMs"] = stopwatch.ElapsedMilliseconds
+            });
+
+
     protected abstract HealthCheckResult UnHealthyReport(Stopwatch stopwatch, int response);
     protected abstract HealthCheckResult DegradedReport(Stopwatch stopwatch, int response);
 }
