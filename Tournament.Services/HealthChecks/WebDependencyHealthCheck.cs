@@ -25,56 +25,17 @@ public class WebDependencyHealthCheck : BaseHealthCheck, IWebDependencyHealthChe
         }
     }
 
-    // Created a custom health check to check the web dependency.
-    //public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
-    //{
-    //    Stopwatch stopwatch = Stopwatch.StartNew();
-
-    //    if (string.IsNullOrWhiteSpace(urlToCheck))
-    //    {
-    //        return HealthCheckResult.Degraded("No URL provided for web dependency check.");
-    //    }
-    //    try
-    //    {
-    //        //TODO web check health move this to its on class. The class must take context cancellationToken and DateTime startTimeStamp. It should return a HealthCheck.Healthy or a HealthCheck.Unhealthy result.
-
-    //        return await GetHealthCheckResultAsync(stopwatch, cancellationToken);
-    //    }
-    //    catch (HttpRequestException)
-    //    {
-    //        //TODO Decide on what to catch and what errors to display.
-    //        return HealthCheckResult.Unhealthy($"Network error while checking web dependency! Please try again later.");
-    //    }
-    //    catch (Exception)
-    //    {
-    //        //TODO Decide on what to catch and what errors to display.
-    //        // Valid but unreachable.
-    //        // Malformed URL.
-    //        return HealthCheckResult.Unhealthy($"Exception while checking web dependency! Please try again later.");
-    //    }
-    //}
-
-
-
     protected override async Task<HealthCheckResult> GetHealthCheckResultAsync(Stopwatch stopwatch, CancellationToken cancellationToken)
     {
         stopwatch.Start();
 
-        using HttpResponseMessage response = await httpClient.GetAsync(urlToCheck, cancellationToken);
+        using HttpResponseMessage httpResponse = await httpClient.GetAsync(urlToCheck, cancellationToken);
 
         stopwatch.Stop();
 
-        return response.IsSuccessStatusCode
-            ? HealthyReport(stopwatch, response.StatusCode.ToString())
-            : HealthCheckResult.Unhealthy($"Web dependency returned an error status code: {(int)response.StatusCode}!",
-            // Valid but returns error status code.
-            //If the url is valid and reachable, but it responses with an HTTP status code indicating an error (400, 500, etc). Return unhealthy status.
-            data: new Dictionary<string, object>
-            {
-                ["url"] = urlToCheck,
-                ["statusCode"] = (int)response.StatusCode
-            }
-            );
+        return httpResponse.IsSuccessStatusCode
+            ? HealthyReport(stopwatch, httpResponse.StatusCode.ToString())
+            : UnHealthyReport(stopwatch, httpResponse.StatusCode.ToString());
     }
 
     protected override HealthCheckResult HealthyReport(Stopwatch stopwatch, string response) => HealthCheckResult.Healthy(
@@ -86,12 +47,17 @@ public class WebDependencyHealthCheck : BaseHealthCheck, IWebDependencyHealthChe
                 ["responseTimeMs"] = stopwatch.ElapsedMilliseconds
             });
 
+    protected override HealthCheckResult UnHealthyReport(Stopwatch stopwatch, string response) => 
+        HealthCheckResult.Unhealthy($"Web dependency returned an error status code: {response}!",
+            // Valid but returns error status code.
+            //If the url is valid and reachable, but it responses with an HTTP status code indicating an error (400, 500, etc). Return unhealthy status.
+            data: new Dictionary<string, object>
+            {
+                ["url"] = urlToCheck,
+                ["statusCode"] = response
+            });
 
-    protected override HealthCheckResult UnHealthyReport(Stopwatch stopwatch, int response)
-    {
-        throw new NotImplementedException();
-    }
-    protected override HealthCheckResult DegradedReport(Stopwatch stopwatch, int response)
+    protected override HealthCheckResult DegradedReport(Stopwatch stopwatch, string response = "0")
     {
         throw new NotImplementedException();
     }
